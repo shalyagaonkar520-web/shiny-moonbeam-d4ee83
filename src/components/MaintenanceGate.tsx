@@ -8,9 +8,6 @@ export default function MaintenanceGate({ children }: { children: React.ReactNod
   const location = useLocation();
   const settings = useSystemStore(state => state.settings);
 
-  // Target reopening date: May 29, 2026 00:00:00 Local Time
-  const targetDate = new Date('2026-05-29T00:00:00');
-  
   const [isTimeMaintenanceActive, setIsTimeMaintenanceActive] = useState(true);
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -22,7 +19,11 @@ export default function MaintenanceGate({ children }: { children: React.ReactNod
   useEffect(() => {
     const calculateTimeLeft = () => {
       const now = new Date();
-      const difference = +targetDate - +now;
+      const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+      const [openHours, openMins] = (settings.openTime || '12:30').split(':').map(Number);
+      tomorrow.setHours(openHours || 12, openMins || 30, 0, 0);
+
+      const difference = +tomorrow - +now;
 
       if (difference <= 0) {
         setIsTimeMaintenanceActive(false);
@@ -42,7 +43,7 @@ export default function MaintenanceGate({ children }: { children: React.ReactNod
     const timer = setInterval(calculateTimeLeft, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [settings.openTime]);
 
   const adminToken = localStorage.getItem('moms_magic_admin_token');
   const userPhone = localStorage.getItem('moms_magic_user_phone');
@@ -53,9 +54,9 @@ export default function MaintenanceGate({ children }: { children: React.ReactNod
                   userPhone === '9606001790';
 
   const isBypassed = location.pathname.startsWith('/admin') || isAdmin;
-  const isMaintenanceActive = false; // Removed temporary closed restriction
+  const isMaintenanceActive = settings.websiteStatus === 'OFF' || settings.emergencyStop;
 
-  // Render original application routes if bypassed or not in maintenance
+  // Render original application routes if bypassed or if website is online
   if (isBypassed || !isMaintenanceActive) {
     return <>{children}</>;
   }

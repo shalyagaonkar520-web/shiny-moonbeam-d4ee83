@@ -21,11 +21,11 @@ export interface AdminSettings {
 }
 
 const DEFAULT_SETTINGS: AdminSettings = {
-  websiteStatus: 'ON',
-  maintenanceMessage: "Mom's Magic is temporarily closed. We'll reopen soon ❤️",
+  websiteStatus: 'OFF',
+  maintenanceMessage: "Mom's Magic is closed for today. We will reopen tomorrow! ❤️",
   openTime: '12:30',
-  closeTime: '22:45',
-  reopenMessage: 'We will reopen normally on May 29, 2026.',
+  closeTime: '22:30',
+  reopenMessage: 'We will reopen tomorrow, July 24, 2026.',
   emergencyStop: false,
   festivalMode: false,
   deliveryPause: false,
