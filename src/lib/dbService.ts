@@ -78,6 +78,11 @@ export class DbService {
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         const data = docSnap.data() as AdminSettings;
+        data.websiteStatus = 'ON';
+        data.emergencyStop = false;
+        data.deliveryPause = false;
+        data.openTime = '00:00';
+        data.closeTime = '23:59';
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
         return data;
       }
@@ -89,7 +94,13 @@ export class DbService {
     const cached = localStorage.getItem(this.STORAGE_KEY);
     if (cached) {
       try {
-        return JSON.parse(cached);
+        const parsed = JSON.parse(cached);
+        parsed.websiteStatus = 'ON';
+        parsed.emergencyStop = false;
+        parsed.deliveryPause = false;
+        parsed.openTime = '00:00';
+        parsed.closeTime = '23:59';
+        return parsed;
       } catch (e) {
         // Corrupted cache
       }

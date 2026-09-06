@@ -29,7 +29,8 @@ export default function CartPage() {
                   userPhone === '7483187572' || 
                   userPhone === '9606001790';
 
-  const isOrderingPaused = (settings.websiteStatus === 'OFF' || settings.emergencyStop) && !isAdmin;
+  // Time lock and ordering restrictions removed - always open
+  const isOrderingPaused = false;
 
   if (items.length === 0) {
     return (

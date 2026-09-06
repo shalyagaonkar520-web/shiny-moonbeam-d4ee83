@@ -74,6 +74,11 @@ export const useSystemStore = create<SystemState>((set, get) => ({
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data() as AdminSettings;
+        data.websiteStatus = 'ON';
+        data.emergencyStop = false;
+        data.deliveryPause = false;
+        data.openTime = '00:00';
+        data.closeTime = '23:59';
         set({ settings: data });
         localStorage.setItem('moms_magic_admin_settings', JSON.stringify(data));
       }

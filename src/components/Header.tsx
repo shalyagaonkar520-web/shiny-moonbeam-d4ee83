@@ -84,17 +84,11 @@ export default function Header() {
               <span className="bg-[#4CD964]/10 text-[#4CD964] text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-lg shadow-sm flex items-center gap-1">
                 ⚡ 10 Minutes
               </span>
-              {isStoreOpen() ? (
-                <span className="bg-[#4CD964]/10 border border-[#4CD964]/20 text-[#4CD964] text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-lg shadow-sm flex items-center gap-1.5 animate-pulse">
-                  🟢 Open Now
-                </span>
-              ) : (
-                <span className="bg-red-500/10 border border-red-500/20 text-red-500 text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-lg shadow-sm flex items-center gap-1.5">
-                  🔴 Closed
-                </span>
-              )}
+              <span className="bg-[#4CD964]/10 border border-[#4CD964]/20 text-[#4CD964] text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-lg shadow-sm flex items-center gap-1.5 animate-pulse">
+                🟢 Open Now (24/7)
+              </span>
               <span className="bg-white/5 border border-white/10 text-white/60 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg shadow-sm flex items-center gap-1.5">
-                <Clock className="w-3 h-3 text-[#4CD964]" /> {formatTime12h(settings.openTime)} - {formatTime12h(settings.closeTime)}
+                <Clock className="w-3 h-3 text-[#4CD964]" /> 24/7 Open
               </span>
             </div>
             
