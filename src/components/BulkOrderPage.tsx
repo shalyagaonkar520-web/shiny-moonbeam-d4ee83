@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ChevronLeft, Plus, X, PartyPopper, ShoppingBag, Calendar, Users } from 'lucide-react';
+import { ArrowRight, ChevronLeft, Plus, Minus, X, PartyPopper, ShoppingBag, Calendar, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useCartStore } from '../store/cartStore';
 import { useBulkOrderStore } from '../store/bulkOrderStore';
@@ -18,7 +18,7 @@ export default function BulkOrderPage() {
   const { menuItems } = useMenuStore();
   useSEO("Bulk & Party Orders", "Plan and customize your custom catering, cakes, and event setup options at Moms Magic.");
   const navigate = useNavigate();
-  const { addItem, items } = useCartStore();
+  const { addItem, items, updateQuantity } = useCartStore();
   const [activeCategory, setActiveCategory] = useState<Category>('Normal');
   const [showUpsell, setShowUpsell] = useState(false);
   const settings = useSystemStore(state => state.settings);
@@ -35,16 +35,7 @@ export default function BulkOrderPage() {
     if (settings.websiteStatus === 'OFF' || settings.emergencyStop) {
       return false;
     }
-    const now = new Date();
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    const currentTimeStr = `${hours}:${minutes}`;
-
-    if (settings.openTime <= settings.closeTime) {
-      return currentTimeStr >= settings.openTime && currentTimeStr <= settings.closeTime;
-    } else {
-      return currentTimeStr >= settings.openTime || currentTimeStr <= settings.closeTime;
-    }
+    return true;
   };
 
   const isClosed = !isStoreOpen() && !isAdmin;
@@ -152,53 +143,34 @@ export default function BulkOrderPage() {
           </button>
         </div>
 
-
-
-
-        {/* Upsell: Book A Setup Card at starting of main list */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-6 rounded-[30px] bg-gradient-to-r from-purple-900/40 via-pink-900/30 to-brand/20 border border-white/10 backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-6 shadow-[0_10px_30px_rgba(168,85,247,0.15)] relative overflow-hidden group mb-8"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-          <div className="space-y-1 relative z-10 text-center sm:text-left">
-            <span className="text-[9px] font-black uppercase tracking-widest text-purple-400 bg-purple-900/30 px-3 py-1 rounded-full border border-purple-500/20">Moms Magic Premium ✨</span>
-            <h3 className="text-xl font-black italic uppercase tracking-tighter text-white mt-2">Want a gorgeous live setup or counter?</h3>
-            <p className="text-white/60 text-xs font-bold">Let our premium decoration team setup the perfect celebration for you!</p>
-          </div>
-          <button
-            onClick={() => navigate('/celebration')}
-            className="px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 active:scale-95 transition-all rounded-2xl font-black text-xs uppercase tracking-widest text-white shadow-[0_0_20px_rgba(168,85,247,0.4)] shrink-0"
-          >
-            Book A Setup 🏛️
-          </button>
-        </motion.div>
-
         {/* Categories Navigation */}
         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-6 mb-8 snap-x">
           {categories.map((cat) => (
-            <button
+            <motion.button
               key={cat}
+              whileHover={{ y: -2, scale: 1.04 }}
+              whileTap={{ y: -4, scale: 1.06 }}
+              transition={{ type: "spring", stiffness: 500, damping: 18 }}
               onClick={() => setActiveCategory(cat)}
-              className={`snap-start whitespace-nowrap px-8 py-4 rounded-[20px] font-black uppercase tracking-widest text-xs transition-all duration-300 ${
+              className={`snap-start whitespace-nowrap px-8 py-4 rounded-[20px] font-black uppercase tracking-widest text-xs transition-colors duration-200 cursor-pointer ${
                 activeCategory === cat 
-                ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-[0_10px_30px_rgba(255,77,0,0.3)] scale-105 border border-white/20' 
+                ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-[0_10px_30px_rgba(255,77,0,0.3)] border border-white/20' 
                 : 'bg-white/5 text-white/50 border border-white/5 hover:bg-white/10'
               }`}
             >
               {cat}
-            </button>
+            </motion.button>
           ))}
         </div>
 
+        {/* Content Views */}
         <AnimatePresence mode="wait">
           <motion.div
             key={activeCategory}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.25 }}
           >
 
             {/* Normal, Ice Cake, Party Items & Snacks */}
@@ -211,12 +183,19 @@ export default function BulkOrderPage() {
                     activeCategory === 'Ice Cake' ? ICE_CAKES :
                     activeCategory === 'Party Items' ? PARTY_ITEMS :
                     SNACKS
-                  ).map(item => (
-                    <div key={item.id} className="group relative p-5 rounded-[30px] bg-white/5 border border-white/10 backdrop-blur-xl hover:bg-white/10 transition-colors overflow-hidden">
+                  ).map((item, idx) => (
+                    <motion.div 
+                      key={item.id} 
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2, delay: Math.min(idx * 0.03, 0.3) }}
+                      whileHover={{ y: -5, scale: 1.02 }}
+                      className="group relative p-5 rounded-[30px] bg-white/5 border border-white/10 backdrop-blur-xl hover:bg-white/10 transition-colors overflow-hidden"
+                    >
                       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-brand/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                       
                       <div className="aspect-square rounded-[20px] overflow-hidden mb-4 relative bg-black/40">
-                         <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                         <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" />
                          {(activeCategory === 'Normal' || activeCategory === 'Ice Cake') && (
                            <div className="absolute bottom-2 left-2 right-2 text-center">
                              <span className="text-[8px] font-black uppercase tracking-widest bg-black/60 backdrop-blur-md px-2 py-1 rounded-full border border-white/10 text-brand">{activeCategory}</span>
@@ -235,19 +214,53 @@ export default function BulkOrderPage() {
                           <h4 className="font-black italic uppercase tracking-tighter text-lg leading-tight">{item.name}</h4>
                           <span className="text-brand font-black">₹{item.price}</span>
                         </div>
-                        <button 
-                          onClick={() => handleAddToCart(item, activeCategory)}
-                          disabled={isClosed}
-                          className={`w-full py-3 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all ${
-                            isClosed
-                              ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
-                              : 'bg-white/10 hover:bg-brand active:scale-95 transition-transform'
-                          }`}
-                        >
-                          {isClosed ? 'Closed' : 'Add Item'}
-                        </button>
+                        {(() => {
+                          const inCart = items.find(i => i.id === item.id);
+                          if (inCart) {
+                            return (
+                              <div className="w-full bg-[#FFC700] text-black rounded-xl flex items-center justify-between px-3 py-2 shadow-md">
+                                <motion.button 
+                                  whileHover={{ scale: 1.15 }}
+                                  whileTap={{ y: -3, scale: 1.25 }}
+                                  onClick={() => updateQuantity(item.id, inCart.quantity - 1)}
+                                  className="font-black text-xs px-2 py-0.5 cursor-pointer"
+                                >
+                                  <Minus className="w-4 h-4 text-black stroke-[3]" />
+                                </motion.button>
+                                <div className="flex flex-col items-center">
+                                  <span className="text-sm font-black leading-none">{inCart.quantity}</span>
+                                  <span className="text-[7px] font-black uppercase tracking-wider text-black/75">Added</span>
+                                </div>
+                                <motion.button 
+                                  whileHover={{ scale: 1.15 }}
+                                  whileTap={{ y: -3, scale: 1.25 }}
+                                  onClick={() => updateQuantity(item.id, inCart.quantity + 1)}
+                                  className="font-black text-xs px-2 py-0.5 cursor-pointer"
+                                >
+                                  <Plus className="w-4 h-4 text-black stroke-[3]" />
+                                </motion.button>
+                              </div>
+                            );
+                          }
+                          return (
+                            <motion.button 
+                              whileHover={{ y: -2, scale: 1.02 }}
+                              whileTap={{ y: -4, scale: 1.04 }}
+                              transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                              onClick={() => handleAddToCart(item, activeCategory)}
+                              disabled={isClosed}
+                              className={`w-full py-3 px-3.5 rounded-xl font-black uppercase tracking-widest text-[11px] flex items-center justify-center transition-colors cursor-pointer ${
+                                isClosed
+                                  ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
+                                  : 'bg-[#FFC700] hover:bg-yellow-400 text-black shadow-lg shadow-[#FFC700]/20'
+                              }`}
+                            >
+                              <span>{isClosed ? 'Closed' : 'ADD +'}</span>
+                            </motion.button>
+                          );
+                        })()}
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </div>

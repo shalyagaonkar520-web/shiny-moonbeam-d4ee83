@@ -15,7 +15,7 @@ interface SystemState {
 }
 
 const DEFAULT_SETTINGS: AdminSettings = {
-  websiteStatus: 'OFF',
+  websiteStatus: 'ON',
   maintenanceMessage: "Mom's Magic is closed for today. We will reopen tomorrow! ❤️",
   openTime: '12:30',
   closeTime: '22:30',

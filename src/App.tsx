@@ -20,7 +20,6 @@ import MaintenanceGate from './components/MaintenanceGate';
 import CityGateway from './components/CityGateway';
 import LocationPicker from './components/LocationPicker';
 import UndoManager from './components/UndoManager';
-import InstallPrompt from './components/InstallPrompt';
 const FeedbackPage = lazy(() => import('./components/FeedbackPage'));
 const AboutFounder = lazy(() => import('./components/AboutFounder'));
 const CelebrationHub = lazy(() => import('./components/CelebrationHub'));
@@ -34,44 +33,7 @@ import { useSystemStore } from './store/systemStore';
 import { useMenuStore } from './store/menuStore';
 
 function GoldenParticles() {
-  return (
-    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-      <div className="hidden md:block">
-        {[...Array(15)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1.5 h-1.5 bg-[#4CD964]/20 rounded-full blur-[0.5px]"
-            initial={{ 
-              x: Math.random() * 100 + "%", 
-              y: Math.random() * 100 + "%",
-              opacity: 0 
-            }}
-            animate={{ 
-              y: [null, "-10%"],
-              opacity: [0, 0.4, 0]
-            }}
-            transition={{ 
-              duration: Math.random() * 8 + 8, 
-              repeat: Infinity, 
-              ease: "linear",
-              delay: Math.random() * 15
-            }}
-          />
-        ))}
-      </div>
-      {/* Pizza and Biryani Watermark Mix Background */}
-      <div className="absolute top-[10%] right-[-100px] w-96 h-96 rounded-full overflow-hidden opacity-[0.025] rotate-12 shrink-0 hidden md:block">
-        <img src="https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=400&q=80" className="w-full h-full object-cover" alt="Biryani" />
-      </div>
-      <div className="absolute bottom-[10%] left-[-100px] w-[450px] h-[450px] rounded-full overflow-hidden opacity-[0.025] -rotate-12 shrink-0 hidden md:block">
-        <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80" className="w-full h-full object-cover" alt="Pizza" />
-      </div>
-
-      {/* Ambient Brand Glow */}
-      <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-[#4CD964]/5 blur-[80px] md:blur-[150px] rounded-full" />
-      <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-[#4CD964]/5 blur-[80px] md:blur-[150px] rounded-full" />
-    </div>
-  );
+  return null;
 }
 
 function PageTransition({ children }: { children: React.ReactNode }) {
@@ -80,10 +42,10 @@ function PageTransition({ children }: { children: React.ReactNode }) {
     <AnimatePresence mode="wait">
       <motion.div
         key={location.pathname}
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 1.02 }}
-        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.15, ease: "easeOut" }}
         className="w-full h-full"
       >
         {children}
@@ -181,12 +143,10 @@ export default function App() {
       />
       <LocationPicker />
       <UndoManager />
-      <InstallPrompt />
       
       <MaintenanceGate>
         <OperatingHoursGate>
-          <div className="min-h-screen bg-matte-black text-text-main font-sans relative flex flex-col selection:bg-brand/30">
-            <GoldenParticles />
+          <div className="min-h-screen bg-gradient-to-b from-[#fff5f7] via-[#fff9fb] to-[#ffffff] text-gray-900 font-sans relative flex flex-col selection:bg-rose-500/20">
 
             <main className="flex-1 relative z-10">
               <PageTransition>

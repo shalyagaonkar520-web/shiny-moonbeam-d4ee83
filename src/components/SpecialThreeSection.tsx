@@ -153,7 +153,12 @@ export default function SpecialThreeSection() {
     <section className="relative w-full min-h-[700px] md:min-h-[850px] bg-gradient-to-b from-brand/10 via-dark-bg to-dark-bg rounded-[60px] md:rounded-[100px] overflow-hidden border border-white/5 my-20 shadow-[0_50px_100px_rgba(0,0,0,0.8)]">
       {/* 3D Background Canvas */}
       <div className="absolute inset-0 z-0">
-        <Canvas shadows camera={{ position: [0, 0, 6], fov: isMobile ? 50 : 40 }}>
+        <Canvas 
+          dpr={[1, 1.5]}
+          gl={{ powerPreference: 'high-performance', antialias: true }}
+          shadows 
+          camera={{ position: [0, 0, 6], fov: isMobile ? 50 : 40 }}
+        >
           <ambientLight intensity={0.8} />
           <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1.5} castShadow />
           <pointLight position={[-10, -10, -10]} intensity={1} color="#FF4D00" />

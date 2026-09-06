@@ -189,7 +189,7 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between items-center text-text-muted font-bold uppercase text-[11px] tracking-widest">
                   <span>Tax ({settings.taxRate ?? 5}%)</span>
-                  <span className="text-white text-2xl font-black italic tracking-tighter">₹{taxAmount.toFixed(2)}</span>
+                  <span className="text-white text-2xl font-black italic tracking-tighter">₹{((total * (settings.taxRate ?? 5)) / 100).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center text-text-muted font-bold uppercase text-[11px] tracking-widest">
                   <span>Rainy Season Fee</span>

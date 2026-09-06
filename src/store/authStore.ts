@@ -14,6 +14,7 @@ import {
   getDoc, 
   setDoc, 
   updateDoc, 
+  deleteDoc,
   runTransaction, 
   collection, 
   addDoc, 
@@ -51,6 +52,7 @@ interface AuthStore {
   loginWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
   addAddress: (label: string, address: string, lat: number, lng: number) => Promise<void>;
   deleteAddress: (addressId: string) => Promise<void>;
   deductWalletBalance: (amount: number, orderId: string) => Promise<void>;
@@ -181,6 +183,27 @@ export const useAuthStore = create<AuthStore>((set, get) => {
         console.error('Logout error:', error);
       } finally {
         set({ loading: false });
+      }
+    },
+
+    deleteAccount: async () => {
+      const { user } = get();
+      set({ loading: true });
+      try {
+        if (user) {
+          const userDocRef = doc(db, 'users', user.uid);
+          await deleteDoc(userDocRef).catch(() => {});
+          await user.delete().catch(() => {});
+        }
+      } catch (err) {
+        console.warn('Error deleting user from Firebase Auth:', err);
+      } finally {
+        localStorage.removeItem('moms_magic_user_phone');
+        localStorage.removeItem('moms_magic_orders');
+        localStorage.removeItem('moms_magic_admin_token');
+        localStorage.removeItem('moms_magic_pwa_installed_logged');
+        await signOut(auth).catch(() => {});
+        set({ user: null, profile: null, loading: false });
       }
     },
 

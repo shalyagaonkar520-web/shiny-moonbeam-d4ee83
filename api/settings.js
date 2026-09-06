@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 let memorySettings = {
-  websiteStatus: "OFF",
+  websiteStatus: "ON",
   maintenanceMessage: "Mom's Magic is closed for today. We will reopen tomorrow! ❤️",
   openTime: "12:30",
   closeTime: "22:30",

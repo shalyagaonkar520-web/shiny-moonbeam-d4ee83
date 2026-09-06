@@ -1,40 +1,75 @@
 import { Link, useLocation } from 'react-router-dom';
+import { UtensilsCrossed, Cake, ShoppingBag, User } from 'lucide-react';
+import { useCartStore } from '../store/cartStore';
 
 export default function BottomNav() {
   const location = useLocation();
+  const { items } = useCartStore();
+  const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md z-[100] md:hidden">
-      <div className="backdrop-blur-xl bg-[#1a1a1a]/85 border border-[#262626] rounded-[2.5rem] py-3 px-8 flex items-center justify-between shadow-2xl">
-        {/* Home */}
-        <Link to="/" className={`transition-colors ${isActive('/') ? 'text-white' : 'text-zinc-500 hover:text-white'}`}>
-          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"></path>
-          </svg>
+    <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-white/95 backdrop-blur-xl border-t border-rose-100 shadow-[0_-4px_25px_rgba(244,63,94,0.06)] py-1.5 px-4 sm:px-6">
+      <div className="max-w-md mx-auto flex items-center justify-between">
+        
+        {/* 1. Food (Home) */}
+        <Link 
+          to="/" 
+          className={`flex flex-col items-center gap-0.5 py-1 px-3 transition-colors ${
+            isActive('/') ? 'text-[#e11d48]' : 'text-gray-400 hover:text-gray-700'
+          }`}
+        >
+          <UtensilsCrossed className={`w-5 h-5 ${isActive('/') ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} />
+          <span className={`text-[10px] ${isActive('/') ? 'font-black text-[#e11d48]' : 'font-semibold'}`}>
+            Food
+          </span>
         </Link>
-        {/* Profile */}
-        <Link to="/profile" className={`transition-colors ${isActive('/profile') ? 'text-white' : 'text-zinc-500 hover:text-white'}`}>
-          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"></path>
-          </svg>
+
+        {/* 2. Cakes & B'day (Redirects to /bulk celebration page) */}
+        <Link 
+          to="/bulk" 
+          className={`flex flex-col items-center gap-0.5 py-1 px-3 transition-colors ${
+            isActive('/bulk') ? 'text-[#e11d48]' : 'text-gray-400 hover:text-gray-700'
+          }`}
+        >
+          <Cake className={`w-5 h-5 ${isActive('/bulk') ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} />
+          <span className={`text-[10px] ${isActive('/bulk') ? 'font-black text-[#e11d48]' : 'font-semibold'}`}>
+            Cakes & B'day
+          </span>
         </Link>
-        {/* Central Search FAB */}
-        <Link to="/food" className="flex flex-col items-center -mt-8">
-          <div className="bg-[#facc15] p-4 rounded-full shadow-lg shadow-[#facc15]/30 border-4 border-[#0a0a0a] transition-transform active:scale-95">
-            <svg className="h-7 w-7 text-black" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round"></path>
-            </svg>
+
+        {/* 3. Cart */}
+        <Link 
+          to="/checkout" 
+          className={`flex flex-col items-center gap-0.5 py-1 px-3 transition-colors relative ${
+            isActive('/checkout') ? 'text-[#e11d48]' : 'text-gray-400 hover:text-gray-700'
+          }`}
+        >
+          <div className="relative">
+            <ShoppingBag className={`w-5 h-5 ${isActive('/checkout') ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} />
+            {itemCount > 0 && (
+              <span className="absolute -top-1 -right-2 bg-[#e11d48] text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
+                {itemCount}
+              </span>
+            )}
           </div>
-          <span className="text-[#facc15] text-[10px] font-black uppercase mt-1 tracking-widest">Search</span>
+          <span className={`text-[10px] ${isActive('/checkout') ? 'font-black text-[#e11d48]' : 'font-semibold'}`}>
+            Cart
+          </span>
         </Link>
-        {/* Favorites -> Cart/Checkout */}
-        <Link to="/checkout" className={`transition-colors ${isActive('/checkout') ? 'text-white' : 'text-zinc-500 hover:text-white'}`}>
-          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            {/* Using a shopping bag icon instead of favorite heart for cart */}
-            <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"></path>
-          </svg>
+
+        {/* 4. Account (Profile) */}
+        <Link 
+          to="/profile" 
+          className={`flex flex-col items-center gap-0.5 py-1 px-3 transition-colors ${
+            isActive('/profile') ? 'text-[#e11d48]' : 'text-gray-400 hover:text-gray-700'
+          }`}
+        >
+          <User className={`w-5 h-5 ${isActive('/profile') ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} />
+          <span className={`text-[10px] ${isActive('/profile') ? 'font-black text-[#e11d48]' : 'font-semibold'}`}>
+            Account
+          </span>
         </Link>
       </div>
     </nav>

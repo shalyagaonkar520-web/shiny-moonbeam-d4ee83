@@ -8,43 +8,6 @@ export default function MaintenanceGate({ children }: { children: React.ReactNod
   const location = useLocation();
   const settings = useSystemStore(state => state.settings);
 
-  const [isTimeMaintenanceActive, setIsTimeMaintenanceActive] = useState(true);
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
-
-  useEffect(() => {
-    const calculateTimeLeft = () => {
-      const now = new Date();
-      const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-      const [openHours, openMins] = (settings.openTime || '12:30').split(':').map(Number);
-      tomorrow.setHours(openHours || 12, openMins || 30, 0, 0);
-
-      const difference = +tomorrow - +now;
-
-      if (difference <= 0) {
-        setIsTimeMaintenanceActive(false);
-        return;
-      }
-
-      setTimeLeft({
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
-      });
-      setIsTimeMaintenanceActive(true);
-    };
-
-    calculateTimeLeft();
-    const timer = setInterval(calculateTimeLeft, 1000);
-
-    return () => clearInterval(timer);
-  }, [settings.openTime]);
-
   const adminToken = localStorage.getItem('moms_magic_admin_token');
   const userPhone = localStorage.getItem('moms_magic_user_phone');
   const isAdmin = adminToken === 'mock-jwt-admin-token-123456' || 

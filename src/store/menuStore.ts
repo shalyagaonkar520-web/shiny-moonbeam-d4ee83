@@ -12,7 +12,6 @@ interface MenuState {
   listenToMenu: () => () => void;
   seedMenuIfEmpty: () => Promise<boolean>;
   addMenuItem: (item: Product) => Promise<boolean>;
-  addMenuItem: (item: Product) => Promise<boolean>;
   updateMenuItem: (id: string, updates: Partial<Product>) => Promise<boolean>;
   deleteMenuItem: (id: string) => Promise<boolean>;
 }

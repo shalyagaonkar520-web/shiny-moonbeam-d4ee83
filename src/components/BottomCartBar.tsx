@@ -1,85 +1,69 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCartStore } from '../store/cartStore';
-import { useLocationStore } from '../store/locationStore';
-import { ShoppingBag, ArrowRight, Zap, Sparkles } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSystemStore } from '../store/systemStore';
 
 export default function BottomCartBar() {
   const { items, total } = useCartStore();
-  const { deliveryLocation } = useLocationStore();
   const navigate = useNavigate();
   const location = useLocation();
   const settings = useSystemStore(state => state.settings);
   
   const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
-  const distanceKm = deliveryLocation?.distance ?? 999;
-  const isOrderingPaused = settings.websiteStatus === 'OFF' || settings.emergencyStop;
 
-  if (itemCount === 0 || location.pathname === '/checkout' || isOrderingPaused) return null;
+  const isVisible = itemCount > 0 && location.pathname !== '/checkout';
 
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ y: 100, opacity: 0, scale: 0.9 }}
-        animate={{ y: 0, opacity: 1, scale: 1 }}
-        exit={{ y: 100, opacity: 0, scale: 0.9 }}
-        className="fixed bottom-[110px] md:bottom-[90px] left-6 right-6 md:left-1/2 md:-translate-x-1/2 md:max-w-xl z-[90] pointer-events-none"
-      >
-        <div className="relative group pointer-events-auto">
-          {/* Luxury Ambient Glow */}
-          <div className="absolute inset-0 bg-brand/5 blur-[80px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-          
-          <div className="relative bg-[#0B0E14]/95 backdrop-blur-xl rounded-3xl md:rounded-[40px] p-3 md:p-5 flex items-center justify-between border border-[#4CD964]/20 shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden">
-            {/* Shimmer Effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#4CD964]/5 to-transparent -translate-x-full animate-[shimmer_4s_infinite]" />
-            
-            <div className="flex items-center gap-3 md:gap-6">
-              <motion.div 
-                whileHover={{ scale: 1.05, rotate: -5 }}
-                className="w-12 h-12 md:w-18 md:h-18 rounded-[20px] md:rounded-[28px] bg-brand flex items-center justify-center relative shadow-xl shadow-brand/10 border border-white/10 shrink-0"
-              >
-                <ShoppingBag className="w-5 h-5 md:w-8 md:h-8 text-white" />
-                <AnimatePresence>
-                  <motion.span 
-                    key={itemCount}
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="absolute -top-2 -right-2 md:-top-3 md:-right-3 bg-brand text-white text-[9px] md:text-[10px] font-black w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded-full shadow-lg border-2 border-[#0B0E14]"
-                  >
-                    {itemCount}
-                  </motion.span>
-                </AnimatePresence>
-              </motion.div>
- 
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1 md:gap-2">
-                  <Sparkles className="w-3 h-3 md:w-3.5 md:h-3.5 text-[#4CD964]" />
-                  <span className="text-white/40 text-[8px] md:text-[10px] font-black uppercase tracking-[2px] whitespace-nowrap">Plate Total</span>
-                </div>
-                <div className="flex items-baseline gap-1 md:gap-2">
-                  <span className="text-white text-xl md:text-3xl font-black italic tracking-tighter">₹{total}</span>
-                </div>
+      {isVisible && (
+        <motion.div
+          key="bottom-cart-bar"
+          initial={{ y: 60, opacity: 0, scale: 0.95 }}
+          animate={{ y: 0, opacity: 1, scale: 1 }}
+          exit={{ y: 60, opacity: 0, scale: 0.95 }}
+          className="fixed bottom-[64px] md:bottom-6 left-3 right-3 md:left-1/2 md:-translate-x-1/2 md:max-w-md z-[95] pointer-events-auto"
+        >
+          <motion.div 
+            whileHover={{ y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => navigate('/checkout')}
+            className="relative bg-gradient-to-r from-[#ffdbe6] via-[#ffeef3] to-[#ffffff] rounded-[24px] p-3 flex items-center justify-between border border-rose-300 ring-1 ring-rose-200 shadow-[0_12px_35px_rgba(244,63,94,0.18)] cursor-pointer overflow-hidden group"
+          >
+            <div className="flex items-center gap-3 relative z-10">
+              {/* Bag Icon with Counter */}
+              <div className="w-11 h-11 rounded-2xl bg-white border border-rose-200/90 flex items-center justify-center relative shadow-xs shrink-0">
+                <svg className="w-5 h-5 text-[#e11d48]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+                <span className="absolute -top-1.5 -right-1.5 bg-[#e11d48] text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full border border-white shadow-xs">
+                  {itemCount}
+                </span>
+              </div>
+
+              {/* Total Info */}
+              <div className="flex flex-col text-left">
+                <span className="text-rose-600 text-[9px] font-black uppercase tracking-wider">Cart Total</span>
+                <span className="text-gray-900 text-xl sm:text-2xl font-black tracking-tight leading-none mt-0.5">
+                  ₹{total}
+                </span>
               </div>
             </div>
- 
-            <motion.button 
-              whileHover={{ x: 5 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate('/checkout')}
-              className="h-12 md:h-18 px-5 md:px-10 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-[2px] text-white flex items-center gap-2 md:gap-3 relative overflow-hidden group/btn shadow-[0_8px_25px_rgba(76,217,100,0.2)] shrink-0"
-              style={{
-                background: 'linear-gradient(135deg, #4CD964, #3AC152)'
-              }}
+
+            {/* View Cart / Checkout Button */}
+            <motion.div 
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#ff2e74] to-[#e11d48] text-white font-black text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-md shadow-rose-500/25 relative z-10 shrink-0"
             >
-              <div className="absolute inset-0 bg-white/10 -translate-x-full group-hover/btn:translate-x-0 transition-transform duration-500" />
-              <span className="relative z-10 hidden sm:inline">Order Now</span>
-              <span className="relative z-10 sm:hidden">Order</span>
-              <ArrowRight className="w-4 h-4 md:w-5 md:h-5 relative z-10 group-hover/btn:translate-x-1 transition-transform" />
-            </motion.button>
-          </div>
-        </div>
+              <span>View Cart</span>
+              <ArrowRight className="w-4 h-4 stroke-[3]" />
+            </motion.div>
+          </motion.div>
       </motion.div>
+      )}
     </AnimatePresence>
   );
 }
