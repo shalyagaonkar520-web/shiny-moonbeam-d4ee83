@@ -1,9 +1,9 @@
 {
   "websiteStatus": "ON",
   "maintenanceMessage": "Mom's Magic is Open! Welcome ❤️",
-  "openTime": "00:00",
-  "closeTime": "23:59",
-  "reopenMessage": "We are open 24/7!",
+  "openTime": "12:30",
+  "closeTime": "22:45",
+  "reopenMessage": "Orders are accepted between 12:30 PM and 10:45 PM daily.",
   "emergencyStop": false,
   "festivalMode": false,
   "deliveryPause": false,

@@ -44,11 +44,8 @@ export default function FoodLoader() {
         </div>
 
         {/* Center Platter with Steaming Chef Dish */}
-        <div className="relative z-10 w-24 h-24 rounded-full bg-gradient-to-tr from-[#ff4d6d] to-[#e11d48] text-white flex flex-col items-center justify-center shadow-xl shadow-rose-500/25 border-4 border-white">
-          <span className="text-3xl animate-bounce">🍲</span>
-          <span className="text-[9px] font-black uppercase tracking-wider text-rose-100 mt-0.5">
-            Mom's
-          </span>
+        <div className="relative z-10 w-24 h-24 rounded-full bg-gradient-to-tr from-[#ff4d6d] to-[#e11d48] text-white flex items-center justify-center shadow-xl shadow-rose-500/25 border-4 border-white">
+          <span className="text-4xl animate-bounce select-none">🍲</span>
         </div>
       </div>
 

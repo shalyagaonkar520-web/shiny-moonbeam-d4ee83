@@ -19,6 +19,7 @@ import CityGateway from './components/CityGateway';
 import LocationPicker from './components/LocationPicker';
 import InstallAppModal from './components/InstallAppModal';
 import FoodLoader from './components/FoodLoader';
+import OperatingHoursGate from './components/OperatingHoursGate';
 import { useInstallModalStore } from './store/installModalStore';
 const FeedbackPage = lazy(() => import('./components/FeedbackPage'));
 const AboutFounder = lazy(() => import('./components/AboutFounder'));
@@ -153,42 +154,44 @@ export default function App() {
           }
         }}
       />
-      <LocationPicker />
-      <InstallAppModal />
-      
-      <div className="min-h-screen bg-gradient-to-b from-[#fff5f7] via-[#fff9fb] to-[#ffffff] text-gray-900 font-sans relative flex flex-col selection:bg-rose-500/20">
+      <OperatingHoursGate>
+        <LocationPicker />
+        <InstallAppModal />
+        
+        <div className="min-h-screen bg-gradient-to-b from-[#fff5f7] via-[#fff9fb] to-[#ffffff] text-gray-900 font-sans relative flex flex-col selection:bg-rose-500/20">
 
-        <main className="flex-1 relative z-10">
-          <PageTransition>
-            <Suspense fallback={<FoodLoader />}>
-              <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/food" element={<CategoryPage type="food" />} />
-                <Route path="/grocery" element={<CategoryPage type="grocery" />} />
-                <Route path="/cart" element={<Navigate to="/checkout" replace />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/track/:orderId" element={<TrackingPage />} />
-                <Route path="/delivery" element={<DeliveryDashboard />} />
-                <Route path="/bulk" element={<BulkOrderPage />} />
-                <Route path="/celebration" element={<CelebrationHub />} />
-                <Route path="/celebration/design" element={<CelebrationDesign />} />
-                <Route path="/feedback" element={<FeedbackPage />} />
-                <Route path="/about" element={<AboutFounder />} />
-                <Route path="/admin" element={<AdminPage />} />
-                <Route path="/orders" element={<OrdersPage />} />
-                <Route path="/spin" element={<LuckyWheelPage />} />
-                <Route path="/login" element={<AuthPage />} />
-                <Route path="/signin" element={<AuthPage />} />
-                <Route path="/signup" element={<AuthPage />} />
-              </Routes>
-            </Suspense>
-          </PageTransition>
-        </main>
+          <main className="flex-1 relative z-10">
+            <PageTransition>
+              <Suspense fallback={<FoodLoader />}>
+                <Routes>
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/food" element={<CategoryPage type="food" />} />
+                  <Route path="/grocery" element={<CategoryPage type="grocery" />} />
+                  <Route path="/cart" element={<Navigate to="/checkout" replace />} />
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/track/:orderId" element={<TrackingPage />} />
+                  <Route path="/delivery" element={<DeliveryDashboard />} />
+                  <Route path="/bulk" element={<BulkOrderPage />} />
+                  <Route path="/celebration" element={<CelebrationHub />} />
+                  <Route path="/celebration/design" element={<CelebrationDesign />} />
+                  <Route path="/feedback" element={<FeedbackPage />} />
+                  <Route path="/about" element={<AboutFounder />} />
+                  <Route path="/admin" element={<AdminPage />} />
+                  <Route path="/orders" element={<OrdersPage />} />
+                  <Route path="/spin" element={<LuckyWheelPage />} />
+                  <Route path="/login" element={<AuthPage />} />
+                  <Route path="/signin" element={<AuthPage />} />
+                  <Route path="/signup" element={<AuthPage />} />
+                </Routes>
+              </Suspense>
+            </PageTransition>
+          </main>
 
-        <BottomCartBar />
-        <BottomNav />
-      </div>
+          <BottomCartBar />
+          <BottomNav />
+        </div>
+      </OperatingHoursGate>
     </Router>
   );
 }

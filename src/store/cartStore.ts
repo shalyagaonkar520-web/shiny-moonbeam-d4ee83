@@ -3,10 +3,8 @@ import { CartItem, Product, SubscriptionPlan } from '../types';
 
 interface CartStore {
   items: CartItem[];
-  lastRemovedItem: CartItem | null;
   addItem: (product: Product, subscriptionPlan?: SubscriptionPlan, quantity?: number) => void;
   removeItem: (productId: string) => void;
-  undoRemove: () => void;
   updateQuantity: (productId: string, quantity: number) => void;
   updateSubscriptionPlan: (productId: string, plan: SubscriptionPlan) => void;
   clearCart: () => void;
@@ -19,9 +17,14 @@ const getMultiplier = (plan: SubscriptionPlan) => {
   return 1;
 };
 
-// Always empty cart on page refresh / reload
+// Always empty cart and clean any leftover undo / removed item state on page refresh / reload
 try {
   localStorage.removeItem('moms-magic-cart');
+  localStorage.removeItem('moms_magic_cart');
+  localStorage.removeItem('lastRemovedItem');
+  localStorage.removeItem('moms_magic_last_removed');
+  localStorage.removeItem('undoItem');
+  sessionStorage.removeItem('moms-magic-cart');
 } catch (e) {}
 
 export const useCartStore = create<CartStore>((set, get) => {
@@ -34,7 +37,6 @@ export const useCartStore = create<CartStore>((set, get) => {
 
   return {
     items: [],
-    lastRemovedItem: null,
     total: 0,
     addItem: (product, subscriptionPlan = null, quantity = 1) => {
       const items = get().items;
@@ -51,21 +53,11 @@ export const useCartStore = create<CartStore>((set, get) => {
     },
     removeItem: (productId) => {
       const items = get().items;
-      const itemToRemove = items.find(i => i.id === productId);
       const newItems = items.filter(i => i.id !== productId);
       set({ 
-        lastRemovedItem: itemToRemove || null,
         items: newItems,
         total: calculateTotal(newItems)
       });
-    },
-    undoRemove: () => {
-      const lastItem = get().lastRemovedItem;
-      if (lastItem) {
-        const newItems = [...get().items, lastItem];
-        set({ lastRemovedItem: null });
-        updateCart(newItems);
-      }
     },
     updateQuantity: (productId, quantity) => {
       if (quantity <= 0) {

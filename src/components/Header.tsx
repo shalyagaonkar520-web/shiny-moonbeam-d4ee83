@@ -33,7 +33,15 @@ export default function Header() {
     }
   };
 
-  const isStoreOpen = () => true;
+  const isStoreOpen = () => {
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const openMinutes = 12 * 60 + 30; // 12:30 PM
+    const closeMinutes = 22 * 60 + 45; // 10:45 PM
+    return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
+  };
+
+  const open = isStoreOpen();
 
   return (
     <>
@@ -42,15 +50,21 @@ export default function Header() {
           {/* Left Side: Delivery Details */}
           <div className="flex flex-col text-left">
             {/* Delivery Time Badge */}
-            <div className="flex items-center gap-1.5 w-fit">
+            <div className="flex items-center gap-1.5 w-fit flex-wrap">
               <span className="bg-[#4CD964]/10 text-[#4CD964] text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-lg shadow-sm flex items-center gap-1">
                 ⚡ 10 Minutes
               </span>
-              <span className="bg-[#4CD964]/10 border border-[#4CD964]/20 text-[#4CD964] text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-lg shadow-sm flex items-center gap-1.5 animate-pulse">
-                🟢 Open Now (24/7)
-              </span>
+              {open ? (
+                <span className="bg-[#4CD964]/10 border border-[#4CD964]/20 text-[#4CD964] text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-lg shadow-sm flex items-center gap-1.5 animate-pulse">
+                  🟢 Open Now
+                </span>
+              ) : (
+                <span className="bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-lg shadow-sm flex items-center gap-1.5">
+                  🔴 Closed (Opens 12:30 PM)
+                </span>
+              )}
               <span className="bg-white/5 border border-white/10 text-white/60 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg shadow-sm flex items-center gap-1.5">
-                <Clock className="w-3 h-3 text-[#4CD964]" /> 24/7 Open
+                <Clock className="w-3 h-3 text-[#4CD964]" /> 12:30 PM - 10:45 PM
               </span>
             </div>
             

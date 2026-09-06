@@ -23,9 +23,9 @@ export interface AdminSettings {
 const DEFAULT_SETTINGS: AdminSettings = {
   websiteStatus: 'ON',
   maintenanceMessage: "Mom's Magic is Open! Welcome ❤️",
-  openTime: '00:00',
-  closeTime: '23:59',
-  reopenMessage: 'We are open 24/7!',
+  openTime: '12:30',
+  closeTime: '22:45',
+  reopenMessage: 'Orders are accepted between 12:30 PM and 10:45 PM daily.',
   emergencyStop: false,
   festivalMode: false,
   deliveryPause: false,
@@ -81,8 +81,10 @@ export class DbService {
         data.websiteStatus = 'ON';
         data.emergencyStop = false;
         data.deliveryPause = false;
-        data.openTime = '00:00';
-        data.closeTime = '23:59';
+        if (!data.openTime || (data.openTime === '00:00' && data.closeTime === '23:59')) {
+          data.openTime = '12:30';
+          data.closeTime = '22:45';
+        }
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
         return data;
       }
@@ -98,8 +100,10 @@ export class DbService {
         parsed.websiteStatus = 'ON';
         parsed.emergencyStop = false;
         parsed.deliveryPause = false;
-        parsed.openTime = '00:00';
-        parsed.closeTime = '23:59';
+        if (!parsed.openTime || (parsed.openTime === '00:00' && parsed.closeTime === '23:59')) {
+          parsed.openTime = '12:30';
+          parsed.closeTime = '22:45';
+        }
         return parsed;
       } catch (e) {
         // Corrupted cache
