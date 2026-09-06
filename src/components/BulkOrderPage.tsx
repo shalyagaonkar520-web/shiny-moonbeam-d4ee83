@@ -1,42 +1,73 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ChevronLeft, Plus, Minus, X, PartyPopper, ShoppingBag, Calendar, Users } from 'lucide-react';
+import { ArrowRight, ChevronLeft, Plus, Minus, X, PartyPopper, ShoppingBag, Download, Cake, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useCartStore } from '../store/cartStore';
-import { useBulkOrderStore } from '../store/bulkOrderStore';
 import { PARTY_ITEMS, SNACKS, ICE_CAKES, NORMAL_CAKES } from '../data/partyItems';
-import { useMenuStore } from '../store/menuStore';
 import { Product } from '../types';
 import { useSEO } from '../utils/seo';
-import { useSystemStore } from '../store/systemStore';
 
 // Category tabs for Party Specials
 type Category = 'Normal' | 'Ice Cake' | 'Party Items' | 'Snacks';
 
 export default function BulkOrderPage() {
-  const { menuItems } = useMenuStore();
-  useSEO("Bulk & Party Orders", "Plan and customize your custom catering, cakes, and event setup options at Moms Magic.");
+  useSEO("Cakes & Birthday Celebrations", "Order freshly baked celebration cakes, party snacks, and birthday essentials from Mom's Magic.");
   const navigate = useNavigate();
   const { addItem, items, updateQuantity } = useCartStore();
   const [activeCategory, setActiveCategory] = useState<Category>('Normal');
   const [showUpsell, setShowUpsell] = useState(false);
-  const settings = useSystemStore(state => state.settings);
-
-  const adminToken = localStorage.getItem('moms_magic_admin_token');
-  const userPhone = localStorage.getItem('moms_magic_user_phone');
-  const isAdmin = adminToken === 'mock-jwt-admin-token-123456' || 
-                  userPhone === '+917483187572' || 
-                  userPhone === '+919606001790' || 
-                  userPhone === '7483187572' || 
-                  userPhone === '9606001790';
-
-  // Time lock restriction removed - store is always open
-  const isClosed = false;
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   useEffect(() => {
     localStorage.setItem('moms_magic_order_type', 'bulk');
+    window.scrollTo(0, 0);
+
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
   }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log('User install choice:', outcome);
+      setDeferredPrompt(null);
+    } else {
+      const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+      if (isiOS) {
+        toast('To install: Tap the Share button (📤) and select "Add to Home Screen" 📲', {
+          duration: 5000,
+          icon: '📱',
+          style: {
+            background: '#ffffff',
+            color: '#111827',
+            border: '1px solid #f43f5e',
+            borderRadius: '16px',
+            fontWeight: 'bold',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.08)'
+          }
+        });
+      } else {
+        toast('To install: Tap browser menu (⋮) and choose "Install App" or "Add to Home Screen" 📲', {
+          duration: 5000,
+          icon: '📱',
+          style: {
+            background: '#ffffff',
+            color: '#111827',
+            border: '1px solid #f43f5e',
+            borderRadius: '16px',
+            fontWeight: 'bold',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.08)'
+          }
+        });
+      }
+    }
+  };
 
   const categories: Category[] = ['Normal', 'Ice Cake', 'Party Items', 'Snacks'];
 
@@ -46,271 +77,298 @@ export default function BulkOrderPage() {
       setActiveCategory(categories[currentIndex + 1]);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      navigate('/cart');
+      navigate('/checkout');
     }
   };
 
-
-
   const handleAddToCart = (product: Product, category: Category) => {
-    if (isClosed) {
-      toast.error('Ordering is currently closed! Please check operating hours.', {
-        style: { background: '#161A22', color: '#fff', border: '1px solid #FF4D00' }
-      });
-      return;
-    }
     addItem(product, undefined, 1);
-
-    toast.success(`${product.name} Added! 🎈`, {
+    toast.success(`${product.name} Added! 🎂`, {
       icon: '🎉',
       style: {
-        background: '#161A22',
-        color: '#FFD700',
-        border: '1px solid #FF4D00'
+        background: '#ffffff',
+        color: '#111827',
+        border: '1px solid #f43f5e',
+        borderRadius: '16px',
+        fontWeight: 'bold'
       }
     });
   };
 
-
-
-  const IS_LOCKED = false;
-  if (IS_LOCKED) {
-    return (
-      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
-        <div className="absolute top-[10%] left-[20%] w-[500px] h-[500px] bg-red-600/10 rounded-full blur-[150px] pointer-events-none" />
-        <div className="space-y-6 relative z-10 max-w-md mx-auto">
-          <PartyPopper className="w-16 h-16 text-brand mx-auto opacity-80" />
-          <h1 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter text-white leading-tight">Party <span className="text-brand">Specials</span></h1>
-          <div className="bg-brand/20 text-brand px-6 py-2 rounded-full font-black text-xs uppercase tracking-widest inline-block border border-brand/30">
-            Coming Soon
-          </div>
-          <p className="text-white/40 text-sm font-bold mt-4 leading-relaxed">
-            We are upgrading our premium celebration experience. Check back later for exclusive bulk deals!
-          </p>
-          <button onClick={() => navigate('/')} className="mt-8 px-8 py-4 bg-white/5 hover:bg-white/10 transition-colors rounded-2xl font-black text-xs uppercase tracking-widest text-white border border-white/10 w-full">
-            Back to Menu
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const totalCartCount = items.reduce((acc, i) => acc + i.quantity, 0);
 
   return (
-    <div className="relative min-h-screen bg-[#050505] text-white pb-32 overflow-hidden">
-      {/* Cinematic Background */}
+    <div className="relative min-h-screen bg-gradient-to-b from-[#fff1f4]/80 via-[#fff8fa]/60 to-[#ffffff] text-gray-900 pb-36 font-sans overflow-hidden">
+      
+      {/* Soft Ambient Glows matching app's light pink theme */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[10%] left-[20%] w-[500px] h-[500px] bg-red-600/10 rounded-full blur-[150px]" />
-        <div className="absolute bottom-[20%] right-[10%] w-[600px] h-[600px] bg-orange-500/10 rounded-full blur-[150px]" />
-        <div className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gold/5 rounded-full blur-[200px] animate-pulse" />
-        
-        {/* Floating Particles - Hidden on Mobile to save battery/performance */}
-        <div className="hidden md:block">
-          {[...Array(20)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-2 h-2 bg-gold/30 rounded-full blur-[1px]"
-              initial={{ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight }}
-              animate={{ 
-                y: [null, Math.random() * -200 - 100],
-                x: [null, Math.random() * 100 - 50],
-                opacity: [0, 0.8, 0]
-              }}
-              transition={{ duration: Math.random() * 5 + 5, repeat: Infinity, ease: "linear" }}
-            />
-          ))}
-        </div>
+        <div className="absolute top-[5%] left-[10%] w-[380px] h-[380px] bg-rose-200/30 rounded-full blur-[120px]" />
+        <div className="absolute top-[40%] right-[10%] w-[420px] h-[420px] bg-pink-100/40 rounded-full blur-[140px]" />
       </div>
 
-      <div className="relative z-10 px-4 md:px-8 max-w-7xl mx-auto pt-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <button onClick={() => navigate('/')} className="w-12 h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center hover:bg-white/10 transition-colors">
-            <ChevronLeft className="w-6 h-6" />
+      <div className="relative z-10 px-4 md:px-8 max-w-7xl mx-auto pt-4 sm:pt-6">
+        
+        {/* TOP HEADER: Back, Title Badge, INSTALL BUTTON UPSIDE, Cart */}
+        <header className="flex items-center justify-between gap-2.5 mb-6 bg-white/80 backdrop-blur-md p-3 sm:p-4 rounded-3xl border border-rose-100 shadow-xs">
+          
+          {/* Back to Home */}
+          <button 
+            onClick={() => navigate('/')} 
+            className="w-10 h-10 sm:w-11 sm:h-11 bg-rose-50 border border-rose-200/80 rounded-2xl flex items-center justify-center text-gray-700 hover:text-gray-900 hover:bg-rose-100 active:scale-95 transition-all cursor-pointer shrink-0"
+            title="Back to Home"
+          >
+            <ChevronLeft className="w-5 h-5 text-gray-800" />
           </button>
-          <div className="flex items-center gap-4 bg-white/5 px-6 py-3 rounded-full border border-white/10 backdrop-blur-md">
-             <PartyPopper className="w-5 h-5 text-brand" />
-             <span className="font-black uppercase tracking-widest text-xs">Premium Celebration</span>
+
+          {/* Page Badge */}
+          <div className="flex items-center gap-1.5 bg-gradient-to-r from-rose-500/10 to-pink-500/10 border border-rose-200/70 px-3.5 py-1.5 sm:py-2 rounded-full">
+            <Cake className="w-4 h-4 text-[#e11d48]" />
+            <span className="font-black uppercase tracking-wider text-[11px] sm:text-xs text-[#e11d48]">
+              Cakes & B'day
+            </span>
           </div>
-          <button onClick={() => navigate('/cart')} className="w-12 h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center hover:bg-white/10 transition-colors relative">
-            <ShoppingBag className="w-5 h-5" />
-            {items.length > 0 && <span className="absolute top-2 right-2 w-2 h-2 bg-brand rounded-full" />}
-          </button>
+
+          {/* Right Section: INSTALL BUTTON UPSIDE + Cart */}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* INSTALL BUTTON UPSIDE */}
+            <button
+              onClick={handleInstallClick}
+              className="px-3 sm:px-4 py-2 rounded-2xl bg-gradient-to-r from-[#ff4d6d] via-[#f43f5e] to-[#e11d48] text-white font-black text-[11px] sm:text-xs uppercase tracking-wider shadow-md shadow-rose-500/25 flex items-center gap-1.5 active:scale-95 hover:opacity-95 transition-all cursor-pointer"
+              title="Install Mom's Magic App"
+            >
+              <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
+              <span>Install</span>
+            </button>
+
+            {/* Cart Icon Button */}
+            <Link
+              to="/checkout"
+              className="w-10 h-10 sm:w-11 sm:h-11 bg-rose-50 border border-rose-200/80 rounded-2xl flex items-center justify-center text-gray-700 hover:text-gray-900 hover:bg-rose-100 active:scale-95 transition-all relative cursor-pointer"
+              title="View Cart"
+            >
+              <ShoppingBag className="w-5 h-5 text-gray-800" />
+              {totalCartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#e11d48] text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
+                  {totalCartCount}
+                </span>
+              )}
+            </Link>
+          </div>
+
+        </header>
+
+        {/* Hero Banner with Soft Pink Theme */}
+        <div className="mb-6 p-4 sm:p-6 rounded-[28px] bg-gradient-to-r from-rose-100/90 via-pink-50/80 to-rose-100/70 border border-rose-200/80 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 text-left">
+          <div className="space-y-1 sm:space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span className="inline-block bg-[#e11d48] text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-xs">
+                Party Specials 🎉
+              </span>
+              <span className="text-[10px] font-bold text-gray-500">
+                Freshly Baked & Handcrafted
+              </span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-black text-gray-900 leading-tight">
+              Delicious Celebration Cakes & Snacks
+            </h1>
+            <p className="text-xs font-semibold text-gray-600 max-w-xl">
+              Freshly prepared with love. Add your customized name & message at checkout!
+            </p>
+          </div>
+
+          <div className="shrink-0 flex items-center gap-3">
+            <button
+              onClick={() => setShowUpsell(true)}
+              className="px-4 py-2.5 rounded-2xl bg-white border border-rose-200 text-[#e11d48] font-black text-xs uppercase tracking-wider shadow-xs hover:bg-rose-50 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#e11d48]" />
+              <span>Party Addons</span>
+            </button>
+          </div>
         </div>
 
-        {/* Categories Navigation */}
-        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-6 mb-8 snap-x">
+        {/* Categories Tabs Row */}
+        <div className="flex gap-2.5 sm:gap-3 overflow-x-auto no-scrollbar pb-3 mb-6 snap-x">
           {categories.map((cat) => (
-            <motion.button
+            <button
               key={cat}
-              whileHover={{ y: -2, scale: 1.04 }}
-              whileTap={{ y: -4, scale: 1.06 }}
-              transition={{ type: "spring", stiffness: 500, damping: 18 }}
               onClick={() => setActiveCategory(cat)}
-              className={`snap-start whitespace-nowrap px-8 py-4 rounded-[20px] font-black uppercase tracking-widest text-xs transition-colors duration-200 cursor-pointer ${
+              className={`snap-start whitespace-nowrap px-5 sm:px-6 py-2.5 sm:py-3 rounded-2xl font-black uppercase tracking-wider text-xs transition-all duration-200 cursor-pointer ${
                 activeCategory === cat 
-                ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-[0_10px_30px_rgba(255,77,0,0.3)] border border-white/20' 
-                : 'bg-white/5 text-white/50 border border-white/5 hover:bg-white/10'
+                  ? 'bg-gradient-to-r from-[#ff4d6d] via-[#f43f5e] to-[#e11d48] text-white shadow-md shadow-rose-500/25 ring-2 ring-rose-300/40' 
+                  : 'bg-white text-gray-600 border border-rose-200/80 hover:bg-rose-50 hover:text-gray-900 shadow-2xs'
               }`}
             >
-              {cat}
-            </motion.button>
+              {cat === 'Normal' ? '🎂 Regular Cakes' :
+               cat === 'Ice Cake' ? '❄️ Ice Cakes' :
+               cat === 'Party Items' ? '🎈 Party Items' :
+               '🍿 Party Snacks'}
+            </button>
           ))}
         </div>
 
-        {/* Content Views */}
+        {/* Product Cards Grid */}
         <AnimatePresence mode="wait">
           <motion.div
             key={activeCategory}
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.25 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.2 }}
           >
-
-            {/* Normal, Ice Cake, Party Items & Snacks */}
-            {(activeCategory === 'Normal' || activeCategory === 'Ice Cake' || activeCategory === 'Party Items' || activeCategory === 'Snacks') && (
-              <div className="space-y-6">
-
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {(
-                    activeCategory === 'Normal' ? NORMAL_CAKES :
-                    activeCategory === 'Ice Cake' ? ICE_CAKES :
-                    activeCategory === 'Party Items' ? PARTY_ITEMS :
-                    SNACKS
-                  ).map((item, idx) => (
-                    <motion.div 
-                      key={item.id} 
-                      initial={{ opacity: 0, y: 15 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.2, delay: Math.min(idx * 0.03, 0.3) }}
-                      whileHover={{ y: -5, scale: 1.02 }}
-                      className="group relative p-5 rounded-[30px] bg-white/5 border border-white/10 backdrop-blur-xl hover:bg-white/10 transition-colors overflow-hidden"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-brand/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      
-                      <div className="aspect-square rounded-[20px] overflow-hidden mb-4 relative bg-black/40">
-                         <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" />
-                         {(activeCategory === 'Normal' || activeCategory === 'Ice Cake') && (
-                           <div className="absolute bottom-2 left-2 right-2 text-center">
-                             <span className="text-[8px] font-black uppercase tracking-widest bg-black/60 backdrop-blur-md px-2 py-1 rounded-full border border-white/10 text-brand">{activeCategory}</span>
-                           </div>
-                         )}
-                         {activeCategory === 'Party Items' && (
-                           <div className="absolute bottom-2 left-2 right-2 text-center">
-                             <span className="text-[8px] font-black uppercase tracking-widest bg-black/60 backdrop-blur-md px-2 py-1 rounded-full border border-white/10 text-white/80">Perfect for Birthday</span>
-                           </div>
-                         )}
-
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-5">
+              {(
+                activeCategory === 'Normal' ? NORMAL_CAKES :
+                activeCategory === 'Ice Cake' ? ICE_CAKES :
+                activeCategory === 'Party Items' ? PARTY_ITEMS :
+                SNACKS
+              ).map((item, idx) => {
+                const inCart = items.find(i => i.id === item.id);
+                return (
+                  <div
+                    key={item.id}
+                    className="group bg-white rounded-[24px] p-3 sm:p-4 border border-rose-100/90 shadow-xs hover:shadow-md hover:border-rose-300 transition-all flex flex-col justify-between text-left"
+                  >
+                    {/* Image Box */}
+                    <div className="aspect-square rounded-2xl overflow-hidden mb-3 relative bg-rose-50/60">
+                      <img 
+                        src={item.image} 
+                        alt={item.name} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                        loading="lazy" 
+                      />
+                      <div className="absolute top-2 left-2">
+                        <span className="bg-white/95 backdrop-blur-md text-[#e11d48] border border-rose-200/80 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-2xs">
+                          {activeCategory === 'Normal' ? 'Regular' :
+                           activeCategory === 'Ice Cake' ? 'Ice Cake' :
+                           activeCategory === 'Party Items' ? 'Celebration' : 'Snack'}
+                        </span>
                       </div>
-                      
-                      <div className="space-y-3 relative z-10">
-                        <div>
-                          <h4 className="font-black italic uppercase tracking-tighter text-lg leading-tight">{item.name}</h4>
-                          <span className="text-brand font-black">₹{item.price}</span>
+                    </div>
+
+                    {/* Content */}
+                    <div className="space-y-2.5 flex-1 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-black text-xs sm:text-sm text-gray-900 line-clamp-2 leading-snug">
+                          {item.name}
+                        </h3>
+                        <div className="flex items-baseline gap-1 mt-1">
+                          <span className="text-sm sm:text-base font-black text-[#e11d48]">
+                            ₹{item.price}
+                          </span>
+                          <span className="text-[10px] font-semibold text-gray-400 line-through">
+                            ₹{Math.round(item.price * 1.25)}
+                          </span>
                         </div>
-                        {(() => {
-                          const inCart = items.find(i => i.id === item.id);
-                          if (inCart) {
-                            return (
-                              <div className="w-full bg-[#FFC700] text-black rounded-xl flex items-center justify-between px-3 py-2 shadow-md">
-                                <motion.button 
-                                  whileHover={{ scale: 1.15 }}
-                                  whileTap={{ y: -3, scale: 1.25 }}
-                                  onClick={() => updateQuantity(item.id, inCart.quantity - 1)}
-                                  className="font-black text-xs px-2 py-0.5 cursor-pointer"
-                                >
-                                  <Minus className="w-4 h-4 text-black stroke-[3]" />
-                                </motion.button>
-                                <div className="flex flex-col items-center">
-                                  <span className="text-sm font-black leading-none">{inCart.quantity}</span>
-                                  <span className="text-[7px] font-black uppercase tracking-wider text-black/75">Added</span>
-                                </div>
-                                <motion.button 
-                                  whileHover={{ scale: 1.15 }}
-                                  whileTap={{ y: -3, scale: 1.25 }}
-                                  onClick={() => updateQuantity(item.id, inCart.quantity + 1)}
-                                  className="font-black text-xs px-2 py-0.5 cursor-pointer"
-                                >
-                                  <Plus className="w-4 h-4 text-black stroke-[3]" />
-                                </motion.button>
-                              </div>
-                            );
-                          }
-                          return (
-                            <motion.button 
-                              whileHover={{ y: -2, scale: 1.02 }}
-                              whileTap={{ y: -4, scale: 1.04 }}
-                              transition={{ type: "spring", stiffness: 500, damping: 15 }}
-                              onClick={() => handleAddToCart(item, activeCategory)}
-                              disabled={isClosed}
-                              className={`w-full py-3 px-3.5 rounded-xl font-black uppercase tracking-widest text-[11px] flex items-center justify-center transition-colors cursor-pointer ${
-                                isClosed
-                                  ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
-                                  : 'bg-[#FFC700] hover:bg-yellow-400 text-black shadow-lg shadow-[#FFC700]/20'
-                              }`}
-                            >
-                              <span>{isClosed ? 'Closed' : 'ADD +'}</span>
-                            </motion.button>
-                          );
-                        })()}
                       </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            )}
 
-
-
+                      {/* Add Button or Stepper Pill */}
+                      <div>
+                        {inCart ? (
+                          <div className="w-full bg-rose-50 border border-rose-300 text-gray-900 rounded-xl flex items-center justify-between px-2 sm:px-3 py-1.5 shadow-2xs">
+                            <button 
+                              onClick={() => updateQuantity(item.id, inCart.quantity - 1)}
+                              className="p-1 rounded-lg hover:bg-rose-100 text-[#e11d48] cursor-pointer"
+                            >
+                              <Minus className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3]" />
+                            </button>
+                            <span className="text-xs sm:text-sm font-black text-gray-900">
+                              {inCart.quantity}
+                            </span>
+                            <button 
+                              onClick={() => updateQuantity(item.id, inCart.quantity + 1)}
+                              className="p-1 rounded-lg hover:bg-rose-100 text-[#e11d48] cursor-pointer"
+                            >
+                              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3]" />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => handleAddToCart(item, activeCategory)}
+                            className="w-full py-2 sm:py-2.5 px-3 rounded-xl font-black uppercase tracking-wider text-[11px] sm:text-xs bg-gradient-to-r from-[#ff4d6d] via-[#f43f5e] to-[#e11d48] text-white shadow-sm shadow-rose-500/20 active:scale-95 hover:opacity-95 transition-all flex items-center justify-center gap-1 cursor-pointer"
+                          >
+                            <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                            <span>ADD</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </motion.div>
         </AnimatePresence>
+
       </div>
 
-      {/* Smart Upselling Popup */}
+      {/* Floating Category Advance Button */}
+      <div className="fixed bottom-20 left-4 right-4 max-w-md mx-auto z-40 flex items-center justify-between gap-3">
+        <button
+          onClick={() => advanceToNextCategory(activeCategory)}
+          className="w-full py-3.5 px-5 rounded-2xl bg-white/95 backdrop-blur-md border border-rose-200 text-gray-800 hover:bg-rose-50 shadow-lg shadow-rose-500/10 font-black uppercase tracking-wider text-xs flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer"
+        >
+          <span>
+            {activeCategory === 'Snacks' ? 'Proceed to Checkout 🛒' : `Next: Next Category`}
+          </span>
+          <ArrowRight className="w-4 h-4 text-[#e11d48]" />
+        </button>
+      </div>
+
+      {/* Smart Upselling Modal with Light Pink Theme */}
       <AnimatePresence>
         {showUpsell && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-xl z-50 flex items-end md:items-center justify-center p-0 md:p-6"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end md:items-center justify-center p-0 md:p-6"
           >
             <motion.div 
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="bg-[#111] w-full md:w-[600px] max-h-[85vh] overflow-y-auto no-scrollbar rounded-t-[40px] md:rounded-[40px] border border-white/10 shadow-2xl relative"
+              className="bg-white w-full md:w-[600px] max-h-[85vh] overflow-y-auto no-scrollbar rounded-t-[32px] md:rounded-[32px] border border-rose-100 shadow-2xl relative text-left"
             >
-              <div className="sticky top-0 bg-[#111]/90 backdrop-blur-md p-6 border-b border-white/5 flex items-center justify-between z-10">
+              <div className="sticky top-0 bg-white/95 backdrop-blur-md p-5 border-b border-rose-100 flex items-center justify-between z-10">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-brand/20 rounded-full flex items-center justify-center">
-                    <PartyPopper className="w-5 h-5 text-brand" />
+                  <div className="w-10 h-10 bg-rose-50 border border-rose-200 rounded-full flex items-center justify-center">
+                    <PartyPopper className="w-5 h-5 text-[#e11d48]" />
                   </div>
                   <div>
-                    <h3 className="font-black italic uppercase tracking-tighter text-xl">Complete Your Celebration 🎉</h3>
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-white/40">Highly recommended addons</p>
+                    <h3 className="font-black text-base text-gray-900">
+                      Complete Your Celebration 🎉
+                    </h3>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                      Party Essentials & Addons
+                    </p>
                   </div>
                 </div>
-                <button onClick={() => setShowUpsell(false)} className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10">
-                  <X className="w-5 h-5" />
+                <button 
+                  onClick={() => setShowUpsell(false)} 
+                  className="w-9 h-9 bg-rose-50 hover:bg-rose-100 rounded-full flex items-center justify-center text-gray-600 transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="p-6 space-y-6 pb-24 md:pb-6">
+              <div className="p-5 space-y-5 pb-24 md:pb-6">
                 <div>
-                  <h4 className="text-xs font-black uppercase tracking-widest text-brand mb-4">Party Essentials</h4>
-                  <div className="grid grid-cols-2 gap-4">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-[#e11d48] mb-3">
+                    Party Essentials
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
                     {PARTY_ITEMS.slice(0, 4).map(item => (
-                      <div key={item.id} className="bg-white/5 rounded-2xl p-4 flex flex-col justify-between border border-white/5">
-                        <img src={item.image} className="w-full h-24 object-cover rounded-xl mb-3" alt={item.name} />
-                        <div className="mb-3">
-                          <p className="font-black uppercase text-[10px] truncate">{item.name}</p>
-                          <p className="text-brand font-black text-xs">₹{item.price}</p>
+                      <div key={item.id} className="bg-rose-50/50 rounded-2xl p-3 border border-rose-100 flex flex-col justify-between">
+                        <img src={item.image} className="w-full h-24 object-cover rounded-xl mb-2.5" alt={item.name} />
+                        <div className="mb-2">
+                          <p className="font-black text-xs text-gray-900 truncate">{item.name}</p>
+                          <p className="text-[#e11d48] font-black text-xs">₹{item.price}</p>
                         </div>
                         <button 
-                          onClick={() => { addItem(item); toast.success('Added!'); }}
-                          className="w-full py-2 bg-white/10 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-brand transition-colors"
+                          onClick={() => { addItem(item); toast.success(`${item.name} added!`); }}
+                          className="w-full py-1.5 bg-[#e11d48] text-white rounded-xl text-[10px] font-black uppercase tracking-wider hover:opacity-95 transition-opacity cursor-pointer"
                         >
                           Add +
                         </button>
@@ -320,22 +378,24 @@ export default function BulkOrderPage() {
                 </div>
 
                 <div>
-                  <h4 className="text-xs font-black uppercase tracking-widest text-brand mb-4">Quick Snacks</h4>
-                  <div className="space-y-3">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-[#e11d48] mb-3">
+                    Quick Snacks
+                  </h4>
+                  <div className="space-y-2.5">
                     {SNACKS.map(snack => (
-                      <div key={snack.id} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
-                        <div className="flex items-center gap-4">
-                          <img src={snack.image} className="w-16 h-16 object-cover rounded-xl" alt="" />
+                      <div key={snack.id} className="flex items-center justify-between p-3 bg-rose-50/50 rounded-2xl border border-rose-100">
+                        <div className="flex items-center gap-3">
+                          <img src={snack.image} className="w-14 h-14 object-cover rounded-xl" alt="" />
                           <div>
-                            <p className="font-black uppercase text-sm">{snack.name}</p>
-                            <p className="text-brand font-black text-xs">₹{snack.price}</p>
+                            <p className="font-black text-xs text-gray-900">{snack.name}</p>
+                            <p className="text-[#e11d48] font-black text-xs">₹{snack.price}</p>
                           </div>
                         </div>
                         <button 
-                          onClick={() => { addItem(snack); toast.success('Added!'); }}
-                          className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center hover:bg-brand transition-colors"
+                          onClick={() => { addItem(snack); toast.success(`${snack.name} added!`); }}
+                          className="w-9 h-9 bg-[#e11d48] text-white rounded-xl flex items-center justify-center hover:opacity-95 transition-opacity cursor-pointer"
                         >
-                          <Plus className="w-5 h-5" />
+                          <Plus className="w-4 h-4 stroke-[3]" />
                         </button>
                       </div>
                     ))}
@@ -343,21 +403,19 @@ export default function BulkOrderPage() {
                 </div>
               </div>
               
-              <div className="sticky bottom-0 bg-[#111] p-4 border-t border-white/5 md:hidden">
-                 <button onClick={() => setShowUpsell(false)} className="w-full py-4 bg-brand rounded-2xl font-black uppercase tracking-widest">Done</button>
+              <div className="sticky bottom-0 bg-white p-4 border-t border-rose-100 md:hidden">
+                <button 
+                  onClick={() => setShowUpsell(false)} 
+                  className="w-full py-3.5 bg-gradient-to-r from-[#ff4d6d] to-[#e11d48] text-white rounded-2xl font-black text-xs uppercase tracking-wider shadow-sm cursor-pointer"
+                >
+                  Done
+                </button>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Skip Button */}
-      <button
-          onClick={() => advanceToNextCategory(activeCategory)}
-          className="fixed bottom-24 left-6 md:bottom-10 md:left-10 z-40 bg-white/10 backdrop-blur-md border border-white/20 text-white px-6 py-4 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:bg-white/20 active:scale-95 transition-all font-black uppercase tracking-widest text-[10px] flex items-center gap-2"
-        >
-          Skip {activeCategory} <ArrowRight className="w-4 h-4" />
-        </button>
     </div>
   );
 }

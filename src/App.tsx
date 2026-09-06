@@ -17,7 +17,6 @@ import BottomNav from './components/BottomNav';
 import BottomCartBar from './components/BottomCartBar';
 import CityGateway from './components/CityGateway';
 import LocationPicker from './components/LocationPicker';
-import UndoManager from './components/UndoManager';
 const FeedbackPage = lazy(() => import('./components/FeedbackPage'));
 const AboutFounder = lazy(() => import('./components/AboutFounder'));
 const CelebrationHub = lazy(() => import('./components/CelebrationHub'));
@@ -140,7 +139,6 @@ export default function App() {
         }}
       />
       <LocationPicker />
-      <UndoManager />
       
       <div className="min-h-screen bg-gradient-to-b from-[#fff5f7] via-[#fff9fb] to-[#ffffff] text-gray-900 font-sans relative flex flex-col selection:bg-rose-500/20">
 
