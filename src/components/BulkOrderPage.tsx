@@ -31,14 +31,8 @@ export default function BulkOrderPage() {
                   userPhone === '7483187572' || 
                   userPhone === '9606001790';
 
-  const isStoreOpen = () => {
-    if (settings.websiteStatus === 'OFF' || settings.emergencyStop) {
-      return false;
-    }
-    return true;
-  };
-
-  const isClosed = !isStoreOpen() && !isAdmin;
+  // Time lock restriction removed - store is always open
+  const isClosed = false;
 
   useEffect(() => {
     localStorage.setItem('moms_magic_order_type', 'bulk');

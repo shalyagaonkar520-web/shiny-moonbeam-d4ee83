@@ -170,7 +170,8 @@ export default function LandingPage() {
                   userPhone === '7483187572' || 
                   userPhone === '9606001790';
 
-  const isClosed = settings.emergencyStop && !isAdmin;
+  // Time lock restriction removed - store is always open
+  const isClosed = false;
 
   // Rotating Search Placeholders
   useEffect(() => {

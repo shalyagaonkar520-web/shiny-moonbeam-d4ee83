@@ -71,12 +71,7 @@ export default function Header() {
     }
   };
 
-  const isStoreOpen = () => {
-    if (settings.websiteStatus === 'OFF' || settings.emergencyStop) {
-      return false;
-    }
-    return true;
-  };
+  const isStoreOpen = () => true;
 
   return (
     <>

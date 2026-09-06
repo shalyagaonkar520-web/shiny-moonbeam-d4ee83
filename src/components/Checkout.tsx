@@ -179,16 +179,7 @@ export default function Checkout() {
       userPhone === '7483187572' ||
       userPhone === '9606001790';
 
-    const isStoreOpen = () => {
-      if (settings.websiteStatus === 'OFF' || settings.emergencyStop) return false;
-      return true;
-    };
-
-    if (!isStoreOpen() && !isAdmin) {
-      toast.error('Ordering is closed! Redirecting to menu.', { id: 'ordering-closed' });
-      navigate('/food');
-      return;
-    }
+    // Time lock / closure restrictions removed - always open
     const savedName    = localStorage.getItem('moms_magic_user_name');
     const savedPhone   = localStorage.getItem('moms_magic_user_phone');
     if (savedName || savedPhone) {
