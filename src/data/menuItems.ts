@@ -2,30 +2,6 @@ import { Product } from '../types';
 
 export const MENU_ITEMS: Product[] = [
   {
-    id: 'party-1',
-    name: 'Moms Magic Mega Feast Box',
-    price: 899,
-    category: 'Party Special',
-    type: 'food',
-    image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80',
-    description: 'Ultimate party box with 2 Chicken Biryanis, 1 Chicken Starter, 2 Butter Naan, Veg Gravy, and 4 Mango Milkshakes!',
-    isTopPick: true,
-    fires: 3,
-    isVeg: false
-  },
-  {
-    id: 'party-2',
-    name: 'Royal Kebab Platter (Family Pack)',
-    price: 649,
-    category: 'Party Special',
-    type: 'food',
-    image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80',
-    description: 'Special assortment of 12 pcs of grilled chicken seekh kebabs, hariyali tikka, and chicken tandoori.',
-    isTopPick: true,
-    fires: 2,
-    isVeg: false
-  },
-  {
     id: 'party-3',
     name: 'Veggie Delight Combo Box',
     price: 549,

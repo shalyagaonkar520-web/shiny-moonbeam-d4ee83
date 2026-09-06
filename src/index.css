@@ -28,9 +28,9 @@
   }
 
   body {
-    @apply bg-matte-black text-text-main antialiased selection:bg-brand/10 overflow-x-hidden;
+    @apply text-gray-900 antialiased overflow-x-hidden;
     font-family: var(--font-sans);
-    background: #050505;
+    background: #fff5f7;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior-y: none;
@@ -156,6 +156,26 @@
 
 .animate-spin-slow {
   animation: spin-slow 12s linear infinite;
+  will-change: transform;
+}
+
+@keyframes food-orbit {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes food-counter {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-360deg); }
+}
+
+.animate-food-orbit {
+  animation: food-orbit 7s linear infinite;
+  will-change: transform;
+}
+
+.animate-food-counter {
+  animation: food-counter 7s linear infinite;
   will-change: transform;
 }
 

@@ -13,17 +13,22 @@ import {
   Clock, 
   Cake, 
   HeartHandshake, 
-  CheckCircle2 
+  CheckCircle2,
+  LogIn,
+  LogOut,
+  Gift,
+  Sparkles
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSEO } from '../utils/seo';
 import { useAuthStore } from '../store/authStore';
 import { useLocationStore } from '../store/locationStore';
+import AuthModal from './AuthModal';
 
 export default function ProfilePage() {
   useSEO("My Account - Mom's Magic", "Manage your profile, delivery address, and contact customer support.");
   const navigate = useNavigate();
-  const { user, profile } = useAuthStore();
+  const { user, profile, logout } = useAuthStore();
   const { deliveryLocation } = useLocationStore();
 
   const [name, setName] = useState('');
@@ -31,6 +36,7 @@ export default function ProfilePage() {
   const [address, setAddress] = useState('');
   const [orders, setOrders] = useState<any[]>([]);
   const [isSaved, setIsSaved] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   // Load user data on mount
   useEffect(() => {
@@ -96,6 +102,60 @@ export default function ProfilePage() {
             </p>
           </div>
         </div>
+
+        {/* Sign In / Account Status Card */}
+        {user || profile ? (
+          <div className="bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200/80 rounded-[24px] p-3.5 sm:p-4 text-left flex items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-2xl bg-[#e11d48] text-white flex items-center justify-center text-base shadow-xs shrink-0">
+                <User className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">
+                  Logged In As
+                </span>
+                <span className="text-xs sm:text-sm font-black text-gray-900 line-clamp-1">
+                  {profile?.name || user?.displayName || 'Active Account'}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={async () => {
+                  await logout();
+                  toast.success('Logged out successfully');
+                }}
+                className="px-3 py-1.5 rounded-xl bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-all active:scale-95"
+              >
+                Log Out
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200/80 rounded-[24px] p-4 text-left flex items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-[#e11d48] text-white flex items-center justify-center text-lg shadow-xs shrink-0">
+                🍲
+              </div>
+              <div>
+                <h3 className="text-xs sm:text-sm font-black text-gray-900 leading-tight">
+                  Welcome to Mom's Magic
+                </h3>
+                <p className="text-[10px] text-gray-500 font-medium mt-0.5">
+                  Sign in to track your orders & delivery addresses
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsAuthModalOpen(true)}
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#ff4d6d] to-[#e11d48] text-white font-black text-[11px] uppercase tracking-wider shadow-sm hover:brightness-105 active:scale-95 transition-all cursor-pointer shrink-0"
+            >
+              Sign In
+            </button>
+          </div>
+        )}
 
         {/* 1. Profile Details Card (Editable & Workable) */}
         <form onSubmit={handleSave} className="bg-white rounded-[26px] p-4 sm:p-5 border border-rose-100/90 shadow-sm space-y-4 text-left">
@@ -335,6 +395,8 @@ export default function ProfilePage() {
         </div>
 
       </div>
+
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </div>
   );
 }

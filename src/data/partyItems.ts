@@ -18,12 +18,10 @@ export const ICE_CAKES: Product[] = [
 
 export const NORMAL_CAKES: Product[] = [
   // Half Kg (0.5kg) - ₹200
-  { id: 'cake-1-05', name: 'Vanilla Cake (0.5kg)', price: 200, originalPrice: 400, category: 'Normal Cakes', type: 'food', image: 'https://images.unsplash.com/photo-1535141192574-5d4897c13636?w=800&q=80', description: 'Classic creamy vanilla cake.', isVeg: true },
   { id: 'cake-2-05', name: 'Chocolate Cake (0.5kg)', price: 200, originalPrice: 400, category: 'Normal Cakes', type: 'food', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&q=80', description: 'Rich chocolate truffle cake.', isVeg: true },
   { id: 'cake-3-05', name: 'Mango Cake (0.5kg)', price: 200, originalPrice: 400, category: 'Normal Cakes', type: 'food', image: 'https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=800&q=80', description: 'Delightful tropical mango cake.', isVeg: true },
 
   // 1 Kg (1kg) - ₹400
-  { id: 'cake-1-1', name: 'Vanilla Cake (1kg)', price: 400, originalPrice: 800, category: 'Normal Cakes', type: 'food', image: 'https://images.unsplash.com/photo-1535141192574-5d4897c13636?w=800&q=80', description: 'Classic creamy vanilla cake.', isVeg: true },
   { id: 'cake-2-1', name: 'Chocolate Cake (1kg)', price: 400, originalPrice: 800, category: 'Normal Cakes', type: 'food', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&q=80', description: 'Rich chocolate truffle cake.', isVeg: true },
   { id: 'cake-3-1', name: 'Mango Cake (1kg)', price: 400, originalPrice: 800, category: 'Normal Cakes', type: 'food', image: 'https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=800&q=80', description: 'Delightful tropical mango cake.', isVeg: true },
 ];

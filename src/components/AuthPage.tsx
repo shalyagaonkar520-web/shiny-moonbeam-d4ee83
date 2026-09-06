@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Mail, Lock, User, Phone, Eye, EyeOff, Sparkles, LogIn, CheckCircle2, ArrowRight, ShieldCheck } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { 
+  X, Mail, Lock, User, Phone, Eye, EyeOff, Sparkles, LogIn, 
+  CheckCircle2, ArrowRight, ShieldCheck, ChevronLeft, Heart, 
+  UtensilsCrossed, Clock, Gift, Award
+} from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { useSEO } from '../utils/seo';
 import toast from 'react-hot-toast';
-
-interface AuthModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  defaultMode?: 'signin' | 'signup' | 'phone';
-}
 
 function getFriendlyErrorMessage(err: any): string {
   const code = err?.code || '';
@@ -41,8 +41,14 @@ function getFriendlyErrorMessage(err: any): string {
   return msg || 'Authentication failed. Please check your credentials.';
 }
 
-export default function AuthModal({ isOpen, onClose, defaultMode = 'signin' }: AuthModalProps) {
-  const [mode, setMode] = useState<'signin' | 'signup' | 'phone'>(defaultMode);
+export default function AuthPage() {
+  useSEO("Sign In / Sign Up - Mom's Magic", "Sign in or register for Mom's Magic Yellapur to get ₹50 welcome bonus and 10-minute food delivery.");
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Determine initial mode based on route
+  const isSignupPath = location.pathname.includes('signup');
+  const [mode, setMode] = useState<'signin' | 'signup' | 'phone'>(isSignupPath ? 'signup' : 'signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -51,7 +57,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = 'signin' }: A
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
 
-  const { loginWithGoogle, loginWithEmail, signUpWithEmail, quickPhoneLogin, resetPassword } = useAuthStore();
+  const { user, profile, loginWithGoogle, loginWithEmail, signUpWithEmail, quickPhoneLogin, resetPassword, logout } = useAuthStore();
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,14 +98,13 @@ export default function AuthModal({ isOpen, onClose, defaultMode = 'signin' }: A
       try {
         await signUpWithEmail(email.trim(), password.trim(), name.trim(), phone.trim());
         toast.success(`Welcome to Mom's Magic, ${name.trim()}! 🍲`);
-        onClose();
+        navigate('/profile');
       } catch (err: any) {
         toast.error(getFriendlyErrorMessage(err));
       } finally {
         setSubmitLoading(false);
       }
     } else {
-      // Sign in mode
       if (!email.trim() || !password.trim()) {
         toast.error('Please enter your email and password.');
         return;
@@ -109,7 +114,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = 'signin' }: A
       try {
         await loginWithEmail(email.trim(), password.trim());
         toast.success('Welcome back to Mom\'s Magic! 🍳');
-        onClose();
+        navigate('/profile');
       } catch (err: any) {
         toast.error(getFriendlyErrorMessage(err));
       } finally {
@@ -132,7 +137,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = 'signin' }: A
 
     quickPhoneLogin(name.trim(), `+91 ${cleanedPhone.slice(-10)}`);
     toast.success(`Welcome, ${name.trim()}! Logged in successfully! 🍲`);
-    onClose();
+    navigate('/profile');
   };
 
   const handleGoogleAuth = async () => {
@@ -140,7 +145,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = 'signin' }: A
     try {
       await loginWithGoogle();
       toast.success('Signed in successfully with Google! 🚀');
-      onClose();
+      navigate('/profile');
     } catch (err: any) {
       toast.error(getFriendlyErrorMessage(err));
     } finally {
@@ -148,43 +153,109 @@ export default function AuthModal({ isOpen, onClose, defaultMode = 'signin' }: A
     }
   };
 
-  if (!isOpen) return null;
+  // If already logged in, show account card with fast action buttons
+  if (user || profile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#fff1f4]/70 via-[#fff8fa]/60 to-[#ffffff] text-gray-900 pb-32 pt-6 px-4">
+        <div className="max-w-md mx-auto space-y-5 text-left">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/')}
+              className="w-9 h-9 rounded-full bg-white shadow-xs border border-gray-200 flex items-center justify-center text-gray-700 hover:text-gray-900 cursor-pointer"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <h1 className="text-xl font-black text-gray-900">Your Account</h1>
+          </div>
+
+          <div className="bg-white rounded-[28px] p-6 border border-rose-100 shadow-md space-y-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#ff4d6d] to-[#ff758f] text-white flex items-center justify-center text-2xl font-black shadow-md shadow-rose-500/20">
+                {(profile?.name || user?.displayName || 'U').charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h2 className="text-lg font-black text-gray-900">
+                  {profile?.name || user?.displayName || 'Customer'}
+                </h2>
+                <p className="text-xs text-gray-500">
+                  {user?.email || profile?.phone || 'Logged In'}
+                </p>
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full mt-1">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Active Session
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-2">
+              <button
+                onClick={() => navigate('/food')}
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#ff4d6d] to-[#e11d48] text-white font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <UtensilsCrossed className="w-4 h-4" />
+                <span>Order Food Now</span>
+              </button>
+
+              <button
+                onClick={() => navigate('/profile')}
+                className="w-full py-3 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-800 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <User className="w-4 h-4" />
+                <span>Manage Profile & Addresses</span>
+              </button>
+
+              <button
+                onClick={async () => {
+                  await logout();
+                  toast.success('Logged out successfully');
+                }}
+                className="w-full py-2.5 text-center text-xs font-bold text-rose-600 hover:text-rose-800 cursor-pointer"
+              >
+                Log Out of Account
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0, y: 20 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.95, opacity: 0, y: 20 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-          className="bg-white border border-rose-100 rounded-[28px] sm:rounded-[32px] w-full max-w-md shadow-[0_20px_50px_rgba(225,29,72,0.18)] relative overflow-hidden my-auto text-left"
-        >
-          {/* Top Brand Gradient Stripe */}
-          <div className="h-1.5 bg-gradient-to-r from-[#ff4d6d] via-[#e11d48] to-[#ff758f]" />
-
-          {/* Close Button */}
+    <div className="min-h-screen bg-gradient-to-b from-[#fff1f4]/70 via-[#fff8fa]/60 to-[#ffffff] text-gray-900 pb-32 pt-4 px-3 sm:px-6">
+      <div className="max-w-md mx-auto space-y-4 text-left">
+        
+        {/* Navigation Header */}
+        <div className="flex items-center justify-between py-2">
           <button
-            onClick={onClose}
-            className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-rose-50 text-gray-400 hover:text-rose-600 transition-all cursor-pointer z-10"
-            aria-label="Close"
+            onClick={() => navigate('/')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-xs border border-gray-200 text-xs font-bold text-gray-700 hover:text-gray-900 active:scale-95 transition-all cursor-pointer"
           >
-            <X className="w-4 h-4" />
+            <ChevronLeft className="w-4 h-4" />
+            <span>Home</span>
           </button>
 
-          <div className="p-5 sm:p-7 space-y-4">
+          <span className="text-[11px] font-black uppercase tracking-wider text-[#e11d48]">
+            Mom's Magic Yellapur
+          </span>
+        </div>
+
+        {/* Main Card */}
+        <div className="bg-white border border-rose-100 rounded-[30px] shadow-[0_15px_45px_rgba(225,29,72,0.12)] overflow-hidden">
+          {/* Top Brand Stripe */}
+          <div className="h-1.5 bg-gradient-to-r from-[#ff4d6d] via-[#e11d48] to-[#ff758f]" />
+
+          <div className="p-6 sm:p-7 space-y-4">
             
-            {/* Header branding */}
+            {/* Title */}
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="w-6 h-6 rounded-lg bg-rose-100 text-[#e11d48] flex items-center justify-center text-xs font-black">
                   🍲
                 </span>
                 <span className="text-[11px] font-black uppercase tracking-widest text-[#e11d48]">
-                  Mom's Magic Yellapur
+                  Delicious Food • 10 Min Delivery
                 </span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
+              <h1 className="text-2xl font-black text-gray-900 tracking-tight">
                 {isForgotPassword
                   ? 'Reset Password'
                   : mode === 'signup'
@@ -192,7 +263,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = 'signin' }: A
                   : mode === 'phone'
                   ? 'Quick Phone Login'
                   : 'Welcome Back!'}
-              </h2>
+              </h1>
               <p className="text-xs text-gray-500 mt-0.5">
                 {isForgotPassword
                   ? 'Enter your registered email to receive a password reset link'
@@ -204,7 +275,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = 'signin' }: A
               </p>
             </div>
 
-            {/* Mode Switcher Tabs */}
+            {/* Tabs */}
             {!isForgotPassword && (
               <div className="grid grid-cols-3 gap-1 bg-gray-100/80 p-1 rounded-2xl">
                 <button
@@ -243,7 +314,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = 'signin' }: A
               </div>
             )}
 
-            {/* Form: Quick Phone Login */}
+            {/* Mode: Quick Phone */}
             {mode === 'phone' && !isForgotPassword && (
               <form onSubmit={handleQuickPhoneAuth} className="space-y-3 pt-1">
                 <div>
@@ -291,7 +362,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = 'signin' }: A
               </form>
             )}
 
-            {/* Form: Email Sign In / Sign Up / Forgot Password */}
+            {/* Mode: Email Sign In / Sign Up / Forgot Password */}
             {(mode !== 'phone' || isForgotPassword) && (
               <form onSubmit={handleEmailAuth} className="space-y-3 pt-1">
                 {mode === 'signup' && !isForgotPassword && (
@@ -464,17 +535,30 @@ export default function AuthModal({ isOpen, onClose, defaultMode = 'signin' }: A
               </>
             )}
 
-            {/* Bottom Perks Footnote */}
-            <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-[10px] text-gray-500 font-semibold">
-              <span className="flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-emerald-500" /> 100% Safe & Secure
-              </span>
-              <span>⚡ 10 Min Fast Delivery</span>
+            {/* Bottom perks */}
+            <div className="pt-3 border-t border-gray-100 grid grid-cols-2 gap-2 text-[11px] text-gray-500 font-medium">
+              <div className="flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-[#e11d48]" />
+                <span>10-min delivery</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <UtensilsCrossed className="w-3.5 h-3.5 text-[#e11d48]" />
+                <span>Fresh & Pure Food</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                <span>Zero hidden fees</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
+                <span>Homestyle recipes</span>
+              </div>
             </div>
 
           </div>
-        </motion.div>
+        </div>
+
       </div>
-    </AnimatePresence>
+    </div>
   );
 }

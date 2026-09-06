@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ChevronLeft, PackageSearch, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSEO } from '../utils/seo';
+import FoodLoader from './FoodLoader';
 
 interface OrderItem {
   name: string;
@@ -57,11 +58,7 @@ export default function OrdersPage() {
   }, [userPhone]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-matte-black flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-[#4CD964] animate-spin" />
-      </div>
-    );
+    return <FoodLoader />;
   }
 
   if (!userPhone) {

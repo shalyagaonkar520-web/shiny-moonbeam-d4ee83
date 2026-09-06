@@ -8,6 +8,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import toast from 'react-hot-toast';
 import { useSEO } from '../utils/seo';
+import FoodLoader from './FoodLoader';
 
 // Helper to calculate distance in km via Haversine
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -227,11 +228,7 @@ export default function TrackingPage() {
   const metrics = getTrackingMetrics();
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-matte-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-[#4CD964]"></div>
-      </div>
-    );
+    return <FoodLoader />;
   }
 
   return (

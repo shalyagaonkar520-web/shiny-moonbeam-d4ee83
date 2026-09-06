@@ -4,13 +4,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, Star, Plus, Minus, ChevronDown, Clock, Zap, 
   ArrowRight, X, Sparkles, User, ShoppingBag, Flame,
-  Store, Image as ImageIcon, Bell, Phone, HelpCircle, MessageCircle
+  Store, Image as ImageIcon, Bell, Phone, HelpCircle, MessageCircle, Download, LogIn
 } from 'lucide-react';
 import { useMenuStore } from '../store/menuStore';
 import { useCartStore } from '../store/cartStore';
 import { useSystemStore } from '../store/systemStore';
 import { useLocationStore } from '../store/locationStore';
 import { useAuthStore } from '../store/authStore';
+import { useInstallModalStore } from '../store/installModalStore';
 import AuthModal from './AuthModal';
 import toast from 'react-hot-toast';
 import { playSound, SOUNDS } from '../utils/audio';
@@ -160,6 +161,7 @@ export default function LandingPage() {
   const [selectedCategoryTab, setSelectedCategoryTab] = useState<string>('All');
   const [activeBannerIndex, setActiveBannerIndex] = useState(0);
   const [showHelpToOrder, setShowHelpToOrder] = useState(false);
+  const openInstallModal = useInstallModalStore(state => state.openModal);
   const bestsellersRef = useRef<HTMLDivElement>(null);
 
   const adminToken = localStorage.getItem('moms_magic_admin_token');
@@ -327,31 +329,53 @@ export default function LandingPage() {
               </p>
             </div>
 
-            {/* Right: Help to Order Button + Profile Avatar */}
-            <div className="flex items-center gap-2 shrink-0">
+            {/* Right: Install App + Help to Order Button + Sign In / Login */}
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               <button
                 type="button"
-                onClick={() => setShowHelpToOrder(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white font-bold text-xs border border-white/30 active:scale-95 transition-all cursor-pointer shadow-xs"
-                title="Need Help with Ordering?"
+                onClick={openInstallModal}
+                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white font-bold text-xs border border-white/30 active:scale-95 transition-all cursor-pointer shadow-xs"
+                title="Install Mom's Magic App"
               >
-                <span>Help to Order? ❓</span>
+                <Download className="w-3.5 h-3.5" />
+                <span>Install</span>
               </button>
 
               <button
                 type="button"
-                onClick={() => navigate('/profile')}
-                className="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 flex items-center justify-center transition-transform active:scale-95 shadow-sm overflow-hidden cursor-pointer shrink-0"
-                aria-label="Profile"
+                onClick={() => setShowHelpToOrder(true)}
+                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white font-bold text-xs border border-white/30 active:scale-95 transition-all cursor-pointer shadow-xs"
+                title="Need Help with Ordering?"
               >
-                {user ? (
-                  <div className="w-full h-full bg-gradient-to-tr from-amber-400 to-amber-200 text-blue-950 font-black text-xs flex items-center justify-center uppercase">
-                    {profile?.name?.charAt(0) || user.displayName?.charAt(0) || 'U'}
-                  </div>
-                ) : (
-                  <User className="w-4 h-4 text-white" />
-                )}
+                <span>Help? ❓</span>
               </button>
+
+              {/* SIGN IN / LOGIN ADDED AT SIDE OF HELP */}
+              {!user && !profile ? (
+                <button
+                  type="button"
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-300 hover:from-amber-300 hover:to-amber-200 text-blue-950 font-black text-xs shadow-md active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+                  title="Sign In / Login to Mom's Magic"
+                >
+                  <LogIn className="w-3.5 h-3.5 text-blue-950" />
+                  <span>Sign In / Login</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => navigate('/profile')}
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white font-bold text-xs border border-white/30 active:scale-95 transition-all cursor-pointer shadow-xs"
+                  title="My Profile & Account"
+                >
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-400 to-amber-200 text-blue-950 font-black text-[10px] flex items-center justify-center uppercase shrink-0">
+                    {profile?.name?.charAt(0) || user?.displayName?.charAt(0) || 'U'}
+                  </div>
+                  <span className="max-w-[70px] sm:max-w-[100px] truncate">
+                    {profile?.name || user?.displayName || 'Account'}
+                  </span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -490,8 +514,159 @@ export default function LandingPage() {
       {/* MAIN BODY: PURE BLUE AND WHITE, NO BLACK! */}
       <main className="max-w-xl mx-auto px-4 mt-5 space-y-6">
         
-        {/* 2. HOTELS SECTION JUST DOWN OF THAT BLUE BOX (IN ROUNDED BOXES, PHOTO BE EMPTY) */}
-        <section>
+        {searchQuery.trim() ? (
+          /* SEARCH RESULTS DIRECTLY AT THE VERY TOP */
+          <section className="space-y-4">
+            <div className="flex items-center justify-between px-1">
+              <div>
+                <h2 className="text-gray-900 font-black text-base sm:text-lg tracking-tight leading-tight flex items-center gap-2">
+                  <span>Search Results</span>
+                  <span className="bg-[#e11d48]/10 text-[#e11d48] text-xs font-bold px-2.5 py-0.5 rounded-full">
+                    {filteredProducts.length} {filteredProducts.length === 1 ? 'item' : 'items'}
+                  </span>
+                </h2>
+                <p className="text-xs text-gray-500 font-medium">Dishes matching "{searchQuery}"</p>
+              </div>
+              <button
+                onClick={() => setSearchQuery('')}
+                className="text-xs font-bold text-[#e11d48] bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-full transition-colors cursor-pointer"
+              >
+                Clear Search ✕
+              </button>
+            </div>
+
+            {filteredProducts.length === 0 ? (
+              <div className="text-center py-12 bg-white rounded-3xl border border-rose-100 p-6 shadow-xs space-y-3">
+                <div className="w-12 h-12 rounded-full bg-rose-50 text-[#e11d48] mx-auto flex items-center justify-center text-xl">
+                  🔍
+                </div>
+                <h3 className="text-gray-900 font-black text-sm">No dishes found for "{searchQuery}"</h3>
+                <p className="text-xs text-gray-500 max-w-xs mx-auto">
+                  Try searching for Biryani, Chicken Kabab, Shawarma, Puffs, or Fried Rice.
+                </p>
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="mt-2 text-xs font-bold text-white bg-[#e11d48] hover:bg-[#ff2e74] px-4 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
+                >
+                  View All Dishes
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                {filteredProducts.map((product) => {
+                  const inCart = cartItems.find(i => i.id === product.id);
+                  const originalPrice = Math.round(product.price * 1.25);
+
+                  return (
+                    <div
+                      key={product.id}
+                      className="bg-white rounded-2xl p-2.5 sm:p-3 border border-rose-100 shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden text-left"
+                    >
+                      {/* Food Image with Floating Plus Button */}
+                      <div className="relative aspect-square rounded-xl overflow-hidden bg-gray-50 mb-2">
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                          loading="lazy"
+                        />
+
+                        {product.fires && product.fires >= 2 && (
+                          <span className="absolute top-1.5 left-1.5 bg-rose-500 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs flex items-center gap-0.5">
+                            <Flame className="w-2.5 h-2.5" /> Hot
+                          </span>
+                        )}
+
+                        {/* Floating Pink Circular "+" / Stepper */}
+                        <div className="absolute bottom-1.5 right-1.5 z-20">
+                          {inCart ? (
+                            <div className="bg-[#e11d48] text-white rounded-full flex items-center gap-1.5 px-2 py-1 shadow-md">
+                              <button
+                                onClick={() => {
+                                  playSound(SOUNDS.QUANTITY_TICK);
+                                  updateQuantity(product.id, inCart.quantity - 1);
+                                }}
+                                className="text-white hover:text-white/80 active:scale-75 text-xs font-bold cursor-pointer"
+                              >
+                                <Minus className="w-3 h-3" />
+                              </button>
+                              <span className="text-[11px] font-black">{inCart.quantity}</span>
+                              <button
+                                onClick={() => {
+                                  playSound(SOUNDS.QUANTITY_TICK);
+                                  updateQuantity(product.id, inCart.quantity + 1);
+                                }}
+                                className="text-white hover:text-white/80 active:scale-75 text-xs font-bold cursor-pointer"
+                              >
+                                <Plus className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handleAddToCart(product)}
+                              disabled={isClosed}
+                              className="w-8 h-8 rounded-full bg-[#ff2e74] hover:bg-[#e11d48] text-white shadow-md flex items-center justify-center active:scale-90 transition-transform cursor-pointer"
+                              title="Add dish"
+                            >
+                              <Plus className="w-4 h-4 stroke-[3]" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Details */}
+                      <div className="flex-1 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span
+                              className={`w-3 h-3 rounded-xs border flex items-center justify-center shrink-0 ${
+                                product.isVeg ? 'border-emerald-600' : 'border-rose-600'
+                              }`}
+                            >
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  product.isVeg ? 'bg-emerald-600' : 'bg-rose-600'
+                                }`}
+                              />
+                            </span>
+                            <span className="text-[10px] font-extrabold text-amber-500 flex items-center gap-0.5">
+                              <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+                              {getStableRating(product.id)}
+                            </span>
+                          </div>
+
+                          <h3 className="font-extrabold text-xs sm:text-[13px] text-gray-900 leading-snug line-clamp-2">
+                            {product.name}
+                          </h3>
+                        </div>
+
+                        {/* Price & Meta */}
+                        <div className="mt-2.5 pt-2 border-t border-gray-100 flex items-center justify-between">
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-xs sm:text-sm font-black text-[#e11d48]">
+                              ₹{product.price}
+                            </span>
+                            <span className="text-[10px] text-gray-400 line-through">
+                              ₹{originalPrice}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-0.5 text-amber-600 font-bold text-[10px]">
+                            <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
+                            <span>{getStableRating(product.id)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        ) : (
+          <>
+            {/* 2. HOTELS SECTION JUST DOWN OF THAT BLUE BOX (IN ROUNDED BOXES, PHOTO BE EMPTY) */}
+            <section>
           <div className="flex items-center justify-between mb-3 px-1">
             <div>
               <h2 className="text-gray-900 font-black text-base sm:text-lg tracking-tight leading-tight">
@@ -961,6 +1136,8 @@ export default function LandingPage() {
             </div>
           )}
         </section>
+        </>
+        )}
       </main>
 
       {/* Help to Order Modal */}

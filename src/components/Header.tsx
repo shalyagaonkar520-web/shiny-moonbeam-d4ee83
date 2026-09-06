@@ -6,6 +6,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useSystemStore } from '../store/systemStore';
 import { useAuthStore } from '../store/authStore';
 import AuthModal from './AuthModal';
+import { useInstallModalStore } from '../store/installModalStore';
 import toast from 'react-hot-toast';
 
 export default function Header() {
@@ -14,49 +15,10 @@ export default function Header() {
   const settings = useSystemStore(state => state.settings);
   const { user, profile } = useAuthStore();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const openInstallModal = useInstallModalStore(state => state.openModal);
 
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e: any) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-  }, []);
-
-  const handleInstallClick = async () => {
-    if (deferredPrompt) {
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log('User install choice:', outcome);
-      setDeferredPrompt(null);
-    } else {
-      const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-      if (isiOS) {
-        toast('To install: Tap the Share button (📤) and choose "Add to Home Screen" 📲', {
-          duration: 5000,
-          icon: '📱',
-          style: {
-            background: '#0B0E14',
-            color: '#FFFFFF',
-            border: '1px solid #4CD964',
-            borderRadius: '16px'
-          }
-        });
-      } else {
-        toast('To install: Tap the browser menu (⋮) and choose "Install App" or "Add to Home Screen" 📲', {
-          duration: 5000,
-          icon: '📱',
-          style: {
-            background: '#0B0E14',
-            color: '#FFFFFF',
-            border: '1px solid #4CD964',
-            borderRadius: '16px'
-          }
-        });
-      }
-    }
+  const handleInstallClick = () => {
+    openInstallModal();
   };
 
   const formatTime12h = (time24: string) => {
@@ -121,19 +83,19 @@ export default function Header() {
 
             {/* Auth & Install Buttons at Top Right */}
             <div className="flex items-center gap-2">
-              {user ? (
+              {user || profile ? (
                 <motion.button
                   whileHover={{ y: -2, scale: 1.03 }}
                   whileTap={{ y: -4, scale: 1.06 }}
                   transition={{ type: "spring", stiffness: 500, damping: 18 }}
                   onClick={() => navigate('/profile')}
-                  className="flex items-center gap-2 bg-white/5 border border-[#4CD964]/20 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-black text-white hover:border-[#4CD964] transition-colors cursor-pointer"
+                  className="flex items-center gap-2 bg-white/10 border border-white/20 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-black text-white hover:border-amber-400 transition-colors cursor-pointer"
                 >
-                  <div className="w-5 h-5 rounded-full bg-[#4CD964]/10 border border-[#4CD964]/30 flex items-center justify-center text-[10px] text-[#4CD964] uppercase font-black shrink-0">
-                    {profile?.name?.charAt(0) || user.displayName?.charAt(0) || 'U'}
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-400 to-amber-200 text-blue-950 flex items-center justify-center text-[10px] uppercase font-black shrink-0">
+                    {profile?.name?.charAt(0) || user?.displayName?.charAt(0) || 'U'}
                   </div>
                   <span className="max-w-[70px] sm:max-w-[120px] truncate uppercase tracking-wider text-[10px] sm:text-xs">
-                    {profile?.name || user.displayName || 'Profile'}
+                    {profile?.name || user?.displayName || 'Profile'}
                   </span>
                 </motion.button>
               ) : (
@@ -142,9 +104,9 @@ export default function Header() {
                   whileTap={{ y: -4, scale: 1.06 }}
                   transition={{ type: "spring", stiffness: 500, damping: 18 }}
                   onClick={() => setIsAuthModalOpen(true)}
-                  className="bg-gradient-to-r from-[#4CD964] to-[#3AC152] text-white font-black text-[10px] uppercase tracking-[1px] px-3 sm:px-4 py-2 rounded-xl shadow-[0_4px_12px_rgba(76,217,100,0.2)] cursor-pointer whitespace-nowrap"
+                  className="bg-gradient-to-r from-amber-400 to-amber-300 hover:from-amber-300 hover:to-amber-200 text-blue-950 font-black text-[10px] sm:text-xs uppercase tracking-[1px] px-3 sm:px-4 py-2 rounded-xl shadow-[0_4px_12px_rgba(244,180,0,0.3)] cursor-pointer whitespace-nowrap"
                 >
-                  Login
+                  Sign In / Login
                 </motion.button>
               )}
 

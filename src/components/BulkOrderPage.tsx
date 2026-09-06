@@ -8,6 +8,8 @@ import { PARTY_ITEMS, SNACKS, ICE_CAKES, NORMAL_CAKES } from '../data/partyItems
 import { Product } from '../types';
 import { useSEO } from '../utils/seo';
 
+import { useInstallModalStore } from '../store/installModalStore';
+
 // Category tabs for Party Specials
 type Category = 'Normal' | 'Ice Cake' | 'Party Items' | 'Snacks';
 
@@ -17,56 +19,15 @@ export default function BulkOrderPage() {
   const { addItem, items, updateQuantity } = useCartStore();
   const [activeCategory, setActiveCategory] = useState<Category>('Normal');
   const [showUpsell, setShowUpsell] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const openInstallModal = useInstallModalStore(state => state.openModal);
 
   useEffect(() => {
     localStorage.setItem('moms_magic_order_type', 'bulk');
     window.scrollTo(0, 0);
-
-    const handleBeforeInstallPrompt = (e: any) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
   }, []);
 
-  const handleInstallClick = async () => {
-    if (deferredPrompt) {
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log('User install choice:', outcome);
-      setDeferredPrompt(null);
-    } else {
-      const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-      if (isiOS) {
-        toast('To install: Tap the Share button (📤) and select "Add to Home Screen" 📲', {
-          duration: 5000,
-          icon: '📱',
-          style: {
-            background: '#ffffff',
-            color: '#111827',
-            border: '1px solid #f43f5e',
-            borderRadius: '16px',
-            fontWeight: 'bold',
-            boxShadow: '0 4px 14px rgba(0,0,0,0.08)'
-          }
-        });
-      } else {
-        toast('To install: Tap browser menu (⋮) and choose "Install App" or "Add to Home Screen" 📲', {
-          duration: 5000,
-          icon: '📱',
-          style: {
-            background: '#ffffff',
-            color: '#111827',
-            border: '1px solid #f43f5e',
-            borderRadius: '16px',
-            fontWeight: 'bold',
-            boxShadow: '0 4px 14px rgba(0,0,0,0.08)'
-          }
-        });
-      }
-    }
+  const handleInstallClick = () => {
+    openInstallModal();
   };
 
   const categories: Category[] = ['Normal', 'Ice Cake', 'Party Items', 'Snacks'];

@@ -7,6 +7,7 @@ import {
   createUserWithEmailAndPassword, 
   signOut, 
   onAuthStateChanged,
+  sendPasswordResetEmail,
   updateProfile
 } from 'firebase/auth';
 import { 
@@ -50,7 +51,9 @@ interface AuthStore {
   initialized: boolean;
   loginWithGoogle: () => Promise<void>;
   loginWithEmail: (email: string, password: string) => Promise<void>;
-  signUpWithEmail: (email: string, password: string, name: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string, name: string, phone?: string) => Promise<void>;
+  quickPhoneLogin: (name: string, phone: string) => void;
+  resetPassword: (email: string) => Promise<void>;
   logout: () => Promise<void>;
   deleteAccount: () => Promise<void>;
   addAddress: (label: string, address: string, lat: number, lng: number) => Promise<void>;
@@ -69,31 +72,20 @@ export const useAuthStore = create<AuthStore>((set, get) => {
         const userDoc = await transaction.get(userDocRef);
         
         if (!userDoc.exists()) {
-          // New User Registration - Setup welcome profile and welcome bonus
+          // New User Registration
           const newProfile: UserProfile = {
             uid: firebaseUser.uid,
-            name: firebaseUser.displayName || 'Guest User',
+            name: firebaseUser.displayName || localStorage.getItem('moms_magic_user_name') || 'Guest User',
             email: firebaseUser.email || '',
-            phone: firebaseUser.phoneNumber || '',
-            walletBalance: 50, // ₹50 welcome bonus
+            phone: firebaseUser.phoneNumber || localStorage.getItem('moms_magic_user_phone') || '',
+            walletBalance: 0,
             rewardPoints: 0,
             addresses: [],
-            welcomeBonusClaimed: true,
+            welcomeBonusClaimed: false,
             createdAt: new Date().toISOString()
           };
 
           transaction.set(userDocRef, newProfile);
-
-          // Add transaction log
-          const transRef = doc(collection(db, 'walletTransactions'));
-          transaction.set(transRef, {
-            userId: firebaseUser.uid,
-            amount: 50,
-            type: 'welcome_bonus',
-            description: 'One-time welcome bonus credited! 🎁',
-            createdAt: new Date().toISOString()
-          });
-
           set({ profile: newProfile });
         } else {
           // Existing User - Retrieve profile
@@ -102,12 +94,31 @@ export const useAuthStore = create<AuthStore>((set, get) => {
         }
       });
     } catch (error) {
-      console.error('Error syncing profile document:', error);
+      console.warn('Error syncing profile document via transaction, attempting fallback read:', error);
       // Fallback read if transaction fails
-      const docSnap = await getDoc(userDocRef);
-      if (docSnap.exists()) {
-        set({ profile: docSnap.data() as UserProfile });
+      try {
+        const docSnap = await getDoc(userDocRef);
+        if (docSnap.exists()) {
+          set({ profile: docSnap.data() as UserProfile });
+          return;
+        }
+      } catch (readErr) {
+        console.warn('Fallback Firestore read failed:', readErr);
       }
+      
+      // Resilient fallback: ensure user profile is always populated so app is never blocked
+      const fallbackProfile: UserProfile = {
+        uid: firebaseUser.uid,
+        name: firebaseUser.displayName || localStorage.getItem('moms_magic_user_name') || 'Customer',
+        email: firebaseUser.email || '',
+        phone: firebaseUser.phoneNumber || localStorage.getItem('moms_magic_user_phone') || '',
+        walletBalance: 0,
+        rewardPoints: 0,
+        addresses: [],
+        welcomeBonusClaimed: false,
+        createdAt: new Date().toISOString()
+      };
+      set({ profile: fallbackProfile });
     }
   };
 
@@ -115,14 +126,34 @@ export const useAuthStore = create<AuthStore>((set, get) => {
   onAuthStateChanged(auth, async (firebaseUser) => {
     set({ loading: true });
     if (firebaseUser) {
-      // Set default local phone number to sync with legacy session data
       if (firebaseUser.phoneNumber) {
         localStorage.setItem('moms_magic_user_phone', firebaseUser.phoneNumber);
+      }
+      if (firebaseUser.displayName) {
+        localStorage.setItem('moms_magic_user_name', firebaseUser.displayName);
       }
       set({ user: firebaseUser });
       await syncProfile(firebaseUser);
     } else {
-      set({ user: null, profile: null });
+      // Check if local guest session exists in localStorage
+      const localName = localStorage.getItem('moms_magic_user_name');
+      const localPhone = localStorage.getItem('moms_magic_user_phone');
+      if (localName || localPhone) {
+        const localProfile: UserProfile = {
+          uid: 'local_' + (localPhone?.replace(/\D/g, '') || 'user'),
+          name: localName || 'Guest User',
+          email: localStorage.getItem('moms_magic_user_email') || '',
+          phone: localPhone || '',
+          walletBalance: 0,
+          rewardPoints: 0,
+          addresses: [],
+          welcomeBonusClaimed: false,
+          createdAt: new Date().toISOString()
+        };
+        set({ user: null, profile: localProfile });
+      } else {
+        set({ user: null, profile: null });
+      }
     }
     set({ loading: false, initialized: true });
   });
@@ -137,7 +168,13 @@ export const useAuthStore = create<AuthStore>((set, get) => {
       set({ loading: true });
       try {
         const provider = new GoogleAuthProvider();
-        await signInWithPopup(auth, provider);
+        const res = await signInWithPopup(auth, provider);
+        if (res.user.displayName) {
+          localStorage.setItem('moms_magic_user_name', res.user.displayName);
+        }
+        if (res.user.phoneNumber) {
+          localStorage.setItem('moms_magic_user_phone', res.user.phoneNumber);
+        }
       } catch (error) {
         console.error('Google sign-in error:', error);
         throw error;
@@ -149,7 +186,10 @@ export const useAuthStore = create<AuthStore>((set, get) => {
     loginWithEmail: async (email, password) => {
       set({ loading: true });
       try {
-        await signInWithEmailAndPassword(auth, email, password);
+        const res = await signInWithEmailAndPassword(auth, email, password);
+        if (res.user.displayName) {
+          localStorage.setItem('moms_magic_user_name', res.user.displayName);
+        }
       } catch (error) {
         console.error('Email login error:', error);
         throw error;
@@ -158,12 +198,15 @@ export const useAuthStore = create<AuthStore>((set, get) => {
       }
     },
 
-    signUpWithEmail: async (email, password, name) => {
+    signUpWithEmail: async (email, password, name, phone) => {
       set({ loading: true });
       try {
         const credential = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(credential.user, { displayName: name });
-        // Manually trigger sync since displayName changes
+        localStorage.setItem('moms_magic_user_name', name);
+        if (phone) {
+          localStorage.setItem('moms_magic_user_phone', phone);
+        }
         await syncProfile(credential.user);
       } catch (error) {
         console.error('Email sign up error:', error);
@@ -173,16 +216,41 @@ export const useAuthStore = create<AuthStore>((set, get) => {
       }
     },
 
+    quickPhoneLogin: (name, phone) => {
+      const cleanName = name.trim() || 'Guest Customer';
+      const cleanPhone = phone.trim();
+      localStorage.setItem('moms_magic_user_name', cleanName);
+      if (cleanPhone) localStorage.setItem('moms_magic_user_phone', cleanPhone);
+
+      const localProfile: UserProfile = {
+        uid: 'local_' + (cleanPhone.replace(/\D/g, '') || Date.now().toString()),
+        name: cleanName,
+        email: '',
+        phone: cleanPhone,
+        walletBalance: 0,
+        rewardPoints: 0,
+        addresses: [],
+        welcomeBonusClaimed: false,
+        createdAt: new Date().toISOString()
+      };
+      set({ profile: localProfile, user: null, loading: false });
+    },
+
+    resetPassword: async (email) => {
+      await sendPasswordResetEmail(auth, email.trim());
+    },
+
     logout: async () => {
       set({ loading: true });
       try {
         await signOut(auth);
-        localStorage.removeItem('moms_magic_user_phone');
-        set({ user: null, profile: null });
       } catch (error) {
         console.error('Logout error:', error);
       } finally {
-        set({ loading: false });
+        localStorage.removeItem('moms_magic_user_phone');
+        localStorage.removeItem('moms_magic_user_name');
+        localStorage.removeItem('moms_magic_user_email');
+        set({ user: null, profile: null, loading: false });
       }
     },
 
