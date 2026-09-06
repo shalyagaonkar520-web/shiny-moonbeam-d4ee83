@@ -1,116 +1,75 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, Moon, Sun, AlertCircle, Sparkles, MessageCircle, Phone, ArrowRight, ShieldCheck, Cake } from 'lucide-react';
-import { useSystemStore } from '../store/systemStore';
+import { motion } from 'framer-motion';
+import { Clock, Moon, MessageCircle, Phone, ShieldCheck } from 'lucide-react';
 
 export default function OperatingHoursGate({ children }: { children: React.ReactNode }) {
-  const settings = useSystemStore(state => state.settings);
-  const [isOpen, setIsOpen] = useState(true);
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [countdown, setCountdown] = useState({ hours: '00', minutes: '00', seconds: '00' });
-
   const location = useLocation();
-  const isBulkOrder = typeof window !== 'undefined' && localStorage.getItem('moms_magic_order_type') === 'bulk';
 
-  // Only allow admin portal access when the app is closed
-  const adminToken = typeof window !== 'undefined' ? localStorage.getItem('moms_magic_admin_token') : null;
-  const userPhone = typeof window !== 'undefined' ? localStorage.getItem('moms_magic_user_phone') : null;
-  const isAdmin = Boolean(
-    adminToken === 'mock-jwt-admin-token-123456' ||
-    userPhone === '+917483187572' ||
-    userPhone === '+919606001790' ||
-    userPhone === '7483187572' ||
-    userPhone === '9606001790'
-  );
+  // Strict operating hours: 12:30 PM (750m) to 10:45 PM (1365m)
+  const isTimeWithinOperatingHours = () => {
+    // Only bypass if navigating the admin portal
+    if (location.pathname.startsWith('/admin')) {
+      return true;
+    }
 
-  const isBypassed = isAdmin || location.pathname.startsWith('/admin');
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-  // Calculate live countdown until next 12:30 PM opening
+    // 12:30 PM = 12 * 60 + 30 = 750
+    // 10:45 PM = 22 * 60 + 45 = 1365
+    const openMinutes = 12 * 60 + 30; // 750
+    const closeMinutes = 22 * 60 + 45; // 1365
+
+    return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
+  };
+
+  const getNextOpenTarget = (now: Date) => {
+    let target = new Date(now);
+    target.setHours(12, 30, 0, 0);
+
+    // If current time is past 12:30 PM today, next opening is tomorrow at 12:30 PM
+    if (now.getTime() >= target.getTime()) {
+      target.setDate(target.getDate() + 1);
+    }
+    return target;
+  };
+
+  const computeCountdown = () => {
+    const now = new Date();
+    const target = getNextOpenTarget(now);
+    const diff = Math.max(0, target.getTime() - now.getTime());
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
+
+    return {
+      hours: hours.toString().padStart(2, '0'),
+      minutes: minutes.toString().padStart(2, '0'),
+      seconds: seconds.toString().padStart(2, '0'),
+    };
+  };
+
+  // Synchronously initialize state so there is zero flash or delay
+  const [isOpen, setIsOpen] = useState(isTimeWithinOperatingHours);
+  const [currentTime, setCurrentTime] = useState(() => new Date());
+  const [countdown, setCountdown] = useState(computeCountdown);
+
+  // Live real-time check & countdown ticking every 1 second
   useEffect(() => {
-    if (isOpen) return;
-
-    const updateCountdown = () => {
-      const now = new Date();
-      const openTimeStr = settings.openTime || '12:30';
-      const [openH, openM] = openTimeStr.split(':').map(Number);
-
-      let target = new Date(now);
-      target.setHours(openH, openM, 0, 0);
-
-      // If current time is past openTime today, target is tomorrow at openTime
-      if (now.getTime() >= target.getTime()) {
-        target.setDate(target.getDate() + 1);
-      }
-
-      const diff = Math.max(0, target.getTime() - now.getTime());
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const minutes = Math.floor((diff / (1000 * 60)) % 60);
-      const seconds = Math.floor((diff / 1000) % 60);
-
-      setCountdown({
-        hours: hours.toString().padStart(2, '0'),
-        minutes: minutes.toString().padStart(2, '0'),
-        seconds: seconds.toString().padStart(2, '0'),
-      });
+    const update = () => {
+      const open = isTimeWithinOperatingHours();
+      setIsOpen(open);
+      setCurrentTime(new Date());
+      setCountdown(computeCountdown());
     };
 
-    updateCountdown();
-    const timer = setInterval(updateCountdown, 1000);
-    return () => clearInterval(timer);
-  }, [isOpen, settings.openTime]);
-
-  // Check store opening hours every 10 seconds
-  useEffect(() => {
-    const checkTime = () => {
-      const now = new Date();
-      setCurrentTime(now);
-
-      const adminToken = localStorage.getItem('moms_magic_admin_token');
-      const userPhone = localStorage.getItem('moms_magic_user_phone');
-      const isAdmin = Boolean(
-        adminToken === 'mock-jwt-admin-token-123456' ||
-        userPhone === '+917483187572' ||
-        userPhone === '+919606001790' ||
-        userPhone === '7483187572' ||
-        userPhone === '9606001790'
-      );
-
-      if (isAdmin || isBypassed) {
-        setIsOpen(true);
-        return;
-      }
-
-      // Check system-level settings overrides
-      if (settings.websiteStatus === 'OFF' || settings.emergencyStop) {
-        setIsOpen(false);
-        return;
-      }
-
-      const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
-      // Default: 12:30 PM (750m) to 10:45 PM (1365m)
-      const openTimeStr = settings.openTime || '12:30';
-      const closeTimeStr = settings.closeTime || '22:45';
-
-      const [openH, openM] = openTimeStr.split(':').map(Number);
-      const [closeH, closeM] = closeTimeStr.split(':').map(Number);
-
-      const openMinutes = openH * 60 + openM;
-      const closeMinutes = closeH * 60 + closeM;
-
-      const isWithinHours = openMinutes <= closeMinutes
-        ? (currentMinutes >= openMinutes && currentMinutes < closeMinutes)
-        : (currentMinutes >= openMinutes || currentMinutes < closeMinutes);
-
-      setIsOpen(isWithinHours);
-    };
-
-    checkTime();
-    const interval = setInterval(checkTime, 10000);
+    update();
+    const interval = setInterval(update, 1000);
     return () => clearInterval(interval);
-  }, [isBypassed, settings, location.pathname]);
+  }, [location.pathname]);
 
+  // If within operating hours (or admin route), render the app normally
   if (isOpen) {
     return <>{children}</>;
   }
@@ -118,17 +77,18 @@ export default function OperatingHoursGate({ children }: { children: React.React
   const hours = currentTime.getHours();
   const isNight = hours >= 22 || hours < 6;
 
+  // Otherwise, FULL SCREEN is covered by this ONE single Closed page
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#fff1f4] via-[#fff8fa] to-[#ffffff] text-gray-900 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden select-none">
+    <div className="fixed inset-0 z-[99999] min-h-screen w-full bg-gradient-to-b from-[#fff1f4] via-[#fff8fa] to-[#ffffff] text-gray-900 flex items-center justify-center p-4 sm:p-6 overflow-y-auto select-none">
       {/* Soft Ambient Rose Decorative Background Glows */}
       <div className="absolute top-[-10%] right-[-10%] w-[380px] h-[380px] bg-rose-400/15 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] left-[-10%] w-[380px] h-[380px] bg-pink-300/15 rounded-full blur-[120px] pointer-events-none" />
 
       <motion.div
-        initial={{ opacity: 0, y: 30, scale: 0.98 }}
+        initial={{ opacity: 0, y: 24, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="w-full max-w-md bg-white/95 backdrop-blur-xl rounded-3xl border border-rose-100 shadow-2xl shadow-rose-500/10 p-6 sm:p-8 relative z-10 text-center"
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+        className="w-full max-w-md bg-white/95 backdrop-blur-xl rounded-3xl border border-rose-100 shadow-2xl shadow-rose-500/10 p-6 sm:p-8 relative z-10 text-center my-auto"
       >
         {/* Closed Status Badge */}
         <div className="inline-flex items-center gap-2 bg-rose-50 border border-rose-200 text-[#e11d48] px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider mb-5 shadow-xs">
@@ -136,7 +96,7 @@ export default function OperatingHoursGate({ children }: { children: React.React
           <span>Currently Closed</span>
         </div>
 
-        {/* Central Dish Plate / Night Icon */}
+        {/* Central Platter / Dish Icon */}
         <div className="relative mx-auto w-24 h-24 mb-5">
           <div className="absolute inset-0 bg-rose-400/20 rounded-full blur-xl animate-pulse" />
           <div className="relative w-24 h-24 rounded-full bg-gradient-to-tr from-[#ff4d6d] to-[#e11d48] text-white flex items-center justify-center shadow-xl shadow-rose-500/25 border-4 border-white">
@@ -154,14 +114,14 @@ export default function OperatingHoursGate({ children }: { children: React.React
             We'll Be Back Soon!
           </h1>
           <p className="text-xs sm:text-sm font-medium text-gray-600 max-w-xs mx-auto leading-relaxed">
-            Mom's Magic accepts fresh food orders daily from{' '}
+            Mom's Magic accepts food orders daily strictly from{' '}
             <span className="font-bold text-[#e11d48]">12:30 PM</span> to{' '}
             <span className="font-bold text-[#e11d48]">10:45 PM</span>.
           </p>
         </div>
 
         {/* LIVE COUNTDOWN TIMER CARD */}
-        <div className="mb-6 p-4 sm:p-5 bg-gradient-to-b from-rose-50/50 to-white rounded-2xl border border-rose-200/80 shadow-inner">
+        <div className="mb-6 p-4 sm:p-5 bg-gradient-to-b from-rose-50/60 to-white rounded-2xl border border-rose-200/80 shadow-inner">
           <div className="flex items-center justify-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#e11d48] mb-3">
             <Clock className="w-3.5 h-3.5" />
             <span>Next Opening In</span>
