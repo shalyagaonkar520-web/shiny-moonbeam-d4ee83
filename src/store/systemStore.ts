@@ -17,9 +17,9 @@ interface SystemState {
 const DEFAULT_SETTINGS: AdminSettings = {
   websiteStatus: 'ON',
   maintenanceMessage: "Mom's Magic is Open! Welcome ❤️",
-  openTime: '12:30',
+  openTime: '12:00',
   closeTime: '22:45',
-  reopenMessage: 'Orders are accepted between 12:30 PM and 10:45 PM daily.',
+  reopenMessage: 'Orders are accepted between 12:00 PM and 10:45 PM daily.',
   emergencyStop: false,
   festivalMode: false,
   deliveryPause: false,

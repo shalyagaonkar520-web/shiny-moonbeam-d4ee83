@@ -3,8 +3,8 @@ import { ComboOffer, Coupon } from '../types';
 export interface AdminSettings {
   websiteStatus: 'ON' | 'OFF';
   maintenanceMessage: string;
-  openTime: string; // e.g. "12:30"
-  closeTime: string; // e.g. "22:30"
+  openTime: string; // e.g. "12:00" (24-hour HH:mm)
+  closeTime: string; // e.g. "22:45" (24-hour HH:mm)
   reopenMessage: string;
   emergencyStop: boolean;
   festivalMode: boolean;
@@ -23,9 +23,9 @@ export interface AdminSettings {
 const DEFAULT_SETTINGS: AdminSettings = {
   websiteStatus: 'ON',
   maintenanceMessage: "Mom's Magic is Open! Welcome ❤️",
-  openTime: '12:30',
+  openTime: '12:00',
   closeTime: '22:45',
-  reopenMessage: 'Orders are accepted between 12:30 PM and 10:45 PM daily.',
+  reopenMessage: 'Orders are accepted between 12:00 PM and 10:45 PM daily.',
   emergencyStop: false,
   festivalMode: false,
   deliveryPause: false,
