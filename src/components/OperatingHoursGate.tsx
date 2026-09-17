@@ -6,12 +6,9 @@ import { Clock, Moon, MessageCircle, Phone, ShieldCheck } from 'lucide-react';
 export default function OperatingHoursGate({ children }: { children: React.ReactNode }) {
   const location = useLocation();
 
-  // Site off for today - updating adding hotels (bypassed for /admin)
+  // Time lock removed - store is always open
   const isTimeWithinOperatingHours = () => {
-    if (location.pathname.startsWith('/admin')) {
-      return true;
-    }
-    return false;
+    return true;
   };
 
   const getNextOpenTarget = (now: Date) => {
