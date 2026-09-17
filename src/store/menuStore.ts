@@ -25,7 +25,11 @@ export const useMenuStore = create<MenuState>((set, get) => ({
     const colRef = collection(db, 'menu');
     const unsubscribe = onSnapshot(colRef, (snapshot) => {
       if (!snapshot.empty) {
-        const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        const items = snapshot.docs.map(doc => {
+          const data = doc.data() as Product;
+          const fallback = FALLBACK_MENU.find(f => f.id === doc.id);
+          return { id: doc.id, ...data, image: fallback?.image || data.image };
+        });
         set({ menuItems: items, isLoading: false, error: null });
         localStorage.setItem('moms_magic_menu_cache', JSON.stringify(items));
       } else {
@@ -33,7 +37,12 @@ export const useMenuStore = create<MenuState>((set, get) => ({
         const cached = localStorage.getItem('moms_magic_menu_cache');
         if (cached) {
           try {
-            set({ menuItems: JSON.parse(cached), isLoading: false });
+            const parsed = JSON.parse(cached);
+            const updated = parsed.map((it: Product) => {
+              const fallback = FALLBACK_MENU.find(f => f.id === it.id);
+              return fallback ? { ...it, image: fallback.image } : it;
+            });
+            set({ menuItems: updated, isLoading: false });
           } catch (e) {
             set({ menuItems: [...FALLBACK_MENU], isLoading: false });
           }

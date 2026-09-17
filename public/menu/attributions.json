@@ -1,0 +1,333 @@
+{
+  "_comment": "Pexels source attribution for the verified dish photos used by Hotel Mumtaz, Coastal Crown and Kaka's Hotel Malabar. Every photo was visually checked against its dish before being committed. Photo URL pattern: https://www.pexels.com/photo/<pexelsId>/",
+  "_license": "Pexels License - free to use, no attribution required. Recorded here for traceability.",
+  "photos": [
+    {
+      "file": "egg-mumtaz-spl.webp",
+      "pexelsId": 35071817,
+      "shows": "Halved boiled eggs in thick reddish-brown gravy"
+    },
+    {
+      "file": "egg-kadai.webp",
+      "pexelsId": 35066815,
+      "shows": "Two boiled eggs in a dark onion-tomato masala",
+      "note": "Replaced after visual audit."
+    },
+    {
+      "file": "egg-handi.webp",
+      "pexelsId": 34217294,
+      "shows": "Halved boiled egg in thick red gravy served in a black handi",
+      "note": "Replaced after visual audit."
+    },
+    {
+      "file": "egg-makhani.webp",
+      "pexelsId": 35267285,
+      "shows": "Whole boiled eggs in creamy orange-brown masala"
+    },
+    {
+      "file": "egg-butter-masala.webp",
+      "pexelsId": 35071817,
+      "shows": "Halved boiled eggs in thick reddish-brown gravy"
+    },
+    {
+      "file": "egg-pahadi.webp",
+      "pexelsId": 8625813,
+      "shows": "Halved boiled egg in green herb gravy"
+    },
+    {
+      "file": "egg-maharaja.webp",
+      "pexelsId": 34217294,
+      "shows": "Deep red egg curry with a royal spread of sides"
+    },
+    {
+      "file": "egg-masala.webp",
+      "pexelsId": 35066815,
+      "shows": "Two boiled eggs in dark onion-tomato masala"
+    },
+    {
+      "file": "egg-kolhapuri.webp",
+      "pexelsId": 34217293,
+      "shows": "Fiery bright red spicy egg curry"
+    },
+    {
+      "file": "egg-hyderabadi.webp",
+      "pexelsId": 14132109,
+      "shows": "Boiled eggs in dark red masala on a steel thali"
+    },
+    {
+      "file": "egg-kurma.webp",
+      "pexelsId": 16048159,
+      "shows": "Halved boiled egg in a pale creamy korma gravy, cropped to a single bowl",
+      "note": "Replaced and re-cropped after visual audit."
+    },
+    {
+      "file": "egg-special-masala.webp",
+      "pexelsId": 35267285,
+      "shows": "Whole boiled eggs in creamy orange-brown masala"
+    },
+    {
+      "file": "chicken-sizzler.webp",
+      "pexelsId": 9738994,
+      "photographer": "iamabdullahsheik",
+      "shows": "Tandoori chicken on a cast-iron sizzler platter"
+    },
+    {
+      "file": "chicken-mumtaz-spl.webp",
+      "pexelsId": 9609844,
+      "photographer": "Prabal Pratap Singh",
+      "shows": "Bone-in chicken in rich creamy orange-red gravy"
+    },
+    {
+      "file": "chicken-kadai.webp",
+      "pexelsId": 9167470,
+      "photographer": "Rajesh Verma",
+      "shows": "Semi-dry chicken with bell pepper strips"
+    },
+    {
+      "file": "chicken-handi.webp",
+      "pexelsId": 34159113,
+      "photographer": "Shalini Shakthi",
+      "shows": "Chicken drumstick in a clay handi pot"
+    },
+    {
+      "file": "chicken-tikka-masala.webp",
+      "pexelsId": 7625056,
+      "photographer": "Saveurs Secretes",
+      "shows": "Charred chicken in creamy red-orange masala"
+    },
+    {
+      "file": "kundapur-chicken.webp",
+      "pexelsId": 35532821,
+      "photographer": "Athul Santhosh",
+      "shows": "Dark red-brown coastal chicken curry in a black kadai"
+    },
+    {
+      "file": "butter-chicken.webp",
+      "pexelsId": 9738981,
+      "photographer": "iamabdullahsheik",
+      "shows": "Chicken in silky bright orange tomato cream gravy"
+    },
+    {
+      "file": "chicken-sukka.webp",
+      "pexelsId": 34636253,
+      "photographer": "Dr Silverfox",
+      "shows": "Dry masala-coated chicken with curry leaves on banana leaf"
+    },
+    {
+      "file": "chicken-coastal-spl.webp",
+      "pexelsId": 38400477,
+      "photographer": "Arijit Dey",
+      "shows": "Chicken in thick orange-brown coastal masala"
+    },
+    {
+      "file": "malabar-chicken-masala.webp",
+      "pexelsId": 35629938,
+      "photographer": "ChefRBS",
+      "shows": "Bone-in chicken in thick coconut-orange Kerala masala"
+    },
+    {
+      "file": "chicken-butter-masala.webp",
+      "pexelsId": 10615283,
+      "photographer": "iamabdullahsheik",
+      "shows": "Chicken in creamy butter-tomato sauce with naan and rice"
+    },
+    {
+      "file": "mutton-mumtaz-spl.webp",
+      "pexelsId": 9609846,
+      "shows": "Bone-in mutton in glossy dark rich gravy, copper bowl"
+    },
+    {
+      "file": "mutton-kadai.webp",
+      "pexelsId": 35287423,
+      "shows": "Bone-in mutton in red gravy with capsicum strips"
+    },
+    {
+      "file": "mutton-handi.webp",
+      "pexelsId": 9609849,
+      "shows": "Bone-in mutton in deep red gravy in a terracotta handi"
+    },
+    {
+      "file": "mutton-makkhani.webp",
+      "pexelsId": 17803250,
+      "shows": "Lamb shank in creamy orange tomato-butter sauce"
+    },
+    {
+      "file": "mutton-rogan-josh.webp",
+      "pexelsId": 28674690,
+      "shows": "Bone-in lamb chop in deep red oily gravy, steel handi"
+    },
+    {
+      "file": "mutton-sukka.webp",
+      "pexelsId": 9392998,
+      "shows": "Dry roasted mutton with clinging masala on banana leaf"
+    },
+    {
+      "file": "mutton-masala.webp",
+      "pexelsId": 29684989,
+      "shows": "Classic dark red-brown mutton masala with marrow bone"
+    },
+    {
+      "file": "mutton-makhanwala.webp",
+      "pexelsId": 30203309,
+      "shows": "Bone-in mutton in pale creamy buttery gravy, brass karahi"
+    },
+    {
+      "file": "mutton-kolhapuri.webp",
+      "pexelsId": 28674566,
+      "shows": "Intense deep-red spicy mutton with bone chops"
+    },
+    {
+      "file": "malabar-mutton-masala.webp",
+      "pexelsId": 28674565,
+      "shows": "Bone-in mutton with rib bones in a dark red Malabar masala",
+      "note": "Replaced after visual audit."
+    },
+    {
+      "file": "veg-mumtaz-spl.webp",
+      "pexelsId": 28867523,
+      "shows": "Mixed vegetables in rich red tomato gravy"
+    },
+    {
+      "file": "paneer-tikka-masala.webp",
+      "pexelsId": 30858420,
+      "shows": "Char-marked paneer in silky orange-red masala"
+    },
+    {
+      "file": "paneer-handi.webp",
+      "pexelsId": 30858402,
+      "shows": "White paneer cubes in thick red masala in a black clay handi"
+    },
+    {
+      "file": "paneer-tawa.webp",
+      "pexelsId": 33430556,
+      "shows": "Charred paneer with onion and capsicum in a cast-iron skillet"
+    },
+    {
+      "file": "mushroom-kadai.webp",
+      "pexelsId": 8250339,
+      "shows": "Whole button mushrooms in a glossy brown sauce with spring onion",
+      "note": "Replaced: the previous photo (25440738) is titled 'Mushrooms, Meat and Sauces' on Pexels and is unsuitable for a vegetarian dish."
+    },
+    {
+      "file": "veg-coastal-spl.webp",
+      "pexelsId": 8395780,
+      "shows": "Coconut-milk South Indian vegetable curry with curry leaves"
+    },
+    {
+      "file": "paneer-butter-masala.webp",
+      "pexelsId": 9609838,
+      "shows": "White paneer cubes in silky orange butter gravy; cropped to remove a third party's branded card",
+      "note": "Replaced and re-cropped after visual audit."
+    },
+    {
+      "file": "kaju-masala.webp",
+      "pexelsId": 34217288,
+      "shows": "Whole cashew nuts in a rich red-orange onion-tomato masala",
+      "note": "Replaced after visual audit."
+    },
+    {
+      "file": "palak-paneer.webp",
+      "pexelsId": 17200452,
+      "shows": "White paneer cubes in deep-green spinach puree"
+    },
+    {
+      "file": "paneer-kadai.webp",
+      "pexelsId": 12737816,
+      "shows": "Paneer cubes in red kadai masala with bell pepper"
+    },
+    {
+      "file": "veg-kadai.webp",
+      "pexelsId": 33430561,
+      "shows": "Mixed vegetable curry with carrot, cauliflower and beans"
+    },
+    {
+      "file": "dal-tadka.webp",
+      "pexelsId": 30203314,
+      "shows": "Yellow lentil dal with ghee tempering and dried red chillies"
+    },
+    {
+      "file": "neer-dosa.webp",
+      "pexelsId": 35580913,
+      "photographer": "Sanchari Nag",
+      "shows": "Soft thin white rice crepes on a banana leaf with chutney"
+    },
+    {
+      "file": "kori-roti.webp",
+      "pexelsId": 36035430,
+      "photographer": "Irene Asthetik",
+      "shows": "Stack of thin crisp dry wafer flatbreads"
+    },
+    {
+      "file": "neer-dosa-chicken-curry.webp",
+      "pexelsId": 14132108,
+      "photographer": "Saveurs Secretes",
+      "shows": "Soft white rice crepe with a red bone-in curry"
+    },
+    {
+      "file": "kori-roti-chicken-curry.webp",
+      "pexelsId": 29684987,
+      "photographer": "Kunal Lakhotia",
+      "shows": "Bright red bone-in chicken curry in a brass kadai"
+    },
+    {
+      "file": "surmai-tawa-masala.webp",
+      "pexelsId": 35267272,
+      "photographer": "Milton Das",
+      "shows": "Kingfish steaks with deep red masala crust, tawa-fried"
+    },
+    {
+      "file": "bangada-tawa-masala.webp",
+      "pexelsId": 37090675,
+      "photographer": "Fadli Octora Channel",
+      "shows": "Whole mackerel, masala coated and pan-fried"
+    },
+    {
+      "file": "prawns-masala.webp",
+      "pexelsId": 9809033,
+      "photographer": "Asit Naskar",
+      "shows": "Whole prawns in thick red masala gravy"
+    },
+    {
+      "file": "paplet-tawa-masala.webp",
+      "pexelsId": 30325818,
+      "photographer": "Rafid k",
+      "shows": "Whole pomfret in dark-red masala on a banana leaf"
+    },
+    {
+      "file": "bangada-kari.webp",
+      "pexelsId": 38324319,
+      "photographer": "Gansham Ramchandani",
+      "shows": "Mackerel steaks in red coconut-tomato gravy"
+    },
+    {
+      "file": "chicken-dum-biryani.webp",
+      "pexelsId": 9609840,
+      "photographer": "Prabal Pratap Singh",
+      "shows": "Brass handi of saffron-streaked biryani with bone-in chicken"
+    },
+    {
+      "file": "chicken-biryani-mini.webp",
+      "pexelsId": 39536492,
+      "photographer": "Bilal Moazzam",
+      "shows": "Single-serving plate of chicken biryani with lemon"
+    },
+    {
+      "file": "mutton-biryani.webp",
+      "pexelsId": 9609856,
+      "photographer": "Prabal Pratap Singh",
+      "shows": "Clay handi of biryani topped with bone-in lamb chops"
+    },
+    {
+      "file": "egg-biryani.webp",
+      "pexelsId": 35071825,
+      "photographer": "Milton Das",
+      "shows": "Spiced biryani with boiled egg halves and star anise"
+    },
+    {
+      "file": "veg-biryani.webp",
+      "pexelsId": 37303308,
+      "photographer": "Tharun Thejus",
+      "shows": "Vegetarian biryani with carrot, peas, potato and cauliflower"
+    }
+  ]
+}

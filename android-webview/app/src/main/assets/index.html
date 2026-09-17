@@ -65,8 +65,8 @@ let map,marker,restaurantMarker,nearbyMarkers=[],circle;
 let selectedLat=null,selectedLng=null,selectedAddress='';
 
 map=L.map('map',{zoomControl:false}).setView([RESTAURANT.lat,RESTAURANT.lng],14);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
-  attribution:'&copy; OSM &copy; CARTO',subdomains:'abcd',maxZoom:19
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  maxZoom:19
 }).addTo(map);
 L.control.zoom({position:'bottomright'}).addTo(map);
 

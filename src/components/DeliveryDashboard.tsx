@@ -413,7 +413,7 @@ export default function DeliveryDashboard() {
                 <div className="space-y-4">
                   {assignedOrders.map((order) => {
                     const customerLoc = order.deliveryLocation;
-                    const mapLink = `https://www.google.com/maps/dir/?api=1&destination=${customerLoc?.lat || 14.9667},${customerLoc?.lng || 74.7167}`;
+                    const mapLink = `https://maps.google.com/maps?daddr=${customerLoc?.lat || 14.9667},${customerLoc?.lng || 74.7167}`;
                     
                     return (
                       <div key={order.id} className="bg-[#0B0E14] border border-white/10 rounded-3xl p-6 text-left space-y-6 hover:border-[#4CD964]/20 transition-all">

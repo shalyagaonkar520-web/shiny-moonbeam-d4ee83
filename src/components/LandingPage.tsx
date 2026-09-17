@@ -54,18 +54,18 @@ const PARTNER_HOTELS = [
     name: "Hotel Mumtaz",
     tagline: "Multi-Cuisine & Biryani",
     isOpen: false,
-    badge: "Coming Soon",
-    deliveryTime: "Coming Soon",
+    badge: "View Menu",
+    deliveryTime: "Ordering Coming Soon",
     image: "/hotel_mumtaz.jpg",
     hasCustomPhoto: true
   },
   {
     id: 'malabar',
     name: "Hotel Malabar",
-    tagline: "Coastal & Kerala Specials",
-    isOpen: false,
-    badge: "Coming Soon",
-    deliveryTime: "Coming Soon",
+    tagline: "Coastal Fish & Multi-Cuisine",
+    isOpen: true,
+    badge: "View Menu",
+    deliveryTime: "20-25 mins",
     image: "/hotel_malabar.jpg",
     hasCustomPhoto: true
   },
@@ -74,8 +74,8 @@ const PARTNER_HOTELS = [
     name: "Hotel Sankalpa",
     tagline: "Pure Veg Heritage Feasts",
     isOpen: false,
-    badge: "Coming Soon",
-    deliveryTime: "Coming Soon",
+    badge: "View Menu",
+    deliveryTime: "Ordering Coming Soon",
     image: "/hotel_sankalpa.jpg",
     hasCustomPhoto: true
   },
@@ -83,9 +83,9 @@ const PARTNER_HOTELS = [
     id: 'coastal_crown',
     name: "Coastal Crown",
     tagline: "Seafood & Tandoor Magic",
-    isOpen: false,
-    badge: "Coming Soon",
-    deliveryTime: "Coming Soon",
+    isOpen: true,
+    badge: "View Menu",
+    deliveryTime: "20-25 mins",
     image: "/hotel_coastal_crown_dining.jpg",
     hasCustomPhoto: true
   },
@@ -93,9 +93,9 @@ const PARTNER_HOTELS = [
     id: 'al_amin',
     name: "Hotel Al Amin",
     tagline: "Kebabs, Rolls & Shawarma",
-    isOpen: false,
-    badge: "Coming Soon",
-    deliveryTime: "Coming Soon",
+    isOpen: true,
+    badge: "View Menu",
+    deliveryTime: "15-20 mins",
     image: "/hotel_al_amin.jpg",
     hasCustomPhoto: true
   }
@@ -192,6 +192,26 @@ export default function LandingPage() {
   }, []);
 
   const handleHotelClick = (hotel: typeof PARTNER_HOTELS[0]) => {
+    if (hotel.id === 'mumtaz') {
+      navigate('/hotel-mumtaz');
+      return;
+    }
+    if (hotel.id === 'al_amin') {
+      navigate('/hotel-al-amin');
+      return;
+    }
+    if (hotel.id === 'coastal_crown') {
+      navigate('/hotel-coastal-crown');
+      return;
+    }
+    if (hotel.id === 'malabar') {
+      navigate('/hotel-malabar');
+      return;
+    }
+    if (hotel.id === 'sankalpa') {
+      navigate('/hotel-sankalpa');
+      return;
+    }
     if (!hotel.isOpen) {
       playSound(SOUNDS.CLICK || SOUNDS.ADD_TO_CART);
       toast(`${hotel.name} is coming soon to Mom's Magic! 🔒 We are setting up their delicious menu.`, {
@@ -712,11 +732,13 @@ export default function LandingPage() {
 
                   {/* Status Badge */}
                   <span className={`absolute top-1.5 right-1.5 text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shadow-xs ${
-                    hotel.isOpen 
-                      ? 'bg-emerald-500 text-white' 
+                    hotel.isOpen
+                      ? 'bg-emerald-500 text-white'
+                      : hotel.id === 'mumtaz' || hotel.id === 'sankalpa'
+                      ? 'bg-blue-600 text-white'
                       : 'bg-amber-400 text-blue-950'
                   }`}>
-                    {hotel.isOpen ? 'OPEN' : 'SOON 🔒'}
+                    {hotel.isOpen ? 'OPEN' : hotel.id === 'mumtaz' || hotel.id === 'sankalpa' ? 'MENU' : 'SOON 🔒'}
                   </span>
                 </div>
 
@@ -1138,6 +1160,21 @@ export default function LandingPage() {
         </section>
         </>
         )}
+
+        {/* Pexels Attribution */}
+        <div className="pt-6 pb-8 text-center border-t border-gray-100">
+          <p className="text-[11px] text-gray-400 font-medium">
+            Food photography provided by{' '}
+            <a
+              href="https://www.pexels.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#1836c2] hover:underline font-semibold"
+            >
+              Pexels
+            </a>
+          </p>
+        </div>
       </main>
 
       {/* Help to Order Modal */}

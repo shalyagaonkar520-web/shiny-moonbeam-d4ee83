@@ -151,8 +151,8 @@ export default function HomeOrderConfirmation() {
       });
 
       // 3. Send Telegram Notification
-      const mapsViewLink = `https://www.google.com/maps?q=${deliveryLocation.lat},${deliveryLocation.lng}`;
-      const mapsNavLink  = `https://www.google.com/maps/dir/?api=1&destination=${deliveryLocation.lat},${deliveryLocation.lng}`;
+      const mapsViewLink = `https://maps.google.com/?q=${deliveryLocation.lat},${deliveryLocation.lng}`;
+      const mapsNavLink  = `https://maps.google.com/maps?daddr=${deliveryLocation.lat},${deliveryLocation.lng}`;
 
       const tgText = [
         `🍽️ <b>NEW HOME ORDER PLACED!</b> 🍽️`,
@@ -171,8 +171,8 @@ export default function HomeOrderConfirmation() {
         `💳 <b>Payment:</b> ${paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}`,
         formData.note.trim() ? `📝 <b>Note:</b> ${escHtml(formData.note.trim())}` : '',
         ``,
-        `🗺️ <b>Map View:</b> ${escHtml(mapsViewLink)}`,
-        `🚗 <b>Navigate:</b> ${escHtml(mapsNavLink)}`,
+        `🗺️ <a href="${mapsViewLink}">View Customer Location on Map</a>`,
+        `🚗 <a href="${mapsNavLink}">Navigate via Google Maps</a>`,
       ].filter(Boolean).join('\n');
 
       sendTelegramMessage(tgText);

@@ -1,0 +1,174 @@
+{
+  "categories": [
+    {
+      "title": "Veg Main Course",
+      "folder": "veg-main-course",
+      "icon": "🥘",
+      "items": [
+        { "name": "Paneer Handi", "price": 200, "slug": "paneer-handi", "shows": "paneer cubes in thick red masala served in a clay handi pot" },
+        { "name": "Aloo Jeera", "price": 130, "slug": "aloo-jeera", "shows": "dry golden potato cubes tossed with cumin seeds and coriander" },
+        { "name": "Capsicum Masala", "price": 150, "slug": "capsicum-masala", "shows": "green bell pepper chunks in a thick onion tomato masala" },
+        { "name": "Gobi Masala", "price": 140, "slug": "gobi-masala", "shows": "cauliflower florets in a thick red onion tomato gravy" },
+        { "name": "Veg Keema", "price": 150, "slug": "veg-keema", "shows": "finely minced mixed vegetables cooked dry like a keema, no meat" },
+        { "name": "Veg Makkanwala", "price": 150, "slug": "veg-makkanwala", "shows": "mixed vegetables in a creamy orange butter tomato gravy" },
+        { "name": "Kaju Kolhapuri", "price": 220, "slug": "kaju-kolhapuri", "shows": "whole cashew nuts in a fiery deep red Kolhapuri gravy" },
+        { "name": "Mix Veg", "price": 150, "slug": "mix-veg", "shows": "mixed vegetable curry with carrot, beans, peas and cauliflower" },
+        { "name": "Veg Kolhapuri", "price": 150, "slug": "veg-kolhapuri", "shows": "mixed vegetables in a spicy deep red Kolhapuri masala" },
+        { "name": "Mushroom Butter Masala", "price": 200, "slug": "mushroom-butter-masala", "shows": "button mushrooms in a creamy orange butter tomato gravy" },
+        { "name": "Tomato Masala", "price": 130, "slug": "tomato-masala", "shows": "tomato curry, thick bright red tomato gravy with coriander" },
+        { "name": "Mushroom Masala", "price": 200, "slug": "mushroom-masala", "shows": "sliced mushrooms in a thick brown onion tomato masala gravy" },
+        { "name": "Veg Kurma", "price": 150, "slug": "veg-kurma", "shows": "mixed vegetables in a pale creamy coconut korma gravy" },
+        { "name": "Kaju Masala", "price": 220, "slug": "kaju-masala", "shows": "whole cashew nuts in a rich onion tomato masala gravy" },
+        { "name": "Paneer Masala", "price": 180, "slug": "paneer-masala", "shows": "paneer cubes in a classic brown onion tomato masala gravy" },
+        { "name": "Paneer Kadai", "price": 220, "slug": "paneer-kadai", "shows": "paneer with bell peppers in a semi dry kadai masala" },
+        { "name": "Paneer Burji", "price": 220, "slug": "paneer-burji", "shows": "scrambled crumbled paneer bhurji with onion tomato and coriander" },
+        { "name": "Kaju Kurma", "price": 220, "slug": "kaju-kurma", "shows": "cashew nuts in a pale creamy mild korma gravy" },
+        { "name": "Paneer Tikka (Main Course)", "price": 220, "slug": "paneer-tikka-main-course", "shows": "charred paneer tikka cubes in a thick masala gravy" },
+        { "name": "Mushroom Tikka Masala", "price": 220, "slug": "mushroom-tikka-masala", "shows": "charred mushrooms in a creamy red tikka masala gravy" },
+        { "name": "Kaju Paneer Masala", "price": 220, "slug": "kaju-paneer-masala", "shows": "cashew nuts and paneer cubes together in a rich creamy gravy" },
+        { "name": "Paneer Tawa", "price": 200, "slug": "paneer-tawa", "shows": "paneer cooked on a flat tawa griddle with onion and capsicum, semi dry" },
+        { "name": "Veg Kadai", "price": 150, "slug": "veg-kadai", "shows": "mixed vegetables with capsicum in a kadai masala, no paneer" },
+        { "name": "Paneer Butter Masala", "price": 200, "slug": "paneer-butter-masala", "shows": "paneer cubes in silky bright orange butter gravy with cream swirl" },
+        { "name": "Aloo Gobi Masala", "price": 140, "slug": "aloo-gobi-masala", "shows": "potato and cauliflower cooked together dry with turmeric and coriander" }
+      ]
+    },
+    {
+      "title": "Veg Starter",
+      "folder": "veg-starter",
+      "icon": "🍢",
+      "items": [
+        { "name": "Aloo Pakoda", "price": 40, "slug": "aloo-pakoda", "shows": "deep fried potato fritters in gram flour batter, golden and crisp" },
+        { "name": "Onion Pakoda", "price": 50, "slug": "onion-pakoda", "shows": "crisp golden onion fritters, shredded onion bhaji clusters" },
+        { "name": "Babycorn Manchurian", "price": 130, "slug": "babycorn-manchurian", "shows": "fried baby corn tossed in a dark glossy manchurian sauce with spring onion" },
+        { "name": "Mushroom Manchurian", "price": 150, "slug": "mushroom-manchurian", "shows": "fried mushrooms in a dark glossy Indo Chinese manchurian sauce" },
+        { "name": "Mirchi Bhaji", "price": 40, "slug": "mirchi-bhaji", "shows": "large green chillies dipped in gram flour batter and deep fried" },
+        { "name": "Roasted Papad", "price": 25, "slug": "roasted-papad", "shows": "plain roasted papadum discs, dry and blistered, no toppings" },
+        { "name": "Fried Papad", "price": 25, "slug": "fried-papad", "shows": "deep fried puffed papadum, golden and bubbly, no toppings" },
+        { "name": "Gobi Manchurian", "price": 80, "slug": "gobi-manchurian", "shows": "crispy fried cauliflower in a dark red glossy manchurian sauce" },
+        { "name": "Gobi Chilly", "price": 100, "slug": "gobi-chilly", "shows": "fried cauliflower tossed with onion, capsicum and green chilli, chilli style" },
+        { "name": "Paneer Crispy", "price": 150, "slug": "paneer-crispy", "shows": "crispy batter fried paneer strips, golden, dry starter" },
+        { "name": "Mushroom 65", "price": 150, "slug": "mushroom-65", "shows": "deep fried mushrooms coated in bright red 65 masala with curry leaves" },
+        { "name": "Masala Papad", "price": 30, "slug": "masala-papad", "shows": "papadum topped with chopped onion, tomato, coriander and masala" },
+        { "name": "Mushroom Chilly", "price": 150, "slug": "mushroom-chilly", "shows": "mushrooms tossed with onion and capsicum in a chilli sauce" },
+        { "name": "Paneer Chilly", "price": 150, "slug": "paneer-chilly", "shows": "paneer cubes tossed with capsicum and onion in a glossy chilli sauce" },
+        { "name": "Paneer 65", "price": 150, "slug": "paneer-65", "shows": "deep fried paneer cubes in bright red 65 masala with curry leaves" },
+        { "name": "Babycorn 65", "price": 150, "slug": "babycorn-65", "shows": "fried baby corn coated in red 65 masala with curry leaves" },
+        { "name": "Babycorn Chilly", "price": 150, "slug": "babycorn-chilly", "shows": "baby corn tossed with capsicum and onion in a chilli sauce" },
+        { "name": "Finger Chips", "price": 60, "slug": "finger-chips", "shows": "a portion of golden french fries, plain potato finger chips" }
+      ]
+    },
+    {
+      "title": "Rice Items",
+      "folder": "rice",
+      "icon": "🍚",
+      "items": [
+        { "name": "Tomato Rice", "price": 100, "slug": "tomato-rice", "shows": "reddish orange tomato rice with curry leaves, South Indian style" },
+        { "name": "Jeera Rice", "price": 90, "slug": "jeera-rice", "shows": "white basmati rice tempered with cumin seeds and coriander" },
+        { "name": "Ghee Rice", "price": 100, "slug": "ghee-rice", "shows": "pale yellow ghee rice with fried onion and whole spices" },
+        { "name": "Masala Rice", "price": 100, "slug": "masala-rice", "shows": "spiced mixed masala rice with vegetables and coriander" },
+        { "name": "Curd Rice", "price": 100, "slug": "curd-rice", "shows": "white curd rice with mustard tempering, curry leaves and pomegranate" },
+        { "name": "Paneer Pulao", "price": 150, "slug": "paneer-pulao", "shows": "basmati rice pulao with visible paneer cubes" },
+        { "name": "Peas Pulao", "price": 130, "slug": "peas-pulao", "shows": "white rice pulao studded with green peas" },
+        { "name": "Peas Panner Pulav", "price": 150, "slug": "peas-paneer-pulav", "shows": "rice pulao with both green peas and paneer cubes" },
+        { "name": "Veg Biryani", "price": 110, "slug": "veg-biryani", "shows": "vegetarian biryani with carrot, beans, peas, no meat and no egg" },
+        { "name": "Mushroom Biryani", "price": 150, "slug": "mushroom-biryani", "shows": "biryani rice with visible mushroom pieces" },
+        { "name": "Lemon Rice", "price": 110, "slug": "lemon-rice", "shows": "bright yellow lemon rice with peanuts and curry leaves" },
+        { "name": "Veg Fried Rice", "price": 130, "slug": "veg-fried-rice", "shows": "Indo Chinese vegetable fried rice with diced carrot, beans, spring onion" },
+        { "name": "Paneer Fried Rice", "price": 150, "slug": "paneer-fried-rice", "shows": "fried rice with paneer cubes and vegetables" },
+        { "name": "Mushroom Fried Rice", "price": 150, "slug": "mushroom-fried-rice", "shows": "fried rice with sliced mushrooms and spring onion" },
+        { "name": "Onion Chilli Fried Rice", "price": 150, "slug": "onion-chilli-fried-rice", "shows": "spicy fried rice with sliced onion and green chilli" },
+        { "name": "Daal Khichdi", "price": 110, "slug": "daal-khichdi", "shows": "soft yellow rice and lentil khichdi with a ghee drizzle" }
+      ]
+    },
+    {
+      "title": "Dosa",
+      "folder": "dosa",
+      "icon": "🥞",
+      "items": [
+        { "name": "Butter Masala Dosa", "price": 70, "slug": "butter-masala-dosa", "shows": "golden crisp masala dosa glistening with butter, potato filling, chutney and sambar" },
+        { "name": "Plain Dosa", "price": 50, "slug": "plain-dosa", "shows": "plain golden crisp dosa rolled, with chutney and sambar, no filling" },
+        { "name": "Set Dosa", "price": 70, "slug": "set-dosa", "shows": "a stack of small soft spongy set dosas with chutney" },
+        { "name": "Butter Plain Dosa", "price": 70, "slug": "butter-plain-dosa", "shows": "plain dosa brushed generously with butter, no filling" },
+        { "name": "Paneer Dosa", "price": 100, "slug": "paneer-dosa", "shows": "dosa filled with spiced paneer stuffing" },
+        { "name": "Rava Dosa", "price": 100, "slug": "rava-dosa", "shows": "lacy crisp semolina rava dosa with a net like holey texture" },
+        { "name": "Khali Dosa", "price": 70, "slug": "khali-dosa", "shows": "soft thick plain dosa without filling, served folded with chutney" },
+        { "name": "Uttappa", "price": 80, "slug": "uttappa", "shows": "thick soft uttapam pancake topped with onion, tomato and coriander" },
+        { "name": "Masala Dosa", "price": 70, "slug": "masala-dosa", "shows": "classic crisp masala dosa with yellow potato filling, sambar and chutney" }
+      ]
+    },
+    {
+      "title": "South Indian Breakfast",
+      "folder": "breakfast",
+      "icon": "🍛",
+      "items": [
+        { "name": "Idli Vada (2+1)", "price": 70, "slug": "idli-vada-2-1", "shows": "a plate with two white steamed idlis and one medu vada, sambar and chutney" },
+        { "name": "Buns", "price": 70, "slug": "buns", "shows": "Mangalore banana buns, soft puffed deep fried sweet bread with chutney" },
+        { "name": "Shira", "price": 40, "slug": "shira", "shows": "sweet semolina sheera kesari bath, golden orange, with nuts" },
+        { "name": "Upma", "price": 30, "slug": "upma", "shows": "savoury semolina upma with curry leaves, mustard seeds and vegetables" },
+        { "name": "Idli (2 pcs)", "price": 40, "slug": "idli-2-pcs", "shows": "two plain white steamed idlis with sambar and coconut chutney" },
+        { "name": "Idli + Vada (1+1)", "price": 50, "slug": "idli-vada-1-1", "shows": "one idli and one medu vada on a plate with chutney" },
+        { "name": "Buns (1 pc)", "price": 35, "slug": "buns-1-pc", "shows": "a single Mangalore banana bun, soft and puffed" },
+        { "name": "Singal Puri", "price": 50, "slug": "singal-puri", "shows": "puffed deep fried puri bread served with potato bhaji" },
+        { "name": "Vada (2 pcs)", "price": 70, "slug": "vada-2-pcs", "shows": "two crisp golden medu vada doughnuts with sambar and chutney" }
+      ]
+    },
+    {
+      "title": "Tandoori",
+      "folder": "tandoori",
+      "icon": "🫓",
+      "items": [
+        { "name": "Roti", "price": 25, "slug": "roti", "shows": "plain tandoori roti flatbread, dry and lightly charred" },
+        { "name": "Naan", "price": 40, "slug": "naan", "shows": "plain naan bread, soft teardrop shape with char spots" },
+        { "name": "Butter Naan", "price": 45, "slug": "butter-naan", "shows": "naan glistening with melted butter brushed on top" },
+        { "name": "Butter Garlic Naan", "price": 70, "slug": "butter-garlic-naan", "shows": "naan topped with chopped garlic, coriander and butter" },
+        { "name": "Garlic Naan", "price": 60, "slug": "garlic-naan", "shows": "naan studded with minced garlic and coriander" },
+        { "name": "Aloo Parota", "price": 60, "slug": "aloo-parota", "shows": "stuffed potato aloo paratha, round, with butter and curd" },
+        { "name": "Butter Kulcha", "price": 40, "slug": "butter-kulcha", "shows": "soft kulcha bread brushed with butter and coriander" },
+        { "name": "Butter Parota", "price": 60, "slug": "butter-parota", "shows": "flaky layered parotta with butter, South Indian style" },
+        { "name": "Masala Roti", "price": 50, "slug": "masala-roti", "shows": "spiced masala roti flatbread with herbs and spices on top" },
+        { "name": "Tandoori Parota", "price": 50, "slug": "tandoori-parota", "shows": "layered tandoori paratha, charred from the clay oven" },
+        { "name": "Butter Roti", "price": 30, "slug": "butter-roti", "shows": "tandoori roti brushed with butter" },
+        { "name": "Paneer Tikka (Tandoori Counter)", "price": 220, "slug": "paneer-tikka-tandoori", "shows": "skewered charred paneer tikka cubes with onion and capsicum, dry tandoori starter" }
+      ]
+    },
+    {
+      "title": "Daal",
+      "folder": "daal",
+      "icon": "🍲",
+      "items": [
+        { "name": "Daal Butter Fry", "price": 130, "slug": "daal-butter-fry", "shows": "yellow dal fry finished with a pat of butter melting on top" },
+        { "name": "Daal Kolhapuri", "price": 130, "slug": "daal-kolhapuri", "shows": "spicy deep red Kolhapuri style lentil dal" },
+        { "name": "Daal Fry", "price": 110, "slug": "daal-fry", "shows": "classic yellow dal fry with onion tomato and coriander" },
+        { "name": "Daal Tadka", "price": 130, "slug": "daal-tadka", "shows": "yellow dal with a ghee tempering of cumin, garlic and dried red chilli" },
+        { "name": "Daal Paneer", "price": 120, "slug": "daal-paneer", "shows": "yellow lentil dal with paneer cubes in it" }
+      ]
+    },
+    {
+      "title": "Soup",
+      "folder": "soup",
+      "icon": "🍜",
+      "items": [
+        { "name": "Tomato Soup", "price": 50, "slug": "tomato-soup", "shows": "creamy red tomato soup in a bowl with cream swirl and croutons" },
+        { "name": "Veg Manchow Soup", "price": 100, "slug": "veg-manchow-soup", "shows": "dark brown Indo Chinese manchow soup topped with crispy fried noodles" }
+      ]
+    },
+    {
+      "title": "Thali",
+      "folder": "thali",
+      "icon": "🍽️",
+      "items": [
+        { "name": "Rice South Thali", "price": 100, "slug": "rice-south-thali", "shows": "South Indian rice thali on a steel plate with rice, sambar, rasam and vegetable sides" },
+        { "name": "North Thali", "price": 200, "slug": "north-thali", "shows": "North Indian thali with roti, dal, paneer curry, rice and salad in steel bowls" },
+        { "name": "South Thali", "price": 120, "slug": "south-thali", "shows": "South Indian vegetarian thali on a banana leaf or steel plate with many small sides" }
+      ]
+    },
+    {
+      "title": "Extra",
+      "folder": "extra",
+      "icon": "➕",
+      "items": [
+        { "name": "Roti + Bhaji", "price": 60, "slug": "roti-bhaji", "shows": "roti flatbread served with a bowl of vegetable bhaji curry" }
+      ]
+    }
+  ]
+}

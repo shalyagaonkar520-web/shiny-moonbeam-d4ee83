@@ -13,6 +13,11 @@ const ProfilePage = lazy(() => import('./components/ProfilePage'));
 const TrackingPage = lazy(() => import('./components/TrackingPage'));
 const DeliveryDashboard = lazy(() => import('./components/DeliveryDashboard'));
 const BulkOrderPage = lazy(() => import('./components/BulkOrderPage'));
+const HotelMumtazMenuPage = lazy(() => import('./components/HotelMumtazMenuPage'));
+const HotelAlAminMenuPage = lazy(() => import('./components/HotelAlAminMenuPage'));
+const HotelCoastalCrownMenuPage = lazy(() => import('./components/HotelCoastalCrownMenuPage'));
+const HotelMalabarMenuPage = lazy(() => import('./components/HotelMalabarMenuPage'));
+const HotelSankalpaMenuPage = lazy(() => import('./components/HotelSankalpaMenuPage'));
 import BottomNav from './components/BottomNav';
 import BottomCartBar from './components/BottomCartBar';
 import CityGateway from './components/CityGateway';
@@ -173,6 +178,11 @@ export default function App() {
                   <Route path="/track/:orderId" element={<TrackingPage />} />
                   <Route path="/delivery" element={<DeliveryDashboard />} />
                   <Route path="/bulk" element={<BulkOrderPage />} />
+                  <Route path="/hotel-mumtaz" element={<HotelMumtazMenuPage />} />
+                  <Route path="/hotel-al-amin" element={<HotelAlAminMenuPage />} />
+                  <Route path="/hotel-coastal-crown" element={<HotelCoastalCrownMenuPage />} />
+                  <Route path="/hotel-malabar" element={<HotelMalabarMenuPage />} />
+                  <Route path="/hotel-sankalpa" element={<HotelSankalpaMenuPage />} />
                   <Route path="/celebration" element={<CelebrationHub />} />
                   <Route path="/celebration/design" element={<CelebrationDesign />} />
                   <Route path="/feedback" element={<FeedbackPage />} />

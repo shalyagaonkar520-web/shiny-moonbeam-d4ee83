@@ -5,25 +5,25 @@ export const ICE_CAKES: Product[] = [
   { id: 'ice-cake-1-05', name: 'Butterscotch Cake (0.5kg)', price: 380, originalPrice: 760, category: 'Ice Cakes', type: 'food', image: '/butterscotch_cake.png', description: 'Premium butterscotch ice cream cake.', isVeg: true, isTopPick: true },
   { id: 'ice-cake-2-05', name: 'Red Velvet Cake (0.5kg)', price: 380, originalPrice: 760, category: 'Ice Cakes', type: 'food', image: '/red_velvet_cake.png', description: 'Luxurious red velvet ice cream cake.', isVeg: true, isTopPick: true },
   { id: 'ice-cake-3-05', name: 'Strawberry Cake (0.5kg)', price: 380, originalPrice: 760, category: 'Ice Cakes', type: 'food', image: '/strawberry_cake.jpg', description: 'Fresh strawberry delight.', isVeg: true },
-  { id: 'ice-cake-4-05', name: 'Mango Cake (0.5kg)', price: 380, originalPrice: 760, category: 'Ice Cakes', type: 'food', image: 'https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=800&q=80', description: 'Tropical mango perfection.', isVeg: true },
+  { id: 'ice-cake-4-05', name: 'Mango Cake (0.5kg)', price: 380, originalPrice: 760, category: 'Ice Cakes', type: 'food', image: '/mango_shake_user.png', description: 'Tropical mango perfection.', isVeg: true },
   { id: 'ice-cake-5-05', name: 'Kiwi Cake (0.5kg)', price: 380, originalPrice: 760, category: 'Ice Cakes', type: 'food', image: '/kiwi_cake.png', description: 'Tangy and sweet kiwi ice cake.', isVeg: true },
 
   // 1 Kg (1kg) - ₹680
   { id: 'ice-cake-1-1', name: 'Butterscotch Cake (1kg)', price: 680, originalPrice: 1360, category: 'Ice Cakes', type: 'food', image: '/butterscotch_cake.png', description: 'Premium butterscotch ice cream cake.', isVeg: true, isTopPick: true },
   { id: 'ice-cake-2-1', name: 'Red Velvet Cake (1kg)', price: 680, originalPrice: 1360, category: 'Ice Cakes', type: 'food', image: '/red_velvet_cake.png', description: 'Luxurious red velvet ice cream cake.', isVeg: true, isTopPick: true },
   { id: 'ice-cake-3-1', name: 'Strawberry Cake (1kg)', price: 680, originalPrice: 1360, category: 'Ice Cakes', type: 'food', image: '/strawberry_cake.jpg', description: 'Fresh strawberry delight.', isVeg: true },
-  { id: 'ice-cake-4-1', name: 'Mango Cake (1kg)', price: 680, originalPrice: 1360, category: 'Ice Cakes', type: 'food', image: 'https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=800&q=80', description: 'Tropical mango perfection.', isVeg: true },
+  { id: 'ice-cake-4-1', name: 'Mango Cake (1kg)', price: 680, originalPrice: 1360, category: 'Ice Cakes', type: 'food', image: '/mango_shake_user.png', description: 'Tropical mango perfection.', isVeg: true },
   { id: 'ice-cake-5-1', name: 'Kiwi Cake (1kg)', price: 680, originalPrice: 1360, category: 'Ice Cakes', type: 'food', image: '/kiwi_cake.png', description: 'Tangy and sweet kiwi ice cake.', isVeg: true },
 ];
 
 export const NORMAL_CAKES: Product[] = [
   // Half Kg (0.5kg) - ₹200
-  { id: 'cake-2-05', name: 'Chocolate Cake (0.5kg)', price: 200, originalPrice: 400, category: 'Normal Cakes', type: 'food', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&q=80', description: 'Rich chocolate truffle cake.', isVeg: true },
-  { id: 'cake-3-05', name: 'Mango Cake (0.5kg)', price: 200, originalPrice: 400, category: 'Normal Cakes', type: 'food', image: 'https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=800&q=80', description: 'Delightful tropical mango cake.', isVeg: true },
+  { id: 'cake-2-05', name: 'Chocolate Cake (0.5kg)', price: 200, originalPrice: 400, category: 'Normal Cakes', type: 'food', image: '/black_forest_cake.png', description: 'Rich chocolate truffle cake.', isVeg: true },
+  { id: 'cake-3-05', name: 'Mango Cake (0.5kg)', price: 200, originalPrice: 400, category: 'Normal Cakes', type: 'food', image: '/mango_shake_user.png', description: 'Delightful tropical mango cake.', isVeg: true },
 
   // 1 Kg (1kg) - ₹400
-  { id: 'cake-2-1', name: 'Chocolate Cake (1kg)', price: 400, originalPrice: 800, category: 'Normal Cakes', type: 'food', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&q=80', description: 'Rich chocolate truffle cake.', isVeg: true },
-  { id: 'cake-3-1', name: 'Mango Cake (1kg)', price: 400, originalPrice: 800, category: 'Normal Cakes', type: 'food', image: 'https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=800&q=80', description: 'Delightful tropical mango cake.', isVeg: true },
+  { id: 'cake-2-1', name: 'Chocolate Cake (1kg)', price: 400, originalPrice: 800, category: 'Normal Cakes', type: 'food', image: '/black_forest_cake.png', description: 'Rich chocolate truffle cake.', isVeg: true },
+  { id: 'cake-3-1', name: 'Mango Cake (1kg)', price: 400, originalPrice: 800, category: 'Normal Cakes', type: 'food', image: '/mango_shake_user.png', description: 'Delightful tropical mango cake.', isVeg: true },
 ];
 
 export const PARTY_ITEMS: Product[] = [

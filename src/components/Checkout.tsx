@@ -14,6 +14,7 @@ import { useSEO } from '../utils/seo';
 import { useAuthStore } from '../store/authStore';
 import { db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
+import { getItemHotelTag, getItemHotel, getOrderHotelName, getOrderHotelId } from '../utils/orderHotels';
 
 const TELEGRAM_BOT_TOKEN = '8828362126:AAGbOzb8Q9Jhi29Bp6sQ_Q6hRo4Xj2SGfQg';
 const TELEGRAM_CHAT_ID   = '-1003803637741';
@@ -128,8 +129,14 @@ export default function Checkout() {
     }
   }
 
-  // Pure logic: NO PLATFORM FEE, NO HOTEL FEE, NO EXTRA FEES, NO TAX. Only food total + delivery - discounts.
-  const grandTotal = Math.max(0, subtotal + deliveryCharge - couponDiscount);
+  // Packaging fee rule: Only Hotel Mumtaz has ₹10 packaging fee, all other hotels/orders have ₹0
+  const hasMumtaz = !isBulkOrder && cartItems.some(
+    (i) => i.hotelId === 'mumtaz' || i.id?.startsWith('mumtaz-') || (i.description && i.description.includes('Hotel Mumtaz'))
+  );
+  const packagingFee = hasMumtaz ? 10 : 0;
+
+  // Pure logic: NO PLATFORM FEE, NO EXTRA FEES, NO TAX. Only food total + delivery + packaging - discounts.
+  const grandTotal = Math.max(0, subtotal + deliveryCharge + packagingFee - couponDiscount);
 
   const maxWalletDeduction = user && profile ? Math.min(profile.walletBalance, grandTotal) : 0;
   
@@ -236,10 +243,13 @@ export default function Checkout() {
     localStorage.setItem('moms_magic_user_name',  formData.name.trim());
     localStorage.setItem('moms_magic_user_phone', formData.phone.trim());
 
-    const mapsViewLink = `https://www.google.com/maps?q=${deliveryLocation.lat},${deliveryLocation.lng}`;
-    const mapsNavLink  = `https://www.google.com/maps/dir/?api=1&destination=${deliveryLocation.lat},${deliveryLocation.lng}`;
+    const mapsViewLink = `https://maps.google.com/?q=${deliveryLocation.lat},${deliveryLocation.lng}`;
+    const mapsNavLink  = `https://maps.google.com/maps?daddr=${deliveryLocation.lat},${deliveryLocation.lng}`;
 
     const buildWaMessage = (paymentId?: string) => {
+      // activeItems so a party order that also has hotel dishes still names the hotel.
+      const hotelName = getOrderHotelName(activeItems);
+
       let orderDetails = '';
       if (isBulkOrder) {
         const decos = [
@@ -247,9 +257,15 @@ export default function Checkout() {
           decoration.spray    > 0 && `${decoration.spray}x Spray`,
           decoration.candles  > 0 && `${decoration.candles}x Candles`,
         ].filter(Boolean).join(', ');
+        // activeItems, not bulkItems: a party order can also carry normal cart items,
+        // and listing only bulkItems dropped those item names from the message.
         orderDetails = [
           `🛒 *FOOD ITEMS:*`,
-          bulkItems.map((i) => `• ${i.name} (${i.finalQuantity} units)`).join('\n'),
+          activeItems.map((i: any) => {
+            const qty = i.finalQuantity ?? i.quantity ?? 1;
+            const unit = i.finalQuantity != null ? ' units' : '';
+            return `• ${i.name}${getItemHotelTag(i)} (${qty}${unit})`;
+          }).join('\n'),
           cake.required ? `🎂 *Cake:* ${cake.size} - "${cake.text}"` : '',
           decos         ? `🎈 *Decorations:* ${decos}` : '',
           additionalServices.disposablePlates ? `🍽️ Disposable plates added` : '',
@@ -257,15 +273,20 @@ export default function Checkout() {
         ].filter(Boolean).join('\n');
       } else {
         orderDetails = `🛒 *ITEMS:*\n` + cartItems.map((item) => {
-          let line = `• ${item.quantity}x ${item.name} - ₹${item.price * item.quantity}`;
+          let line = `• ${item.quantity}x ${item.name}${getItemHotelTag(item)} - ₹${item.price * item.quantity}`;
           if (item.items?.length) line += `\n  (${item.items.join(', ')})`;
           return line;
         }).join('\n');
       }
 
       return [
-        isBulkOrder ? `🎉 *NEW EVENT ORDER!* 🎉` : `📦 *NEW ORDER - MOM'S MAGIC!* 📦`,
+        isBulkOrder 
+          ? `🎉 *NEW EVENT ORDER!* 🎉` 
+          : hotelName 
+          ? `🏨 *NEW ORDER - ${hotelName.toUpperCase()}!* 🏨` 
+          : `📦 *NEW ORDER - MOM'S MAGIC!* 📦`,
         ``,
+        hotelName ? `🏨 *Hotel:* ${hotelName}` : '',
         `👤 *Name:* ${formData.name.trim()}`,
         `📞 *Phone:* ${formData.phone.trim()}`,
         `📍 *City:* ${selectedCity?.name || 'Yellapur'}`,
@@ -275,6 +296,7 @@ export default function Checkout() {
         orderDetails,
         ``,
         `💰 *Cart Total:* ₹${subtotal.toFixed(2)}`,
+        packagingFee > 0 ? `📦 *Packaging Fee (Hotel Mumtaz):* ₹${packagingFee.toFixed(2)}` : '',
         `🚚 *Delivery Fee:* ${isFreeDelivery ? `FREE (${freeDeliveryReason})` : `₹${deliveryCharge.toFixed(2)}`}`,
         couponDiscount > 0 ? `🎟️ *Coupon Discount:* -₹${couponDiscount.toFixed(2)}` : '',
         walletDeduction > 0 ? `🎁 *Wallet Used:* -₹${walletDeduction.toFixed(2)}` : '',
@@ -287,23 +309,39 @@ export default function Checkout() {
         `🚗 *Navigate:* ${mapsNavLink}`,
         ``,
         `━━━━━━━━━━━━━━━━`,
-        `🍽️ *Mom's Magic - All Orders*`,
+        hotelName ? `🏨 *${hotelName} Order via Mom's Magic*` : `🍽️ *Mom's Magic - All Orders*`,
         `👉 https://momsmagic.shop`,
         `━━━━━━━━━━━━━━━━`,
       ].filter((l) => l !== '').join('\n');
     };
 
     const buildTgMessage = (paymentId?: string) => {
+      // activeItems so a party order that also has hotel dishes still names the hotel.
+      const hotelName = getOrderHotelName(activeItems);
+
       let tgDetails = '';
       if (isBulkOrder) {
-        tgDetails = bulkItems.map((i) => `• ${escHtml(i.name)} (${i.finalQuantity} units)`).join('\n');
+        // activeItems, not bulkItems: a party order can also carry normal cart items,
+        // and listing only bulkItems dropped those item names from the message.
+        tgDetails = activeItems.map((i: any) => {
+          const qty = i.finalQuantity ?? i.quantity ?? 1;
+          const unit = i.finalQuantity != null ? ' units' : '';
+          return `• ${escHtml(i.name)}${escHtml(getItemHotelTag(i))} (${qty}${unit})`;
+        }).join('\n');
       } else {
-        tgDetails = cartItems.map((item) => `• ${item.quantity}x ${escHtml(item.name)} (₹${item.price * item.quantity})`).join('\n');
+        tgDetails = cartItems.map((item) => {
+          return `• ${item.quantity}x ${escHtml(item.name)}${escHtml(getItemHotelTag(item))} (₹${item.price * item.quantity})`;
+        }).join('\n');
       }
 
       return [
-        isBulkOrder ? `🎉 <b>NEW EVENT ORDER!</b>` : `📦 <b>NEW FOOD ORDER!</b>`,
+        isBulkOrder 
+          ? `🎉 <b>NEW EVENT ORDER!</b>` 
+          : hotelName 
+          ? `🏨 <b>NEW ORDER - ${hotelName.toUpperCase()}!</b> 🏨` 
+          : `📦 <b>NEW FOOD ORDER!</b>`,
         ``,
+        hotelName ? `🏨 <b>Hotel:</b> ${hotelName}` : '',
         `👤 <b>Name:</b> ${escHtml(formData.name.trim())}`,
         `📞 <b>Phone:</b> ${escHtml(formData.phone.trim())}`,
         `🏠 <b>Address:</b> ${escHtml(deliveryLocation.address)}`,
@@ -312,6 +350,7 @@ export default function Checkout() {
         `🛒 <b>Items:</b>\n${tgDetails}`,
         ``,
         `💰 <b>Subtotal:</b> ₹${subtotal.toFixed(2)}`,
+        packagingFee > 0 ? `📦 <b>Packaging Fee (Hotel Mumtaz):</b> ₹${packagingFee.toFixed(2)}` : '',
         `🚚 <b>Delivery Fee:</b> ${isFreeDelivery ? `₹0 (${freeDeliveryReason})` : `₹${deliveryCharge.toFixed(2)}`}`,
         couponDiscount > 0 ? `🎟️ <b>Coupon:</b> -₹${couponDiscount.toFixed(2)}` : '',
         walletDeduction > 0 ? `🎁 <b>Wallet:</b> -₹${walletDeduction.toFixed(2)}` : '',
@@ -320,6 +359,7 @@ export default function Checkout() {
         formData.additionalMessage.trim() ? `📝 <b>Note:</b> ${escHtml(formData.additionalMessage.trim())}` : '',
         ``,
         `🗺️ <a href="${mapsViewLink}">View Customer Location on Map</a>`,
+        `🚗 <a href="${mapsNavLink}">Start Navigation</a>`,
       ].filter((l) => l !== '').join('\n');
     };
 
@@ -329,6 +369,10 @@ export default function Checkout() {
       if (user && walletDeduction > 0) {
         await deductWalletBalance(walletDeduction, orderId);
       }
+
+      // Bulk orders can also contain hotel items, so look at everything being ordered.
+      const hotelName = getOrderHotelName(activeItems);
+      const orderHotelId = getOrderHotelId(activeItems);
 
       const waMsg    = buildWaMessage(paymentId);
       const tgMsg    = buildTgMessage(paymentId);
@@ -342,9 +386,22 @@ export default function Checkout() {
           userName: formData.name.trim(),
           userPhone: formData.phone.trim(),
           orderType: isBulkOrder ? 'bulk' : 'regular',
-          items: activeItems,
+          hotelName: hotelName || null,
+          hotelId: orderHotelId,
+          // Stamp each line with the hotel it came from so order screens and the
+          // kitchen can tell a mixed-hotel order apart without re-deriving it.
+          items: activeItems.map((item: any) => {
+            const hotel = getItemHotel(item);
+            return {
+              ...item,
+              name: item.name || 'Unnamed item',
+              hotelId: hotel?.id ?? item.hotelId ?? null,
+              hotelName: hotel?.name ?? null,
+            };
+          }),
           subtotal,
           deliveryCharge,
+          packagingFee,
           grandTotal,
           payableAmount,
           paymentMethod: payableAmount === 0 ? 'wallet' : paymentMethod,
@@ -651,9 +708,21 @@ export default function Checkout() {
           </div>
 
           {/* Packaging Fees */}
-          <div className="flex justify-between items-center text-xs sm:text-[13px] font-medium text-gray-400">
-            <span className="line-through">Packaging Fees</span>
-            <span className="text-[11px] font-bold text-gray-600">Seriously? Nope</span>
+          <div className="flex justify-between items-center text-xs sm:text-[13px] font-medium text-gray-700">
+            {packagingFee > 0 ? (
+              <>
+                <div className="flex items-center gap-1">
+                  <span>Packaging Fees</span>
+                  <span className="text-rose-600 text-[10px] font-bold">(Hotel Mumtaz)</span>
+                </div>
+                <span className="font-bold text-gray-900">₹{packagingFee.toFixed(2)}</span>
+              </>
+            ) : (
+              <>
+                <span className="line-through text-gray-400">Packaging Fees</span>
+                <span className="text-[11px] font-bold text-emerald-600 uppercase">FREE</span>
+              </>
+            )}
           </div>
 
           {/* Coupon Discount */}

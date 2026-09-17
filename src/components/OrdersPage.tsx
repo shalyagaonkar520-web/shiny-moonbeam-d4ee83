@@ -4,12 +4,18 @@ import { ChevronLeft, PackageSearch, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSEO } from '../utils/seo';
 import FoodLoader from './FoodLoader';
+import { getItemHotel } from '../utils/orderHotels';
 
 interface OrderItem {
+  id?: string;
   name: string;
   price: number;
   quantity?: number;
   finalQuantity?: number;
+  /** Stamped at checkout so the hotel shows even on older mixed orders. */
+  hotelId?: string;
+  hotelName?: string;
+  description?: string;
 }
 
 interface Order {
@@ -125,11 +131,21 @@ export default function OrdersPage() {
                 </div>
 
                 <div className="space-y-2">
-                  {order.items.slice(0, 3).map((item, idx) => (
-                    <div key={idx} className="flex justify-between items-center text-xs">
-                      <span className="text-white/70 font-medium">{item.quantity || item.finalQuantity || 1}x {item.name}</span>
-                    </div>
-                  ))}
+                  {order.items.slice(0, 3).map((item, idx) => {
+                    const itemHotel = item.hotelName || getItemHotel(item)?.name;
+                    return (
+                      <div key={idx} className="flex justify-between items-center gap-2 text-xs">
+                        <span className="text-white/70 font-medium">
+                          {item.quantity || item.finalQuantity || 1}x {item.name || 'Unnamed item'}
+                        </span>
+                        {itemHotel && (
+                          <span className="shrink-0 text-[9px] font-bold uppercase tracking-wider text-[#4CD964]/80 bg-[#4CD964]/10 border border-[#4CD964]/20 px-1.5 py-0.5 rounded-full">
+                            {itemHotel}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
                   {order.items.length > 3 && (
                     <p className="text-[#4CD964]/70 text-[10px] font-bold italic mt-2">+ {order.items.length - 3} more items</p>
                   )}

@@ -30,6 +30,7 @@ import {
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import AdminMenuManager from './AdminMenuManager';
 import AdminCouponManager from './AdminCouponManager';
+import { getItemHotel } from '../utils/orderHotels';
 
 // Real Orders fetched from localStorage
 
@@ -1013,11 +1014,19 @@ export default function AdminPage() {
 
                     <div className="space-y-1">
                       <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">Order Items:</p>
-                      {order.items.slice(0,3).map((item: any, idx: number) => (
-                        <div key={idx} className="flex justify-between text-xs font-medium text-white/80">
-                          <span>{item.finalQuantity || item.quantity || 1}x {item.name}</span>
-                        </div>
-                      ))}
+                      {order.items.slice(0,3).map((item: any, idx: number) => {
+                        const itemHotel = item.hotelName || getItemHotel(item)?.name;
+                        return (
+                          <div key={idx} className="flex justify-between gap-2 text-xs font-medium text-white/80">
+                            <span>{item.finalQuantity || item.quantity || 1}x {item.name || 'Unnamed item'}</span>
+                            {itemHotel && (
+                              <span className="shrink-0 text-[9px] font-black uppercase tracking-wider text-amber-300/90">
+                                {itemHotel}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
                       {order.items.length > 3 && <p className="text-[10px] text-white/40 italic">+{order.items.length - 3} more</p>}
                     </div>
 

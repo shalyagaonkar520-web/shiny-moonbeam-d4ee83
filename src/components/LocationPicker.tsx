@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Navigation, Check, X, Loader2, AlertTriangle, Store, Locate, ChevronDown } from 'lucide-react';
+import { MapPin, Navigation, Check, X, Loader2, AlertTriangle, Store, Locate, ChevronDown, Search } from 'lucide-react';
 import { useLocationStore, NearbyRestaurant } from '../store/locationStore';
 
 import { haversineDistance, reverseGeocode } from '../lib/location';
@@ -71,6 +71,9 @@ export default function LocationPicker() {
   const [mapReady, setMapReady] = useState(false);
   const [isManualEntry, setIsManualEntry] = useState(false);
   const [manualAddress, setManualAddress] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   // ───────────────────────────────────────────────────────────
   // UPDATE MARKER AND DATA
@@ -150,6 +153,43 @@ export default function LocationPicker() {
     },
     [restaurantLocation, maxDeliveryRange, setNearbyRestaurants]
   );
+
+  // ───────────────────────────────────────────────────────────
+  // SEARCH PLACES VIA OPENSTREETMAP (NO API REQUIRED)
+  // ───────────────────────────────────────────────────────────
+  const handleSearchPlaces = async (query: string) => {
+    setSearchQuery(query);
+    if (!query.trim() || query.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    setIsSearching(true);
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=in&limit=5`
+      );
+      const data = await res.json();
+      setSearchResults(Array.isArray(data) ? data : []);
+    } catch {
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSelectSearchResult = (result: any) => {
+    const lat = parseFloat(result.lat);
+    const lon = parseFloat(result.lon);
+    if (!isNaN(lat) && !isNaN(lon)) {
+      updateLocation(lat, lon);
+      const map = mapInstanceRef.current;
+      if (map) {
+        map.setView([lat, lon], 17, { animate: true });
+      }
+    }
+    setSearchResults([]);
+    setSearchQuery('');
+  };
 
   // Cleanup map on unmount/close
   useEffect(() => {
@@ -259,12 +299,11 @@ export default function LocationPicker() {
 
       const map = L.map(mapContainerRef.current, {
         zoomControl: false,
+        attributionControl: false,
       }).setView([defaultLat, defaultLng], 14);
 
-      // Dark tile layer for premium look
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
-        subdomains: 'abcd',
+      // Standard OpenStreetMap - displays all places, roads, shops & landmarks with NO API required
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
       }).addTo(map);
 
@@ -368,16 +407,68 @@ export default function LocationPicker() {
             <span className="hidden sm:inline">{isGeolocating ? 'Locating...' : 'My Location'}</span>
           </motion.button>
 
+          {/* SEARCH ALL PLACES (OPENSTREETMAP - NO API REQUIRED) */}
+          <div className="absolute top-4 left-4 right-36 z-[1000]">
+            <div className="relative">
+              <div className="flex items-center gap-2 px-3.5 py-2.5 bg-[#161A22]/95 backdrop-blur-xl border border-white/10 rounded-2xl text-white shadow-2xl focus-within:border-brand transition-all">
+                {isSearching ? (
+                  <Loader2 className="w-4 h-4 text-brand animate-spin shrink-0" />
+                ) : (
+                  <Search className="w-4 h-4 text-white/50 shrink-0" />
+                )}
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => handleSearchPlaces(e.target.value)}
+                  placeholder="Search all places, towns, streets..."
+                  className="bg-transparent text-white text-xs font-semibold outline-none w-full placeholder:text-white/40"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSearchResults([]);
+                    }}
+                    className="text-white/40 hover:text-white"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* SEARCH RESULTS DROPDOWN */}
+              {searchResults.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-[#161A22] border border-white/15 rounded-2xl overflow-hidden shadow-2xl max-h-56 overflow-y-auto z-[1001]">
+                  {searchResults.map((item) => (
+                    <button
+                      key={item.place_id}
+                      onClick={() => handleSelectSearchResult(item)}
+                      className="w-full text-left px-4 py-2.5 hover:bg-white/10 border-b border-white/5 flex items-start gap-2.5 transition-all text-xs"
+                    >
+                      <MapPin className="w-3.5 h-3.5 text-brand shrink-0 mt-0.5" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-white font-bold truncate">
+                          {item.name || item.display_name.split(',')[0]}
+                        </p>
+                        <p className="text-white/40 text-[10px] truncate">{item.display_name}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* TAP INSTRUCTION OVERLAY */}
-          {!selectedLat && (
+          {!selectedLat && !searchQuery && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="absolute top-4 left-4 right-20 z-[1000] flex items-center gap-3 px-4 py-3 bg-brand/90 backdrop-blur-xl rounded-2xl text-white shadow-2xl"
+              className="absolute top-18 left-4 right-4 z-[999] flex items-center gap-3 px-4 py-2.5 bg-brand/90 backdrop-blur-xl rounded-2xl text-white shadow-2xl"
             >
-              <Navigation className="w-5 h-5 shrink-0 animate-pulse" />
+              <Navigation className="w-4 h-4 shrink-0 animate-pulse" />
               <p className="font-bold text-xs">
-                Tap anywhere on the map to set your delivery location, or use "My Location" button
+                Tap anywhere on the map or search any place above to select your address
               </p>
             </motion.div>
           )}

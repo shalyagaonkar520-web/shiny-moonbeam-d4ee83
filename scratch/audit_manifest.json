@@ -1,0 +1,1502 @@
+[
+  {
+    "hotel": "Hotel Mumtaz",
+    "category": "Egg Main Course",
+    "dish": "Egg Mumtaz Spl",
+    "image": "/menu/egg-mumtaz-spl.webp",
+    "isVeg": false,
+    "path": "public/menu/egg-mumtaz-spl.webp"
+  },
+  {
+    "hotel": "Hotel Mumtaz",
+    "category": "Egg Main Course",
+    "dish": "Egg Kadai",
+    "image": "/menu/egg-kadai.webp",
+    "isVeg": false,
+    "path": "public/menu/egg-kadai.webp"
+  },
+  {
+    "hotel": "Hotel Mumtaz",
+    "category": "Egg Main Course",
+    "dish": "Egg Handi",
+    "image": "/menu/egg-handi.webp",
+    "isVeg": false,
+    "path": "public/menu/egg-handi.webp"
+  },
+  {
+    "hotel": "Hotel Mumtaz",
+    "category": "Egg Main Course",
+    "dish": "Egg Makhani",
+    "image": "/menu/egg-makhani.webp",
+    "isVeg": false,
+    "path": "public/menu/egg-makhani.webp"
+  },
+  {
+    "hotel": "Hotel Mumtaz",
+    "category": "Egg Main Course",
+    "dish": "Egg Pahadi",
+    "image": "/menu/egg-pahadi.webp",
+    "isVeg": false,
+    "path": "public/menu/egg-pahadi.webp"
+  },
+  {
+    "hotel": "Hotel Mumtaz",
+    "category": "Chicken Main Course",
+    "dish": "Chicken Sizzler",
+    "image": "/menu/chicken-sizzler.webp",
+    "isVeg": false,
+    "path": "public/menu/chicken-sizzler.webp"
+  },
+  {
+    "hotel": "Hotel Mumtaz",
+    "category": "Chicken Main Course",
+    "dish": "Chicken Mumtaz Spl",
+    "image": "/menu/chicken-mumtaz-spl.webp",
+    "isVeg": false,
+    "path": "public/menu/chicken-mumtaz-spl.webp"
+  },
+  {
+    "hotel": "Hotel Mumtaz",
+    "category": "Chicken Main Course",
+    "dish": "Chicken Kadai",
+    "image": "/menu/chicken-kadai.webp",
+    "isVeg": false,
+    "path": "public/menu/chicken-kadai.webp"
+  },
+  {
+    "hotel": "Hotel Mumtaz",
+    "category": "Chicken Main Course",
+    "dish": "Chicken Handi",
+    "image": "/menu/chicken-handi.webp",
+    "isVeg": false,
+    "path": "public/menu/chicken-handi.webp"
+  },
+  {
+    "hotel": "Hotel Mumtaz",
+    "category": "Chicken Main Course",
+    "dish": "Chicken Tikka Masala",
+    "image": "/menu/chicken-tikka-masala.webp",
+    "isVeg": false,
+    "path": "public/menu/chicken-tikka-masala.webp"
+  },
+  {
+    "hotel": "Hotel Mumtaz",
+    "category": "Veg Main Course",
+    "dish": "Veg Mumtaz Spl",
+    "image": "/menu/veg-mumtaz-spl.webp",
+    "isVeg": true,
+    "path": "public/menu/veg-mumtaz-spl.webp"
+  },
+  {
+    "hotel": "Hotel Mumtaz",
+    "category": "Veg Main Course",
+    "dish": "Paneer Tikka Masala",
+    "image": "/menu/paneer-tikka-masala.webp",
+    "isVeg": true,
+    "path": "public/menu/paneer-tikka-masala.webp"
+  },
+  {
+    "hotel": "Hotel Mumtaz",
+    "category": "Veg Main Course",
+    "dish": "Paneer Handi",
+    "image": "/menu/paneer-handi.webp",
+    "isVeg": true,
+    "path": "public/menu/paneer-handi.webp"
+  },
+  {
+    "hotel": "Hotel Mumtaz",
+    "category": "Veg Main Course",
+    "dish": "Paneer Tawa",
+    "image": "/menu/paneer-tawa.webp",
+    "isVeg": true,
+    "path": "public/menu/paneer-tawa.webp"
+  },
+  {
+    "hotel": "Hotel Mumtaz",
+    "category": "Veg Main Course",
+    "dish": "Mushroom Kadai",
+    "image": "/menu/mushroom-kadai.webp",
+    "isVeg": true,
+    "path": "public/menu/mushroom-kadai.webp"
+  },
+  {
+    "hotel": "Hotel Mumtaz",
+    "category": "Mutton Main Course",
+    "dish": "Mutton Mumtaz Spl",
+    "image": "/menu/mutton-mumtaz-spl.webp",
+    "isVeg": false,
+    "path": "public/menu/mutton-mumtaz-spl.webp"
+  },
+  {
+    "hotel": "Hotel Mumtaz",
+    "category": "Mutton Main Course",
+    "dish": "Mutton Kadai",
+    "image": "/menu/mutton-kadai.webp",
+    "isVeg": false,
+    "path": "public/menu/mutton-kadai.webp"
+  },
+  {
+    "hotel": "Hotel Mumtaz",
+    "category": "Mutton Main Course",
+    "dish": "Mutton Handi",
+    "image": "/menu/mutton-handi.webp",
+    "isVeg": false,
+    "path": "public/menu/mutton-handi.webp"
+  },
+  {
+    "hotel": "Hotel Mumtaz",
+    "category": "Mutton Main Course",
+    "dish": "Mutton Makkhani",
+    "image": "/menu/mutton-makkhani.webp",
+    "isVeg": false,
+    "path": "public/menu/mutton-makkhani.webp"
+  },
+  {
+    "hotel": "Hotel Mumtaz",
+    "category": "Mutton Main Course",
+    "dish": "Mutton Rogan Josh",
+    "image": "/menu/mutton-rogan-josh.webp",
+    "isVeg": false,
+    "path": "public/menu/mutton-rogan-josh.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Coastal Special",
+    "dish": "Kundapur Chicken",
+    "image": "/menu/kundapur-chicken.webp",
+    "isVeg": false,
+    "path": "public/menu/kundapur-chicken.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Coastal Special",
+    "dish": "Neer Dosa Chicken Curry",
+    "image": "/menu/neer-dosa-chicken-curry.webp",
+    "isVeg": false,
+    "path": "public/menu/neer-dosa-chicken-curry.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Coastal Special",
+    "dish": "Kori Roti Chicken Curry",
+    "image": "/menu/kori-roti-chicken-curry.webp",
+    "isVeg": false,
+    "path": "public/menu/kori-roti-chicken-curry.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Coastal Special",
+    "dish": "Neer Dosa",
+    "image": "/menu/neer-dosa.webp",
+    "isVeg": true,
+    "path": "public/menu/neer-dosa.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Coastal Special",
+    "dish": "Kori Roti",
+    "image": "/menu/kori-roti.webp",
+    "isVeg": true,
+    "path": "public/menu/kori-roti.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Chicken Main Course",
+    "dish": "Chicken Coastal Crown Spl",
+    "image": "/menu/chicken-coastal-spl.webp",
+    "isVeg": false,
+    "path": "public/menu/chicken-coastal-spl.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Chicken Main Course",
+    "dish": "Butter Chicken",
+    "image": "/menu/butter-chicken.webp",
+    "isVeg": false,
+    "path": "public/menu/butter-chicken.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Chicken Main Course",
+    "dish": "Chicken Tikka Masala",
+    "image": "/menu/chicken-tikka-masala.webp",
+    "isVeg": false,
+    "path": "public/menu/chicken-tikka-masala.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Chicken Main Course",
+    "dish": "Chicken Sukka",
+    "image": "/menu/chicken-sukka.webp",
+    "isVeg": false,
+    "path": "public/menu/chicken-sukka.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Chicken Main Course",
+    "dish": "Chicken Kadai",
+    "image": "/menu/chicken-kadai.webp",
+    "isVeg": false,
+    "path": "public/menu/chicken-kadai.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Mutton Main Course",
+    "dish": "Mutton Sukka",
+    "image": "/menu/mutton-sukka.webp",
+    "isVeg": false,
+    "path": "public/menu/mutton-sukka.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Mutton Main Course",
+    "dish": "Mutton Masala",
+    "image": "/menu/mutton-masala.webp",
+    "isVeg": false,
+    "path": "public/menu/mutton-masala.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Mutton Main Course",
+    "dish": "Mutton Kadai",
+    "image": "/menu/mutton-kadai.webp",
+    "isVeg": false,
+    "path": "public/menu/mutton-kadai.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Mutton Main Course",
+    "dish": "Mutton Handi",
+    "image": "/menu/mutton-handi.webp",
+    "isVeg": false,
+    "path": "public/menu/mutton-handi.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Mutton Main Course",
+    "dish": "Mutton Makhanwala",
+    "image": "/menu/mutton-makhanwala.webp",
+    "isVeg": false,
+    "path": "public/menu/mutton-makhanwala.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Veg Main Course",
+    "dish": "Veg Coastal Crown Spl",
+    "image": "/menu/veg-coastal-spl.webp",
+    "isVeg": true,
+    "path": "public/menu/veg-coastal-spl.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Veg Main Course",
+    "dish": "Paneer Butter Masala",
+    "image": "/menu/paneer-butter-masala.webp",
+    "isVeg": true,
+    "path": "public/menu/paneer-butter-masala.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Veg Main Course",
+    "dish": "Kaju Masala",
+    "image": "/menu/kaju-masala.webp",
+    "isVeg": true,
+    "path": "public/menu/kaju-masala.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Veg Main Course",
+    "dish": "Palak Paneer",
+    "image": "/menu/palak-paneer.webp",
+    "isVeg": true,
+    "path": "public/menu/palak-paneer.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Veg Main Course",
+    "dish": "Dal Tadka",
+    "image": "/menu/dal-tadka.webp",
+    "isVeg": true,
+    "path": "public/menu/dal-tadka.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Egg Main Course",
+    "dish": "Egg Maharaja",
+    "image": "/menu/egg-maharaja.webp",
+    "isVeg": false,
+    "path": "public/menu/egg-maharaja.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Egg Main Course",
+    "dish": "Egg Masala",
+    "image": "/menu/egg-masala.webp",
+    "isVeg": false,
+    "path": "public/menu/egg-masala.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Egg Main Course",
+    "dish": "Egg Kolhapuri",
+    "image": "/menu/egg-kolhapuri.webp",
+    "isVeg": false,
+    "path": "public/menu/egg-kolhapuri.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Egg Main Course",
+    "dish": "Egg Hyderabadi",
+    "image": "/menu/egg-hyderabadi.webp",
+    "isVeg": false,
+    "path": "public/menu/egg-hyderabadi.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Egg Main Course",
+    "dish": "Egg Makhanwala",
+    "image": "/menu/egg-makhani.webp",
+    "isVeg": false,
+    "path": "public/menu/egg-makhani.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Biryani Specials",
+    "dish": "Chicken Dum Biriyani",
+    "image": "/menu/chicken-dum-biryani.webp",
+    "isVeg": false,
+    "path": "public/menu/chicken-dum-biryani.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Biryani Specials",
+    "dish": "Chicken Biriyani (Mini)",
+    "image": "/menu/chicken-biryani-mini.webp",
+    "isVeg": false,
+    "path": "public/menu/chicken-biryani-mini.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Biryani Specials",
+    "dish": "Mutton Biriyani",
+    "image": "/menu/mutton-biryani.webp",
+    "isVeg": false,
+    "path": "public/menu/mutton-biryani.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Biryani Specials",
+    "dish": "Egg Biriyani",
+    "image": "/menu/egg-biryani.webp",
+    "isVeg": false,
+    "path": "public/menu/egg-biryani.webp"
+  },
+  {
+    "hotel": "Coastal Crown",
+    "category": "Biryani Specials",
+    "dish": "Veg Biriyani",
+    "image": "/menu/veg-biryani.webp",
+    "isVeg": true,
+    "path": "public/menu/veg-biryani.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Fish Main Course",
+    "dish": "Surumai Tawa Masala",
+    "image": "/menu/surmai-tawa-masala.webp",
+    "isVeg": false,
+    "path": "public/menu/surmai-tawa-masala.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Fish Main Course",
+    "dish": "Bangada Tawa Masala",
+    "image": "/menu/bangada-tawa-masala.webp",
+    "isVeg": false,
+    "path": "public/menu/bangada-tawa-masala.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Fish Main Course",
+    "dish": "Prawns Masala",
+    "image": "/menu/prawns-masala.webp",
+    "isVeg": false,
+    "path": "public/menu/prawns-masala.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Fish Main Course",
+    "dish": "Paplet Tawa Masala",
+    "image": "/menu/paplet-tawa-masala.webp",
+    "isVeg": false,
+    "path": "public/menu/paplet-tawa-masala.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Fish Main Course",
+    "dish": "Bangada Kari",
+    "image": "/menu/bangada-kari.webp",
+    "isVeg": false,
+    "path": "public/menu/bangada-kari.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Chicken Main Course",
+    "dish": "Malabar Special Chicken Masala",
+    "image": "/menu/malabar-chicken-masala.webp",
+    "isVeg": false,
+    "path": "public/menu/malabar-chicken-masala.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Chicken Main Course",
+    "dish": "Chicken Handi",
+    "image": "/menu/chicken-handi.webp",
+    "isVeg": false,
+    "path": "public/menu/chicken-handi.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Chicken Main Course",
+    "dish": "Chicken Tikka Masala",
+    "image": "/menu/chicken-tikka-masala.webp",
+    "isVeg": false,
+    "path": "public/menu/chicken-tikka-masala.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Chicken Main Course",
+    "dish": "Chicken Kadai",
+    "image": "/menu/chicken-kadai.webp",
+    "isVeg": false,
+    "path": "public/menu/chicken-kadai.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Chicken Main Course",
+    "dish": "Chicken Butter Masala",
+    "image": "/menu/chicken-butter-masala.webp",
+    "isVeg": false,
+    "path": "public/menu/chicken-butter-masala.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Mutton Main Course",
+    "dish": "Malabar Special Mutton Masala",
+    "image": "/menu/malabar-mutton-masala.webp",
+    "isVeg": false,
+    "path": "public/menu/malabar-mutton-masala.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Mutton Main Course",
+    "dish": "Mutton Handi",
+    "image": "/menu/mutton-handi.webp",
+    "isVeg": false,
+    "path": "public/menu/mutton-handi.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Mutton Main Course",
+    "dish": "Mutton Kadai",
+    "image": "/menu/mutton-kadai.webp",
+    "isVeg": false,
+    "path": "public/menu/mutton-kadai.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Mutton Main Course",
+    "dish": "Mutton Kolhapuri",
+    "image": "/menu/mutton-kolhapuri.webp",
+    "isVeg": false,
+    "path": "public/menu/mutton-kolhapuri.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Mutton Main Course",
+    "dish": "Mutton Sukka",
+    "image": "/menu/mutton-sukka.webp",
+    "isVeg": false,
+    "path": "public/menu/mutton-sukka.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Egg Main Course",
+    "dish": "Egg Butter Masala",
+    "image": "/menu/egg-butter-masala.webp",
+    "isVeg": false,
+    "path": "public/menu/egg-butter-masala.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Egg Main Course",
+    "dish": "Egg Kolhapuri",
+    "image": "/menu/egg-kolhapuri.webp",
+    "isVeg": false,
+    "path": "public/menu/egg-kolhapuri.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Egg Main Course",
+    "dish": "Egg Hydrabadi",
+    "image": "/menu/egg-hyderabadi.webp",
+    "isVeg": false,
+    "path": "public/menu/egg-hyderabadi.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Egg Main Course",
+    "dish": "Egg Special Masala",
+    "image": "/menu/egg-special-masala.webp",
+    "isVeg": false,
+    "path": "public/menu/egg-special-masala.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Egg Main Course",
+    "dish": "Egg Kurma",
+    "image": "/menu/egg-kurma.webp",
+    "isVeg": false,
+    "path": "public/menu/egg-kurma.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Veg & Paneer Main Course",
+    "dish": "Paneer Kadai",
+    "image": "/menu/paneer-kadai.webp",
+    "isVeg": true,
+    "path": "public/menu/paneer-kadai.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Veg & Paneer Main Course",
+    "dish": "Paneer Tikka Masala",
+    "image": "/menu/paneer-tikka-masala.webp",
+    "isVeg": true,
+    "path": "public/menu/paneer-tikka-masala.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Veg & Paneer Main Course",
+    "dish": "Paneer Butter Masala",
+    "image": "/menu/paneer-butter-masala.webp",
+    "isVeg": true,
+    "path": "public/menu/paneer-butter-masala.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Veg & Paneer Main Course",
+    "dish": "Veg Kadai",
+    "image": "/menu/veg-kadai.webp",
+    "isVeg": true,
+    "path": "public/menu/veg-kadai.webp"
+  },
+  {
+    "hotel": "Hotel Malabar",
+    "category": "Veg & Paneer Main Course",
+    "dish": "Dal Tadaka",
+    "image": "/menu/dal-tadka.webp",
+    "isVeg": true,
+    "path": "public/menu/dal-tadka.webp"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Paneer Handi",
+    "image": "/images/menu/veg-main-course/paneer-handi.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/paneer-handi.jpg",
+    "expected": "paneer cubes in thick red masala served in a clay handi pot"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Aloo Jeera",
+    "image": "/images/menu/veg-main-course/aloo-jeera.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/aloo-jeera.jpg",
+    "expected": "dry golden potato cubes tossed with cumin seeds and coriander"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Capsicum Masala",
+    "image": "/images/menu/veg-main-course/capsicum-masala.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/capsicum-masala.jpg",
+    "expected": "green bell pepper chunks in a thick onion tomato masala"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Gobi Masala",
+    "image": "/images/menu/veg-main-course/gobi-masala.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/gobi-masala.jpg",
+    "expected": "cauliflower florets in a thick red onion tomato gravy"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Veg Keema",
+    "image": "/images/menu/veg-main-course/veg-keema.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/veg-keema.jpg",
+    "expected": "finely minced mixed vegetables cooked dry like a keema, no meat"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Veg Makkanwala",
+    "image": "/images/menu/veg-main-course/veg-makkanwala.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/veg-makkanwala.jpg",
+    "expected": "mixed vegetables in a creamy orange butter tomato gravy"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Kaju Kolhapuri",
+    "image": "/images/menu/veg-main-course/kaju-kolhapuri.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/kaju-kolhapuri.jpg",
+    "expected": "whole cashew nuts in a fiery deep red Kolhapuri gravy"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Mix Veg",
+    "image": "/images/menu/veg-main-course/mix-veg.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/mix-veg.jpg",
+    "expected": "mixed vegetable curry with carrot, beans, peas and cauliflower"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Veg Kolhapuri",
+    "image": "/images/menu/veg-main-course/veg-kolhapuri.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/veg-kolhapuri.jpg",
+    "expected": "mixed vegetables in a spicy deep red Kolhapuri masala"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Mushroom Butter Masala",
+    "image": "/images/menu/veg-main-course/mushroom-butter-masala.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/mushroom-butter-masala.jpg",
+    "expected": "button mushrooms in a creamy orange butter tomato gravy"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Tomato Masala",
+    "image": "/images/menu/veg-main-course/tomato-masala.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/tomato-masala.jpg",
+    "expected": "tomato curry, thick bright red tomato gravy with coriander"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Mushroom Masala",
+    "image": "/images/menu/veg-main-course/mushroom-masala.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/mushroom-masala.jpg",
+    "expected": "sliced mushrooms in a thick brown onion tomato masala gravy"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Veg Kurma",
+    "image": "/images/menu/veg-main-course/veg-kurma.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/veg-kurma.jpg",
+    "expected": "mixed vegetables in a pale creamy coconut korma gravy"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Kaju Masala",
+    "image": "/images/menu/veg-main-course/kaju-masala.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/kaju-masala.jpg",
+    "expected": "whole cashew nuts in a rich onion tomato masala gravy"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Paneer Masala",
+    "image": "/images/menu/veg-main-course/paneer-masala.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/paneer-masala.jpg",
+    "expected": "paneer cubes in a classic brown onion tomato masala gravy"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Paneer Kadai",
+    "image": "/images/menu/veg-main-course/paneer-kadai.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/paneer-kadai.jpg",
+    "expected": "paneer with bell peppers in a semi dry kadai masala"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Paneer Burji",
+    "image": "/images/menu/veg-main-course/paneer-burji.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/paneer-burji.jpg",
+    "expected": "scrambled crumbled paneer bhurji with onion tomato and coriander"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Kaju Kurma",
+    "image": "/images/menu/veg-main-course/kaju-kurma.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/kaju-kurma.jpg",
+    "expected": "cashew nuts in a pale creamy mild korma gravy"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Paneer Tikka (Main Course)",
+    "image": "/images/menu/veg-main-course/paneer-tikka-main-course.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/paneer-tikka-main-course.jpg",
+    "expected": "charred paneer tikka cubes in a thick masala gravy"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Mushroom Tikka Masala",
+    "image": "/images/menu/veg-main-course/mushroom-tikka-masala.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/mushroom-tikka-masala.jpg",
+    "expected": "charred mushrooms in a creamy red tikka masala gravy"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Kaju Paneer Masala",
+    "image": "/images/menu/veg-main-course/kaju-paneer-masala.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/kaju-paneer-masala.jpg",
+    "expected": "cashew nuts and paneer cubes together in a rich creamy gravy"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Paneer Tawa",
+    "image": "/images/menu/veg-main-course/paneer-tawa.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/paneer-tawa.jpg",
+    "expected": "paneer cooked on a flat tawa griddle with onion and capsicum, semi dry"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Veg Kadai",
+    "image": "/images/menu/veg-main-course/veg-kadai.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/veg-kadai.jpg",
+    "expected": "mixed vegetables with capsicum in a kadai masala, no paneer"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Paneer Butter Masala",
+    "image": "/images/menu/veg-main-course/paneer-butter-masala.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/paneer-butter-masala.jpg",
+    "expected": "paneer cubes in silky bright orange butter gravy with cream swirl"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Main Course",
+    "dish": "Aloo Gobi Masala",
+    "image": "/images/menu/veg-main-course/aloo-gobi-masala.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-main-course/aloo-gobi-masala.jpg",
+    "expected": "potato and cauliflower cooked together dry with turmeric and coriander"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Starter",
+    "dish": "Aloo Pakoda",
+    "image": "/images/menu/veg-starter/aloo-pakoda.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-starter/aloo-pakoda.jpg",
+    "expected": "deep fried potato fritters in gram flour batter, golden and crisp"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Starter",
+    "dish": "Onion Pakoda",
+    "image": "/images/menu/veg-starter/onion-pakoda.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-starter/onion-pakoda.jpg",
+    "expected": "crisp golden onion fritters, shredded onion bhaji clusters"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Starter",
+    "dish": "Babycorn Manchurian",
+    "image": "/images/menu/veg-starter/babycorn-manchurian.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-starter/babycorn-manchurian.jpg",
+    "expected": "fried baby corn tossed in a dark glossy manchurian sauce with spring onion"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Starter",
+    "dish": "Mushroom Manchurian",
+    "image": "/images/menu/veg-starter/mushroom-manchurian.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-starter/mushroom-manchurian.jpg",
+    "expected": "fried mushrooms in a dark glossy Indo Chinese manchurian sauce"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Starter",
+    "dish": "Mirchi Bhaji",
+    "image": "/images/menu/veg-starter/mirchi-bhaji.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-starter/mirchi-bhaji.jpg",
+    "expected": "large green chillies dipped in gram flour batter and deep fried"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Starter",
+    "dish": "Roasted Papad",
+    "image": "/images/menu/veg-starter/roasted-papad.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-starter/roasted-papad.jpg",
+    "expected": "plain roasted papadum discs, dry and blistered, no toppings"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Starter",
+    "dish": "Fried Papad",
+    "image": "/images/menu/veg-starter/fried-papad.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-starter/fried-papad.jpg",
+    "expected": "deep fried puffed papadum, golden and bubbly, no toppings"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Starter",
+    "dish": "Gobi Manchurian",
+    "image": "/images/menu/veg-starter/gobi-manchurian.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-starter/gobi-manchurian.jpg",
+    "expected": "crispy fried cauliflower in a dark red glossy manchurian sauce"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Starter",
+    "dish": "Gobi Chilly",
+    "image": "/images/menu/veg-starter/gobi-chilly.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-starter/gobi-chilly.jpg",
+    "expected": "fried cauliflower tossed with onion, capsicum and green chilli, chilli style"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Starter",
+    "dish": "Paneer Crispy",
+    "image": "/images/menu/veg-starter/paneer-crispy.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-starter/paneer-crispy.jpg",
+    "expected": "crispy batter fried paneer strips, golden, dry starter"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Starter",
+    "dish": "Mushroom 65",
+    "image": "/images/menu/veg-starter/mushroom-65.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-starter/mushroom-65.jpg",
+    "expected": "deep fried mushrooms coated in bright red 65 masala with curry leaves"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Starter",
+    "dish": "Masala Papad",
+    "image": "/images/menu/veg-starter/masala-papad.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-starter/masala-papad.jpg",
+    "expected": "papadum topped with chopped onion, tomato, coriander and masala"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Starter",
+    "dish": "Mushroom Chilly",
+    "image": "/images/menu/veg-starter/mushroom-chilly.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-starter/mushroom-chilly.jpg",
+    "expected": "mushrooms tossed with onion and capsicum in a chilli sauce"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Starter",
+    "dish": "Paneer Chilly",
+    "image": "/images/menu/veg-starter/paneer-chilly.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-starter/paneer-chilly.jpg",
+    "expected": "paneer cubes tossed with capsicum and onion in a glossy chilli sauce"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Starter",
+    "dish": "Paneer 65",
+    "image": "/images/menu/veg-starter/paneer-65.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-starter/paneer-65.jpg",
+    "expected": "deep fried paneer cubes in bright red 65 masala with curry leaves"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Starter",
+    "dish": "Babycorn 65",
+    "image": "/images/menu/veg-starter/babycorn-65.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-starter/babycorn-65.jpg",
+    "expected": "fried baby corn coated in red 65 masala with curry leaves"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Starter",
+    "dish": "Babycorn Chilly",
+    "image": "/images/menu/veg-starter/babycorn-chilly.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-starter/babycorn-chilly.jpg",
+    "expected": "baby corn tossed with capsicum and onion in a chilli sauce"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Veg Starter",
+    "dish": "Finger Chips",
+    "image": "/images/menu/veg-starter/finger-chips.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/veg-starter/finger-chips.jpg",
+    "expected": "a portion of golden french fries, plain potato finger chips"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Rice Items",
+    "dish": "Tomato Rice",
+    "image": "/images/menu/rice/tomato-rice.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/rice/tomato-rice.jpg",
+    "expected": "reddish orange tomato rice with curry leaves, South Indian style"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Rice Items",
+    "dish": "Jeera Rice",
+    "image": "/images/menu/rice/jeera-rice.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/rice/jeera-rice.jpg",
+    "expected": "white basmati rice tempered with cumin seeds and coriander"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Rice Items",
+    "dish": "Ghee Rice",
+    "image": "/images/menu/rice/ghee-rice.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/rice/ghee-rice.jpg",
+    "expected": "pale yellow ghee rice with fried onion and whole spices"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Rice Items",
+    "dish": "Masala Rice",
+    "image": "/images/menu/rice/masala-rice.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/rice/masala-rice.jpg",
+    "expected": "spiced mixed masala rice with vegetables and coriander"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Rice Items",
+    "dish": "Curd Rice",
+    "image": "/images/menu/rice/curd-rice.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/rice/curd-rice.jpg",
+    "expected": "white curd rice with mustard tempering, curry leaves and pomegranate"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Rice Items",
+    "dish": "Paneer Pulao",
+    "image": "/images/menu/rice/paneer-pulao.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/rice/paneer-pulao.jpg",
+    "expected": "basmati rice pulao with visible paneer cubes"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Rice Items",
+    "dish": "Peas Pulao",
+    "image": "/images/menu/rice/peas-pulao.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/rice/peas-pulao.jpg",
+    "expected": "white rice pulao studded with green peas"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Rice Items",
+    "dish": "Peas Panner Pulav",
+    "image": "/images/menu/rice/peas-paneer-pulav.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/rice/peas-paneer-pulav.jpg",
+    "expected": "rice pulao with both green peas and paneer cubes"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Rice Items",
+    "dish": "Veg Biryani",
+    "image": "/images/menu/rice/veg-biryani.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/rice/veg-biryani.jpg",
+    "expected": "vegetarian biryani with carrot, beans, peas, no meat and no egg"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Rice Items",
+    "dish": "Mushroom Biryani",
+    "image": "/images/menu/rice/mushroom-biryani.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/rice/mushroom-biryani.jpg",
+    "expected": "biryani rice with visible mushroom pieces"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Rice Items",
+    "dish": "Lemon Rice",
+    "image": "/images/menu/rice/lemon-rice.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/rice/lemon-rice.jpg",
+    "expected": "bright yellow lemon rice with peanuts and curry leaves"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Rice Items",
+    "dish": "Veg Fried Rice",
+    "image": "/images/menu/rice/veg-fried-rice.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/rice/veg-fried-rice.jpg",
+    "expected": "Indo Chinese vegetable fried rice with diced carrot, beans, spring onion"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Rice Items",
+    "dish": "Paneer Fried Rice",
+    "image": "/images/menu/rice/paneer-fried-rice.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/rice/paneer-fried-rice.jpg",
+    "expected": "fried rice with paneer cubes and vegetables"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Rice Items",
+    "dish": "Mushroom Fried Rice",
+    "image": "/images/menu/rice/mushroom-fried-rice.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/rice/mushroom-fried-rice.jpg",
+    "expected": "fried rice with sliced mushrooms and spring onion"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Rice Items",
+    "dish": "Onion Chilli Fried Rice",
+    "image": "/images/menu/rice/onion-chilli-fried-rice.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/rice/onion-chilli-fried-rice.jpg",
+    "expected": "spicy fried rice with sliced onion and green chilli"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Rice Items",
+    "dish": "Daal Khichdi",
+    "image": "/images/menu/rice/daal-khichdi.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/rice/daal-khichdi.jpg",
+    "expected": "soft yellow rice and lentil khichdi with a ghee drizzle"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Dosa",
+    "dish": "Butter Masala Dosa",
+    "image": "/images/menu/dosa/butter-masala-dosa.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/dosa/butter-masala-dosa.jpg",
+    "expected": "golden crisp masala dosa glistening with butter, potato filling, chutney and sambar"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Dosa",
+    "dish": "Plain Dosa",
+    "image": "/images/menu/dosa/plain-dosa.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/dosa/plain-dosa.jpg",
+    "expected": "plain golden crisp dosa rolled, with chutney and sambar, no filling"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Dosa",
+    "dish": "Set Dosa",
+    "image": "/images/menu/dosa/set-dosa.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/dosa/set-dosa.jpg",
+    "expected": "a stack of small soft spongy set dosas with chutney"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Dosa",
+    "dish": "Butter Plain Dosa",
+    "image": "/images/menu/dosa/butter-plain-dosa.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/dosa/butter-plain-dosa.jpg",
+    "expected": "plain dosa brushed generously with butter, no filling"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Dosa",
+    "dish": "Paneer Dosa",
+    "image": "/images/menu/dosa/paneer-dosa.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/dosa/paneer-dosa.jpg",
+    "expected": "dosa filled with spiced paneer stuffing"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Dosa",
+    "dish": "Rava Dosa",
+    "image": "/images/menu/dosa/rava-dosa.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/dosa/rava-dosa.jpg",
+    "expected": "lacy crisp semolina rava dosa with a net like holey texture"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Dosa",
+    "dish": "Khali Dosa",
+    "image": "/images/menu/dosa/khali-dosa.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/dosa/khali-dosa.jpg",
+    "expected": "soft thick plain dosa without filling, served folded with chutney"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Dosa",
+    "dish": "Uttappa",
+    "image": "/images/menu/dosa/uttappa.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/dosa/uttappa.jpg",
+    "expected": "thick soft uttapam pancake topped with onion, tomato and coriander"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Dosa",
+    "dish": "Masala Dosa",
+    "image": "/images/menu/dosa/masala-dosa.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/dosa/masala-dosa.jpg",
+    "expected": "classic crisp masala dosa with yellow potato filling, sambar and chutney"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "South Indian Breakfast",
+    "dish": "Idli Vada (2+1)",
+    "image": "/images/menu/breakfast/idli-vada-2-1.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/breakfast/idli-vada-2-1.jpg",
+    "expected": "a plate with two white steamed idlis and one medu vada, sambar and chutney"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "South Indian Breakfast",
+    "dish": "Buns",
+    "image": "/images/menu/breakfast/buns.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/breakfast/buns.jpg",
+    "expected": "Mangalore banana buns, soft puffed deep fried sweet bread with chutney"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "South Indian Breakfast",
+    "dish": "Shira",
+    "image": "/images/menu/breakfast/shira.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/breakfast/shira.jpg",
+    "expected": "sweet semolina sheera kesari bath, golden orange, with nuts"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "South Indian Breakfast",
+    "dish": "Upma",
+    "image": "/images/menu/breakfast/upma.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/breakfast/upma.jpg",
+    "expected": "savoury semolina upma with curry leaves, mustard seeds and vegetables"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "South Indian Breakfast",
+    "dish": "Idli (2 pcs)",
+    "image": "/images/menu/breakfast/idli-2-pcs.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/breakfast/idli-2-pcs.jpg",
+    "expected": "two plain white steamed idlis with sambar and coconut chutney"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "South Indian Breakfast",
+    "dish": "Idli + Vada (1+1)",
+    "image": "/images/menu/breakfast/idli-vada-1-1.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/breakfast/idli-vada-1-1.jpg",
+    "expected": "one idli and one medu vada on a plate with chutney"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "South Indian Breakfast",
+    "dish": "Buns (1 pc)",
+    "image": "/images/menu/breakfast/buns-1-pc.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/breakfast/buns-1-pc.jpg",
+    "expected": "a single Mangalore banana bun, soft and puffed"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "South Indian Breakfast",
+    "dish": "Singal Puri",
+    "image": "/images/menu/breakfast/singal-puri.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/breakfast/singal-puri.jpg",
+    "expected": "puffed deep fried puri bread served with potato bhaji"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "South Indian Breakfast",
+    "dish": "Vada (2 pcs)",
+    "image": "/images/menu/breakfast/vada-2-pcs.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/breakfast/vada-2-pcs.jpg",
+    "expected": "two crisp golden medu vada doughnuts with sambar and chutney"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Tandoori",
+    "dish": "Roti",
+    "image": "/images/menu/tandoori/roti.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/tandoori/roti.jpg",
+    "expected": "plain tandoori roti flatbread, dry and lightly charred"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Tandoori",
+    "dish": "Naan",
+    "image": "/images/menu/tandoori/naan.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/tandoori/naan.jpg",
+    "expected": "plain naan bread, soft teardrop shape with char spots"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Tandoori",
+    "dish": "Butter Naan",
+    "image": "/images/menu/tandoori/butter-naan.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/tandoori/butter-naan.jpg",
+    "expected": "naan glistening with melted butter brushed on top"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Tandoori",
+    "dish": "Butter Garlic Naan",
+    "image": "/images/menu/tandoori/butter-garlic-naan.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/tandoori/butter-garlic-naan.jpg",
+    "expected": "naan topped with chopped garlic, coriander and butter"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Tandoori",
+    "dish": "Garlic Naan",
+    "image": "/images/menu/tandoori/garlic-naan.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/tandoori/garlic-naan.jpg",
+    "expected": "naan studded with minced garlic and coriander"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Tandoori",
+    "dish": "Aloo Parota",
+    "image": "/images/menu/tandoori/aloo-parota.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/tandoori/aloo-parota.jpg",
+    "expected": "stuffed potato aloo paratha, round, with butter and curd"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Tandoori",
+    "dish": "Butter Kulcha",
+    "image": "/images/menu/tandoori/butter-kulcha.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/tandoori/butter-kulcha.jpg",
+    "expected": "soft kulcha bread brushed with butter and coriander"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Tandoori",
+    "dish": "Butter Parota",
+    "image": "/images/menu/tandoori/butter-parota.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/tandoori/butter-parota.jpg",
+    "expected": "flaky layered parotta with butter, South Indian style"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Tandoori",
+    "dish": "Masala Roti",
+    "image": "/images/menu/tandoori/masala-roti.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/tandoori/masala-roti.jpg",
+    "expected": "spiced masala roti flatbread with herbs and spices on top"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Tandoori",
+    "dish": "Tandoori Parota",
+    "image": "/images/menu/tandoori/tandoori-parota.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/tandoori/tandoori-parota.jpg",
+    "expected": "layered tandoori paratha, charred from the clay oven"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Tandoori",
+    "dish": "Butter Roti",
+    "image": "/images/menu/tandoori/butter-roti.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/tandoori/butter-roti.jpg",
+    "expected": "tandoori roti brushed with butter"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Tandoori",
+    "dish": "Paneer Tikka (Tandoori Counter)",
+    "image": "/images/menu/tandoori/paneer-tikka-tandoori.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/tandoori/paneer-tikka-tandoori.jpg",
+    "expected": "skewered charred paneer tikka cubes with onion and capsicum, dry tandoori starter"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Daal",
+    "dish": "Daal Butter Fry",
+    "image": "/images/menu/daal/daal-butter-fry.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/daal/daal-butter-fry.jpg",
+    "expected": "yellow dal fry finished with a pat of butter melting on top"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Daal",
+    "dish": "Daal Kolhapuri",
+    "image": "/images/menu/daal/daal-kolhapuri.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/daal/daal-kolhapuri.jpg",
+    "expected": "spicy deep red Kolhapuri style lentil dal"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Daal",
+    "dish": "Daal Fry",
+    "image": "/images/menu/daal/daal-fry.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/daal/daal-fry.jpg",
+    "expected": "classic yellow dal fry with onion tomato and coriander"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Daal",
+    "dish": "Daal Tadka",
+    "image": "/images/menu/daal/daal-tadka.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/daal/daal-tadka.jpg",
+    "expected": "yellow dal with a ghee tempering of cumin, garlic and dried red chilli"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Daal",
+    "dish": "Daal Paneer",
+    "image": "/images/menu/daal/daal-paneer.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/daal/daal-paneer.jpg",
+    "expected": "yellow lentil dal with paneer cubes in it"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Soup",
+    "dish": "Tomato Soup",
+    "image": "/images/menu/soup/tomato-soup.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/soup/tomato-soup.jpg",
+    "expected": "creamy red tomato soup in a bowl with cream swirl and croutons"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Soup",
+    "dish": "Veg Manchow Soup",
+    "image": "/images/menu/soup/veg-manchow-soup.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/soup/veg-manchow-soup.jpg",
+    "expected": "dark brown Indo Chinese manchow soup topped with crispy fried noodles"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Thali",
+    "dish": "Rice South Thali",
+    "image": "/images/menu/thali/rice-south-thali.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/thali/rice-south-thali.jpg",
+    "expected": "South Indian rice thali on a steel plate with rice, sambar, rasam and vegetable sides"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Thali",
+    "dish": "North Thali",
+    "image": "/images/menu/thali/north-thali.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/thali/north-thali.jpg",
+    "expected": "North Indian thali with roti, dal, paneer curry, rice and salad in steel bowls"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Thali",
+    "dish": "South Thali",
+    "image": "/images/menu/thali/south-thali.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/thali/south-thali.jpg",
+    "expected": "South Indian vegetarian thali on a banana leaf or steel plate with many small sides"
+  },
+  {
+    "hotel": "Hotel Sankalpa",
+    "category": "Extra",
+    "dish": "Roti + Bhaji",
+    "image": "/images/menu/extra/roti-bhaji.jpg",
+    "isVeg": true,
+    "path": "public/images/menu/extra/roti-bhaji.jpg",
+    "expected": "roti flatbread served with a bowl of vegetable bhaji curry"
+  }
+]
