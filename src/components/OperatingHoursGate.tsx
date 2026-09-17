@@ -6,9 +6,22 @@ import { Clock, Moon, MessageCircle, Phone, ShieldCheck } from 'lucide-react';
 export default function OperatingHoursGate({ children }: { children: React.ReactNode }) {
   const location = useLocation();
 
-  // Time lock removed - store is always open
+  // Strict operating hours: 12:30 PM (750m) to 10:45 PM (1365m)
   const isTimeWithinOperatingHours = () => {
-    return true;
+    // Only bypass if navigating the admin portal
+    if (location.pathname.startsWith('/admin')) {
+      return true;
+    }
+
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    // 12:30 PM = 12 * 60 + 30 = 750
+    // 10:45 PM = 22 * 60 + 45 = 1365
+    const openMinutes = 12 * 60 + 30; // 750
+    const closeMinutes = 22 * 60 + 45; // 1365
+
+    return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
   };
 
   const getNextOpenTarget = (now: Date) => {
@@ -80,41 +93,74 @@ export default function OperatingHoursGate({ children }: { children: React.React
         {/* Closed Status Badge */}
         <div className="inline-flex items-center gap-2 bg-rose-50 border border-rose-200 text-[#e11d48] px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider mb-5 shadow-xs">
           <span className="w-2.5 h-2.5 rounded-full bg-[#e11d48] animate-ping" />
-          <span>Off For Today • Updating</span>
+          <span>Currently Closed</span>
         </div>
 
-        {/* Central Hotel / Update Icon */}
+        {/* Central Platter / Dish Icon */}
         <div className="relative mx-auto w-24 h-24 mb-5">
           <div className="absolute inset-0 bg-rose-400/20 rounded-full blur-xl animate-pulse" />
           <div className="relative w-24 h-24 rounded-full bg-gradient-to-tr from-[#ff4d6d] to-[#e11d48] text-white flex items-center justify-center shadow-xl shadow-rose-500/25 border-4 border-white">
-            <span className="text-4xl animate-bounce">🏨</span>
+            {isNight ? (
+              <Moon className="w-11 h-11 text-white animate-pulse" />
+            ) : (
+              <span className="text-4xl animate-bounce">🍲</span>
+            )}
           </div>
         </div>
 
         {/* Heading & Notice */}
         <div className="space-y-2 mb-6">
           <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
-            Off For Today
+            We'll Be Back Soon!
           </h1>
           <p className="text-xs sm:text-sm font-medium text-gray-600 max-w-xs mx-auto leading-relaxed">
-            Mom's Magic is closed today while we update our platform and add new partner hotels & restaurants.
+            Mom's Magic accepts food orders daily strictly from{' '}
+            <span className="font-bold text-[#e11d48]">12:30 PM</span> to{' '}
+            <span className="font-bold text-[#e11d48]">10:45 PM</span>.
           </p>
         </div>
 
-        {/* Live Update Status Card */}
-        <div className="mb-6 p-4 sm:p-5 bg-gradient-to-b from-rose-50/60 to-white rounded-2xl border border-rose-200/80 shadow-inner text-center">
-          <div className="flex items-center justify-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#e11d48] mb-2">
+        {/* LIVE COUNTDOWN TIMER CARD */}
+        <div className="mb-6 p-4 sm:p-5 bg-gradient-to-b from-rose-50/60 to-white rounded-2xl border border-rose-200/80 shadow-inner">
+          <div className="flex items-center justify-center gap-1.5 text-xs font-black uppercase tracking-widest text-[#e11d48] mb-3">
             <Clock className="w-3.5 h-3.5" />
-            <span>Adding New Hotels</span>
+            <span>Next Opening In</span>
           </div>
-          <p className="text-xs font-bold text-gray-800 mb-1">
-            Exciting New Menus Coming Soon!
-          </p>
-          <p className="text-[11px] text-gray-500 leading-relaxed mb-3">
-            We are working behind the scenes to partner with top hotels and bring delicious new varieties to you.
-          </p>
-          <div className="inline-flex items-center gap-1.5 bg-rose-100 text-[#e11d48] text-[11px] font-black px-3.5 py-1 rounded-full uppercase tracking-wider">
-            <span>Reopening Tomorrow</span>
+
+          <div className="flex items-center justify-center gap-2 sm:gap-3 font-mono">
+            {/* Hours */}
+            <div className="flex flex-col items-center bg-white border border-rose-200 rounded-2xl py-2.5 px-3 sm:px-4 min-w-[66px] shadow-xs">
+              <span className="text-2xl sm:text-3xl font-black text-[#e11d48]">{countdown.hours}</span>
+              <span className="text-[9px] font-extrabold uppercase tracking-wider text-rose-500 mt-0.5">Hours</span>
+            </div>
+            <span className="text-2xl font-black text-rose-300 -mt-3">:</span>
+            {/* Minutes */}
+            <div className="flex flex-col items-center bg-white border border-rose-200 rounded-2xl py-2.5 px-3 sm:px-4 min-w-[66px] shadow-xs">
+              <span className="text-2xl sm:text-3xl font-black text-[#e11d48]">{countdown.minutes}</span>
+              <span className="text-[9px] font-extrabold uppercase tracking-wider text-rose-500 mt-0.5">Mins</span>
+            </div>
+            <span className="text-2xl font-black text-rose-300 -mt-3">:</span>
+            {/* Seconds */}
+            <div className="flex flex-col items-center bg-white border border-rose-200 rounded-2xl py-2.5 px-3 sm:px-4 min-w-[66px] shadow-xs">
+              <span className="text-2xl sm:text-3xl font-black text-[#e11d48]">{countdown.seconds}</span>
+              <span className="text-[9px] font-extrabold uppercase tracking-wider text-rose-500 mt-0.5">Secs</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Operating Hours Summary */}
+        <div className="grid grid-cols-2 gap-3 mb-5">
+          <div className="bg-rose-50/60 border border-rose-100 rounded-2xl p-3 text-center">
+            <span className="text-[10px] font-black uppercase tracking-wider text-gray-500 block mb-0.5">Opens Daily</span>
+            <p className="text-base sm:text-lg font-black text-gray-900">
+              12:30 <span className="text-xs font-bold text-[#e11d48]">PM</span>
+            </p>
+          </div>
+          <div className="bg-rose-50/60 border border-rose-100 rounded-2xl p-3 text-center">
+            <span className="text-[10px] font-black uppercase tracking-wider text-gray-500 block mb-0.5">Closes Daily</span>
+            <p className="text-base sm:text-lg font-black text-gray-900">
+              10:45 <span className="text-xs font-bold text-[#e11d48]">PM</span>
+            </p>
           </div>
         </div>
 
