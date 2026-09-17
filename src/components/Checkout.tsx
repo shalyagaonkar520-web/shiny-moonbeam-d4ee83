@@ -14,7 +14,7 @@ import { useSEO } from '../utils/seo';
 import { useAuthStore } from '../store/authStore';
 import { db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
-import { getItemHotelTag, getItemHotel, getOrderHotelName, getOrderHotelId } from '../utils/orderHotels';
+import { getItemHotelTag, getItemHotel, getOrderHotelName, getOrderHotelId, groupItemsByHotel } from '../utils/orderHotels';
 import DishImage from './DishImage';
 
 const TELEGRAM_BOT_TOKEN = '8828362126:AAGbOzb8Q9Jhi29Bp6sQ_Q6hRo4Xj2SGfQg';
@@ -390,46 +390,87 @@ export default function Checkout() {
       const waUrl    = `https://wa.me/${waNumber}?text=${encodeURIComponent(waMsg)}`;
 
       try {
-        const order = {
-          id: orderId,
-          userId: user?.uid || null,
-          userName: formData.name.trim(),
-          userPhone: formData.phone.trim(),
-          orderType: isBulkOrder ? 'bulk' : 'regular',
-          hotelName: hotelName || null,
-          hotelId: orderHotelId,
-          // Stamp each line with the hotel it came from so order screens and the
-          // kitchen can tell a mixed-hotel order apart without re-deriving it.
-          items: activeItems.map((item: any) => {
-            const hotel = getItemHotel(item);
-            return {
-              ...item,
-              name: item.name || 'Unnamed item',
-              hotelId: hotel?.id ?? item.hotelId ?? null,
-              hotelName: hotel?.name ?? null,
-            };
-          }),
-          subtotal,
-          deliveryCharge,
-          packagingFee,
-          grandTotal,
-          payableAmount,
-          paymentMethod: payableAmount === 0 ? 'wallet' : paymentMethod,
-          paymentId: paymentId || null,
-          deliveryLocation,
-          status: 'pending',
-          needCutlery,
-          instructions: formData.additionalMessage.trim(),
-          createdAt: new Date().toISOString(),
-        };
+        // One order per kitchen. A cart that mixes hotels becomes several
+        // orders sharing an orderGroupId, so each kitchen is only ever sent
+        // the food it is actually cooking. Cart-wide amounts (delivery,
+        // discount, wallet) are carried by the first order alone, so the
+        // orders still sum to exactly what the customer paid.
+        const groups = groupItemsByHotel(activeItems);
+        const nowIso = new Date().toISOString();
+
+        const orders = groups.map((group, index) => {
+          const isPrimary = index === 0;
+          // Packaging is Hotel Mumtaz's own charge, so it rides with Mumtaz.
+          const groupPackagingFee =
+            group.hotelId === 'mumtaz' ? packagingFee : 0;
+          const groupDelivery = isPrimary ? deliveryCharge : 0;
+          const groupDiscount = isPrimary ? couponDiscount : 0;
+          const groupWallet = isPrimary ? walletDeduction : 0;
+
+          const groupGrandTotal = Math.max(
+            0,
+            group.subtotal + groupDelivery + groupPackagingFee - groupDiscount
+          );
+          const groupPayable = Math.max(0, groupGrandTotal - groupWallet);
+
+          return {
+            id: isPrimary ? orderId : `${orderId}-${group.hotelId}`,
+            orderGroupId: orderId,
+            userId: user?.uid || null,
+            userName: formData.name.trim(),
+            userPhone: formData.phone.trim(),
+            orderType: isBulkOrder ? 'bulk' : 'regular',
+
+            hotelId: group.hotelId,
+            hotelName: group.hotelName,
+            restaurantId: group.hotelId,
+
+            items: group.items.map((item: any) => {
+              const itemHotel = getItemHotel(item);
+              return {
+                ...item,
+                name: item.name || 'Unnamed item',
+                hotelId: itemHotel?.id ?? group.hotelId,
+                hotelName: itemHotel?.name ?? group.hotelName,
+              };
+            }),
+
+            subtotal: group.subtotal,
+            deliveryCharge: groupDelivery,
+            packagingFee: groupPackagingFee,
+            couponDiscount: groupDiscount,
+            walletAmountUsed: groupWallet,
+            grandTotal: groupGrandTotal,
+            totalAmount: groupPayable,
+            payableAmount: groupPayable,
+
+            paymentMethod: payableAmount === 0 ? 'wallet' : paymentMethod,
+            paymentId: paymentId || null,
+            paymentStatus: paymentId ? 'completed' : 'pending',
+
+            // Every order is born at JIS Kitchen: never dispatched, always NEW.
+            // The hotel cannot see it until an operator presses SEND.
+            orderStatus: 'NEW',
+            dispatchStatus: 'PENDING_DISPATCH',
+            sentAt: null,
+            sentBy: null,
+            // Legacy lowercase mirror, still read by the tracking screen.
+            status: 'pending',
+
+            deliveryLocation,
+            needCutlery,
+            instructions: formData.additionalMessage.trim(),
+            createdAt: nowIso,
+          };
+        });
 
         await Promise.race([
-          setDoc(doc(db, 'orders', orderId), order),
-          new Promise(resolve => setTimeout(resolve, 1500))
+          Promise.all(orders.map((o) => setDoc(doc(db, 'orders', o.id), o))),
+          new Promise(resolve => setTimeout(resolve, 2500))
         ]);
 
         const existing = JSON.parse(localStorage.getItem('moms_magic_orders') || '[]');
-        existing.unshift(order);
+        orders.forEach((o) => existing.unshift(o));
         localStorage.setItem('moms_magic_orders', JSON.stringify(existing));
       } catch (err) {
         console.error('Failed to store order:', err);

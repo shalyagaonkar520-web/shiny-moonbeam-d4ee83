@@ -75,3 +75,51 @@ export function getOrderHotelId(items: AnyItem[]): string | null {
   const hotels = getOrderHotels(items);
   return hotels.length > 0 ? hotels[0].id : null;
 }
+
+/**
+ * Mom's Magic's own kitchen, treated as a hotel so that every order names a
+ * real hotel record. JIS Kitchen dispatches these exactly like partner orders,
+ * which keeps one code path instead of a special case for "our own" food.
+ */
+export const OWN_KITCHEN = {
+  id: 'moms-magic',
+  name: "Mom's Magic Kitchen",
+} as const;
+
+export interface HotelOrderGroup {
+  hotelId: string;
+  hotelName: string;
+  items: any[];
+  /** Sum of this group's own line items, before any cart-wide fees. */
+  subtotal: number;
+}
+
+/**
+ * Splits a cart into one group per kitchen.
+ *
+ * A cart may legitimately mix hotels, and one order can only be dispatched to
+ * one kitchen -- so checkout writes a separate order per group rather than
+ * sending Mumtaz a ticket containing Sankalpa's food. Items with no partner
+ * hotel fall into Mom's Magic's own kitchen.
+ */
+export function groupItemsByHotel(items: AnyItem[]): HotelOrderGroup[] {
+  const groups = new Map<string, HotelOrderGroup>();
+
+  for (const item of items || []) {
+    if (!item) continue;
+    const hotel = getItemHotel(item);
+    const hotelId = hotel?.id ?? OWN_KITCHEN.id;
+    const hotelName = hotel?.name ?? OWN_KITCHEN.name;
+
+    if (!groups.has(hotelId)) {
+      groups.set(hotelId, { hotelId, hotelName, items: [], subtotal: 0 });
+    }
+    const group = groups.get(hotelId)!;
+    const anyItem = item as any;
+    const qty = Number(anyItem.finalQuantity ?? anyItem.quantity ?? 1);
+    group.items.push(item);
+    group.subtotal += Number(anyItem.price || 0) * qty;
+  }
+
+  return Array.from(groups.values());
+}
