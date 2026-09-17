@@ -7,6 +7,7 @@ import { Star, Plus, Zap, ArrowRight } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useMenuStore } from '../store/menuStore';
 import toast from 'react-hot-toast';
+import DishImage from './DishImage';
 
 function Milkshake3D() {
   const glassRef = useRef<THREE.Mesh>(null);
@@ -92,7 +93,7 @@ function Milkshake3D() {
 }
 
 function SceneBackground() {
-  const texture = useTexture('/mango_special.png');
+  const texture = useTexture('/mango_special.webp');
   return (
     <mesh position={[0, 0, -5]} scale={[15, 10, 1]}>
       <planeGeometry />
@@ -253,7 +254,7 @@ export default function SpecialThreeSection() {
                 onClick={() => handleAdd(shake)}
               >
                 <div className="w-16 h-16 rounded-2xl overflow-hidden border border-white/10 relative">
-                  <img src={shake.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="" />
+                  <DishImage src={shake.image} alt={shake.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
                   <div className="absolute inset-0 bg-brand/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="flex-1">

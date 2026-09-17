@@ -620,15 +620,6 @@
   {
     "hotel": "Hotel Sankalpa",
     "category": "Veg Main Course",
-    "dish": "Capsicum Masala",
-    "image": "/images/menu/veg-main-course/capsicum-masala.jpg",
-    "isVeg": true,
-    "path": "public/images/menu/veg-main-course/capsicum-masala.jpg",
-    "expected": "green bell pepper chunks in a thick onion tomato masala"
-  },
-  {
-    "hotel": "Hotel Sankalpa",
-    "category": "Veg Main Course",
     "dish": "Gobi Masala",
     "image": "/images/menu/veg-main-course/gobi-masala.jpg",
     "isVeg": true,
@@ -710,15 +701,6 @@
   {
     "hotel": "Hotel Sankalpa",
     "category": "Veg Main Course",
-    "dish": "Veg Kurma",
-    "image": "/images/menu/veg-main-course/veg-kurma.jpg",
-    "isVeg": true,
-    "path": "public/images/menu/veg-main-course/veg-kurma.jpg",
-    "expected": "mixed vegetables in a pale creamy coconut korma gravy"
-  },
-  {
-    "hotel": "Hotel Sankalpa",
-    "category": "Veg Main Course",
     "dish": "Kaju Masala",
     "image": "/images/menu/veg-main-course/kaju-masala.jpg",
     "isVeg": true,
@@ -742,15 +724,6 @@
     "isVeg": true,
     "path": "public/images/menu/veg-main-course/paneer-kadai.jpg",
     "expected": "paneer with bell peppers in a semi dry kadai masala"
-  },
-  {
-    "hotel": "Hotel Sankalpa",
-    "category": "Veg Main Course",
-    "dish": "Paneer Burji",
-    "image": "/images/menu/veg-main-course/paneer-burji.jpg",
-    "isVeg": true,
-    "path": "public/images/menu/veg-main-course/paneer-burji.jpg",
-    "expected": "scrambled crumbled paneer bhurji with onion tomato and coriander"
   },
   {
     "hotel": "Hotel Sankalpa",
@@ -845,15 +818,6 @@
   {
     "hotel": "Hotel Sankalpa",
     "category": "Veg Starter",
-    "dish": "Babycorn Manchurian",
-    "image": "/images/menu/veg-starter/babycorn-manchurian.jpg",
-    "isVeg": true,
-    "path": "public/images/menu/veg-starter/babycorn-manchurian.jpg",
-    "expected": "fried baby corn tossed in a dark glossy manchurian sauce with spring onion"
-  },
-  {
-    "hotel": "Hotel Sankalpa",
-    "category": "Veg Starter",
     "dish": "Mushroom Manchurian",
     "image": "/images/menu/veg-starter/mushroom-manchurian.jpg",
     "isVeg": true,
@@ -908,38 +872,11 @@
   {
     "hotel": "Hotel Sankalpa",
     "category": "Veg Starter",
-    "dish": "Paneer Crispy",
-    "image": "/images/menu/veg-starter/paneer-crispy.jpg",
-    "isVeg": true,
-    "path": "public/images/menu/veg-starter/paneer-crispy.jpg",
-    "expected": "crispy batter fried paneer strips, golden, dry starter"
-  },
-  {
-    "hotel": "Hotel Sankalpa",
-    "category": "Veg Starter",
-    "dish": "Mushroom 65",
-    "image": "/images/menu/veg-starter/mushroom-65.jpg",
-    "isVeg": true,
-    "path": "public/images/menu/veg-starter/mushroom-65.jpg",
-    "expected": "deep fried mushrooms coated in bright red 65 masala with curry leaves"
-  },
-  {
-    "hotel": "Hotel Sankalpa",
-    "category": "Veg Starter",
     "dish": "Masala Papad",
     "image": "/images/menu/veg-starter/masala-papad.jpg",
     "isVeg": true,
     "path": "public/images/menu/veg-starter/masala-papad.jpg",
     "expected": "papadum topped with chopped onion, tomato, coriander and masala"
-  },
-  {
-    "hotel": "Hotel Sankalpa",
-    "category": "Veg Starter",
-    "dish": "Mushroom Chilly",
-    "image": "/images/menu/veg-starter/mushroom-chilly.jpg",
-    "isVeg": true,
-    "path": "public/images/menu/veg-starter/mushroom-chilly.jpg",
-    "expected": "mushrooms tossed with onion and capsicum in a chilli sauce"
   },
   {
     "hotel": "Hotel Sankalpa",
@@ -958,24 +895,6 @@
     "isVeg": true,
     "path": "public/images/menu/veg-starter/paneer-65.jpg",
     "expected": "deep fried paneer cubes in bright red 65 masala with curry leaves"
-  },
-  {
-    "hotel": "Hotel Sankalpa",
-    "category": "Veg Starter",
-    "dish": "Babycorn 65",
-    "image": "/images/menu/veg-starter/babycorn-65.jpg",
-    "isVeg": true,
-    "path": "public/images/menu/veg-starter/babycorn-65.jpg",
-    "expected": "fried baby corn coated in red 65 masala with curry leaves"
-  },
-  {
-    "hotel": "Hotel Sankalpa",
-    "category": "Veg Starter",
-    "dish": "Babycorn Chilly",
-    "image": "/images/menu/veg-starter/babycorn-chilly.jpg",
-    "isVeg": true,
-    "path": "public/images/menu/veg-starter/babycorn-chilly.jpg",
-    "expected": "baby corn tossed with capsicum and onion in a chilli sauce"
   },
   {
     "hotel": "Hotel Sankalpa",
@@ -1106,15 +1025,6 @@
   {
     "hotel": "Hotel Sankalpa",
     "category": "Rice Items",
-    "dish": "Mushroom Fried Rice",
-    "image": "/images/menu/rice/mushroom-fried-rice.jpg",
-    "isVeg": true,
-    "path": "public/images/menu/rice/mushroom-fried-rice.jpg",
-    "expected": "fried rice with sliced mushrooms and spring onion"
-  },
-  {
-    "hotel": "Hotel Sankalpa",
-    "category": "Rice Items",
     "dish": "Onion Chilli Fried Rice",
     "image": "/images/menu/rice/onion-chilli-fried-rice.jpg",
     "isVeg": true,
@@ -1165,15 +1075,6 @@
     "isVeg": true,
     "path": "public/images/menu/dosa/butter-plain-dosa.jpg",
     "expected": "plain dosa brushed generously with butter, no filling"
-  },
-  {
-    "hotel": "Hotel Sankalpa",
-    "category": "Dosa",
-    "dish": "Paneer Dosa",
-    "image": "/images/menu/dosa/paneer-dosa.jpg",
-    "isVeg": true,
-    "path": "public/images/menu/dosa/paneer-dosa.jpg",
-    "expected": "dosa filled with spiced paneer stuffing"
   },
   {
     "hotel": "Hotel Sankalpa",
@@ -1232,15 +1133,6 @@
   {
     "hotel": "Hotel Sankalpa",
     "category": "South Indian Breakfast",
-    "dish": "Shira",
-    "image": "/images/menu/breakfast/shira.jpg",
-    "isVeg": true,
-    "path": "public/images/menu/breakfast/shira.jpg",
-    "expected": "sweet semolina sheera kesari bath, golden orange, with nuts"
-  },
-  {
-    "hotel": "Hotel Sankalpa",
-    "category": "South Indian Breakfast",
     "dish": "Upma",
     "image": "/images/menu/breakfast/upma.jpg",
     "isVeg": true,
@@ -1264,15 +1156,6 @@
     "isVeg": true,
     "path": "public/images/menu/breakfast/idli-vada-1-1.jpg",
     "expected": "one idli and one medu vada on a plate with chutney"
-  },
-  {
-    "hotel": "Hotel Sankalpa",
-    "category": "South Indian Breakfast",
-    "dish": "Buns (1 pc)",
-    "image": "/images/menu/breakfast/buns-1-pc.jpg",
-    "isVeg": true,
-    "path": "public/images/menu/breakfast/buns-1-pc.jpg",
-    "expected": "a single Mangalore banana bun, soft and puffed"
   },
   {
     "hotel": "Hotel Sankalpa",
@@ -1475,28 +1358,10 @@
   {
     "hotel": "Hotel Sankalpa",
     "category": "Thali",
-    "dish": "North Thali",
-    "image": "/images/menu/thali/north-thali.jpg",
-    "isVeg": true,
-    "path": "public/images/menu/thali/north-thali.jpg",
-    "expected": "North Indian thali with roti, dal, paneer curry, rice and salad in steel bowls"
-  },
-  {
-    "hotel": "Hotel Sankalpa",
-    "category": "Thali",
     "dish": "South Thali",
     "image": "/images/menu/thali/south-thali.jpg",
     "isVeg": true,
     "path": "public/images/menu/thali/south-thali.jpg",
     "expected": "South Indian vegetarian thali on a banana leaf or steel plate with many small sides"
-  },
-  {
-    "hotel": "Hotel Sankalpa",
-    "category": "Extra",
-    "dish": "Roti + Bhaji",
-    "image": "/images/menu/extra/roti-bhaji.jpg",
-    "isVeg": true,
-    "path": "public/images/menu/extra/roti-bhaji.jpg",
-    "expected": "roti flatbread served with a bowl of vegetable bhaji curry"
   }
 ]

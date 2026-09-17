@@ -15,11 +15,17 @@ import { useAuthStore } from '../store/authStore';
 import { db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { getItemHotelTag, getItemHotel, getOrderHotelName, getOrderHotelId } from '../utils/orderHotels';
+import DishImage from './DishImage';
 
 const TELEGRAM_BOT_TOKEN = '8828362126:AAGbOzb8Q9Jhi29Bp6sQ_Q6hRo4Xj2SGfQg';
 const TELEGRAM_CHAT_ID   = '-1003803637741';
 const WHATSAPP_BULK_NUMBER = '917483187572';
 const WHATSAPP_FOOD_NUMBER = '919606001790';
+
+// Marker for a deliberate blank line in an order message. Conditional lines collapse
+// to '' and get filtered out; without this sentinel the filter also ate every blank
+// line and the message arrived as one unreadable block of text.
+const GAP = '__GAP__';
 
 const escHtml = (s: string) =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -151,6 +157,10 @@ export default function Checkout() {
   }
 
   const payableAmount = Math.max(0, grandTotal - walletDeduction);
+
+  // Hotel shown in the on-screen order summary. Derived from the items so it stays
+  // in step with the WhatsApp and Telegram messages and the saved order.
+  const summaryHotelName = getOrderHotelName(activeItems);
 
   const handleApplyCoupon = () => {
     const inputUpper = couponInput.trim().toUpperCase();
@@ -285,16 +295,16 @@ export default function Checkout() {
           : hotelName 
           ? `🏨 *NEW ORDER - ${hotelName.toUpperCase()}!* 🏨` 
           : `📦 *NEW ORDER - MOM'S MAGIC!* 📦`,
-        ``,
+        GAP,
         hotelName ? `🏨 *Hotel:* ${hotelName}` : '',
         `👤 *Name:* ${formData.name.trim()}`,
         `📞 *Phone:* ${formData.phone.trim()}`,
         `📍 *City:* ${selectedCity?.name || 'Yellapur'}`,
         `🏠 *Address:* ${deliveryLocation.address}`,
         `📏 *Distance:* ${distanceKm} km`,
-        ``,
+        GAP,
         orderDetails,
-        ``,
+        GAP,
         `💰 *Cart Total:* ₹${subtotal.toFixed(2)}`,
         packagingFee > 0 ? `📦 *Packaging Fee (Hotel Mumtaz):* ₹${packagingFee.toFixed(2)}` : '',
         `🚚 *Delivery Fee:* ${isFreeDelivery ? `FREE (${freeDeliveryReason})` : `₹${deliveryCharge.toFixed(2)}`}`,
@@ -304,15 +314,15 @@ export default function Checkout() {
         paymentId ? `✅ *PAYMENT:* Paid Online (${paymentId})` : `💵 *PAYMENT:* Cash on Delivery (COD)`,
         needCutlery ? `🍴 *Cutlery:* Requested` : `🌱 *Cutlery:* Not needed`,
         formData.additionalMessage.trim() ? `📝 *Cooking / Delivery Note:* ${formData.additionalMessage.trim()}` : '',
-        ``,
+        GAP,
         `🗺️ *View Map:* ${mapsViewLink}`,
         `🚗 *Navigate:* ${mapsNavLink}`,
-        ``,
+        GAP,
         `━━━━━━━━━━━━━━━━`,
         hotelName ? `🏨 *${hotelName} Order via Mom's Magic*` : `🍽️ *Mom's Magic - All Orders*`,
         `👉 https://momsmagic.shop`,
         `━━━━━━━━━━━━━━━━`,
-      ].filter((l) => l !== '').join('\n');
+      ].filter((l) => l !== '').map((l) => (l === GAP ? '' : l)).join('\n');
     };
 
     const buildTgMessage = (paymentId?: string) => {
@@ -340,15 +350,15 @@ export default function Checkout() {
           : hotelName 
           ? `🏨 <b>NEW ORDER - ${hotelName.toUpperCase()}!</b> 🏨` 
           : `📦 <b>NEW FOOD ORDER!</b>`,
-        ``,
+        GAP,
         hotelName ? `🏨 <b>Hotel:</b> ${hotelName}` : '',
         `👤 <b>Name:</b> ${escHtml(formData.name.trim())}`,
         `📞 <b>Phone:</b> ${escHtml(formData.phone.trim())}`,
         `🏠 <b>Address:</b> ${escHtml(deliveryLocation.address)}`,
         `📏 <b>Distance:</b> ${distanceKm} km`,
-        ``,
+        GAP,
         `🛒 <b>Items:</b>\n${tgDetails}`,
-        ``,
+        GAP,
         `💰 <b>Subtotal:</b> ₹${subtotal.toFixed(2)}`,
         packagingFee > 0 ? `📦 <b>Packaging Fee (Hotel Mumtaz):</b> ₹${packagingFee.toFixed(2)}` : '',
         `🚚 <b>Delivery Fee:</b> ${isFreeDelivery ? `₹0 (${freeDeliveryReason})` : `₹${deliveryCharge.toFixed(2)}`}`,
@@ -357,10 +367,10 @@ export default function Checkout() {
         `💵 <b>TOTAL PAYABLE:</b> ₹${payableAmount.toFixed(2)}`,
         paymentId ? `✅ <b>Payment:</b> Online (${escHtml(paymentId)})` : `💵 <b>Payment:</b> Cash on Delivery (COD)`,
         formData.additionalMessage.trim() ? `📝 <b>Note:</b> ${escHtml(formData.additionalMessage.trim())}` : '',
-        ``,
+        GAP,
         `🗺️ <a href="${mapsViewLink}">View Customer Location on Map</a>`,
         `🚗 <a href="${mapsNavLink}">Start Navigation</a>`,
-      ].filter((l) => l !== '').join('\n');
+      ].filter((l) => l !== '').map((l) => (l === GAP ? '' : l)).join('\n');
     };
 
     const completeOrder = async (paymentId?: string) => {
@@ -580,7 +590,12 @@ export default function Checkout() {
             </div>
             <div>
               <h2 className="text-sm sm:text-base font-black text-gray-900 leading-snug">
-                Mom's Magic - All Orders
+                {/* Name the hotel the food is actually from. This used to be hardcoded to
+                    "Mom's Magic - All Orders", so a Hotel Sankalpa order showed the wrong
+                    kitchen on screen even though the WhatsApp message named it correctly. */}
+                {summaryHotelName
+                  ? `${summaryHotelName} via Mom's Magic`
+                  : "Mom's Magic - All Orders"}
               </h2>
               <p className="text-[11px] text-gray-500 font-medium">
                 {deliveryLocation ? deliveryLocation.address.split(',')[0] : 'Yellapur'} • {activeItems.length} items
@@ -596,8 +611,11 @@ export default function Checkout() {
 
               return (
                 <div key={item.id} className="pt-3 first:pt-0 flex items-start justify-between gap-2.5">
-                  {/* Left: Veg/Non-Veg icon + Item Details */}
+                  {/* Left: dish photo + Veg/Non-Veg icon + Item Details */}
                   <div className="flex items-start gap-2 flex-1 min-w-0">
+                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 border border-gray-100 shrink-0">
+                      <DishImage src={(item as any).image} alt={item.name} />
+                    </div>
                     <span
                       className={`w-3.5 h-3.5 rounded-[4px] border flex items-center justify-center shrink-0 mt-0.5 ${
                         item.isVeg ? 'border-emerald-600' : 'border-rose-600'

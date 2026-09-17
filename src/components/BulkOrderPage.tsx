@@ -9,6 +9,7 @@ import { Product } from '../types';
 import { useSEO } from '../utils/seo';
 
 import { useInstallModalStore } from '../store/installModalStore';
+import DishImage from './DishImage';
 
 // Category tabs for Party Specials
 type Category = 'Normal' | 'Ice Cake' | 'Party Items' | 'Snacks';
@@ -192,11 +193,10 @@ export default function BulkOrderPage() {
                   >
                     {/* Image Box */}
                     <div className="aspect-square rounded-2xl overflow-hidden mb-3 relative bg-rose-50/60">
-                      <img 
-                        src={item.image} 
-                        alt={item.name} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                        loading="lazy" 
+                      <DishImage
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute top-2 left-2">
                         <span className="bg-white/95 backdrop-blur-md text-[#e11d48] border border-rose-200/80 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-2xs">
@@ -322,7 +322,7 @@ export default function BulkOrderPage() {
                   <div className="grid grid-cols-2 gap-3">
                     {PARTY_ITEMS.slice(0, 4).map(item => (
                       <div key={item.id} className="bg-rose-50/50 rounded-2xl p-3 border border-rose-100 flex flex-col justify-between">
-                        <img src={item.image} className="w-full h-24 object-cover rounded-xl mb-2.5" alt={item.name} />
+                        <DishImage src={item.image} alt={item.name} className="w-full h-24 object-cover rounded-xl mb-2.5" />
                         <div className="mb-2">
                           <p className="font-black text-xs text-gray-900 truncate">{item.name}</p>
                           <p className="text-[#e11d48] font-black text-xs">₹{item.price}</p>
@@ -346,7 +346,7 @@ export default function BulkOrderPage() {
                     {SNACKS.map(snack => (
                       <div key={snack.id} className="flex items-center justify-between p-3 bg-rose-50/50 rounded-2xl border border-rose-100">
                         <div className="flex items-center gap-3">
-                          <img src={snack.image} className="w-14 h-14 object-cover rounded-xl" alt="" />
+                          <DishImage src={snack.image} alt={snack.name} className="w-14 h-14 object-cover rounded-xl" />
                           <div>
                             <p className="font-black text-xs text-gray-900">{snack.name}</p>
                             <p className="text-[#e11d48] font-black text-xs">₹{snack.price}</p>

@@ -233,11 +233,11 @@ export default function HotelMumtazMenuPage() {
       <section className="relative w-full overflow-hidden bg-gray-900 border-b border-gray-200">
         <div className="relative h-56 sm:h-72 w-full">
           <img
-            src="/hotel_mumtaz.jpg"
+            src="/hotel_mumtaz.webp"
             alt="Hotel Mumtaz Restaurant"
             className="w-full h-full object-cover opacity-85 scale-105"
             onError={(e) => {
-              e.currentTarget.src = '/chicken_biryani_new.png';
+              e.currentTarget.src = '/chicken_biryani_new.webp';
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/60 to-black/30" />

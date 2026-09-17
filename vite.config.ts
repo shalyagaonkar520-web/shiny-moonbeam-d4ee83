@@ -45,7 +45,39 @@ export default defineConfig(({mode}) => {
           ]
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,png,jpg,jpeg,svg,ico,json}'],
+          // Precache the app shell ONLY. Previously this globbed every png/jpg in the
+          // build, so a first visit downloaded ~52 MB of food photos before the app was
+          // usable. Photos are now fetched on demand and cached as they are seen.
+          globPatterns: ['**/*.{js,css,html,svg,ico,webmanifest}'],
+          navigateFallbackDenylist: [/^\/api/],
+          runtimeCaching: [
+            {
+              // Dish photos and other local images.
+              // StaleWhileRevalidate, NOT CacheFirst: a dish photo keeps the same filename
+              // when it is replaced, so CacheFirst pinned the old picture for 30 days and
+              // menu updates never reached anyone who had already opened the page. This
+              // still paints instantly from cache, then refreshes the file in the
+              // background so the next view shows the new photo.
+              urlPattern: ({ request, url }) =>
+                request.destination === 'image' && url.origin === self.location.origin,
+              handler: 'StaleWhileRevalidate',
+              options: {
+                // Bumped name so existing visitors drop the stale cache from the
+                // CacheFirst era and pick the current photos up straight away.
+                cacheName: 'food-images-v2',
+                expiration: { maxEntries: 300, maxAgeSeconds: 60 * 60 * 24 * 30 },
+                cacheableResponse: { statuses: [0, 200] }
+              }
+            },
+            {
+              // Google Fonts stylesheets and font files.
+              urlPattern: ({ url }) =>
+                url.origin === 'https://fonts.googleapis.com' ||
+                url.origin === 'https://fonts.gstatic.com',
+              handler: 'StaleWhileRevalidate',
+              options: { cacheName: 'google-fonts' }
+            }
+          ],
           // Import the Firebase Cloud Messaging service worker script
           // to combine FCM background push alerts with PWA offline caching!
           importScripts: ['/firebase-messaging-sw.js']

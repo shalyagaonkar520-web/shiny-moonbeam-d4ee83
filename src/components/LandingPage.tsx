@@ -16,6 +16,7 @@ import AuthModal from './AuthModal';
 import toast from 'react-hot-toast';
 import { playSound, SOUNDS } from '../utils/audio';
 import { useSEO } from '../utils/seo';
+import DishImage from './DishImage';
 
 const getStableRating = (id: string | number) => {
   const str = String(id);
@@ -56,7 +57,7 @@ const PARTNER_HOTELS = [
     isOpen: false,
     badge: "View Menu",
     deliveryTime: "Ordering Coming Soon",
-    image: "/hotel_mumtaz.jpg",
+    image: "/hotel_mumtaz.webp",
     hasCustomPhoto: true
   },
   {
@@ -66,7 +67,7 @@ const PARTNER_HOTELS = [
     isOpen: true,
     badge: "View Menu",
     deliveryTime: "20-25 mins",
-    image: "/hotel_malabar.jpg",
+    image: "/hotel_malabar.webp",
     hasCustomPhoto: true
   },
   {
@@ -76,7 +77,7 @@ const PARTNER_HOTELS = [
     isOpen: false,
     badge: "View Menu",
     deliveryTime: "Ordering Coming Soon",
-    image: "/hotel_sankalpa.jpg",
+    image: "/hotel_sankalpa.webp",
     hasCustomPhoto: true
   },
   {
@@ -86,7 +87,7 @@ const PARTNER_HOTELS = [
     isOpen: true,
     badge: "View Menu",
     deliveryTime: "20-25 mins",
-    image: "/hotel_coastal_crown_dining.jpg",
+    image: "/hotel_coastal_crown_dining.webp",
     hasCustomPhoto: true
   },
   {
@@ -96,7 +97,7 @@ const PARTNER_HOTELS = [
     isOpen: true,
     badge: "View Menu",
     deliveryTime: "15-20 mins",
-    image: "/hotel_al_amin.jpg",
+    image: "/hotel_al_amin.webp",
     hasCustomPhoto: true
   }
 ];
@@ -106,37 +107,37 @@ const WHATS_ON_YOUR_MIND = [
   {
     id: 'biryani',
     name: 'Biryani',
-    image: '/chicken_biryani_new.png'
+    image: '/chicken_biryani_new.webp'
   },
   {
     id: 'north_indian',
     name: 'North Indian',
-    image: '/dal_tadka.png'
+    image: '/dal_tadka.webp'
   },
   {
     id: 'south_indian',
     name: 'South Indian',
-    image: '/parota.jpg'
+    image: '/parota.webp'
   },
   {
     id: 'chinese',
     name: 'Chinese',
-    image: '/chicken_65_chinese.png'
+    image: '/chicken_65_chinese.webp'
   },
   {
     id: 'rolls',
     name: 'Rolls & Fast Food',
-    image: '/roll_combo.jpg'
+    image: '/roll_combo.webp'
   },
   {
     id: 'cakes',
     name: 'Cakes & Sweets',
-    image: '/black_forest_cake.png'
+    image: '/black_forest_cake.webp'
   },
   {
     id: 'drinks',
     name: 'Drinks & Shakes',
-    image: '/classic_mojito.png'
+    image: '/classic_mojito.webp'
   }
 ];
 
@@ -480,7 +481,7 @@ export default function LandingPage() {
                     className="absolute inset-0"
                   >
                     <img
-                      src="/banner_food_feast.jpg"
+                      src="/banner_food_feast.webp"
                       alt="Food Feast"
                       className="w-full h-full object-cover"
                     />
@@ -584,11 +585,10 @@ export default function LandingPage() {
                     >
                       {/* Food Image with Floating Plus Button */}
                       <div className="relative aspect-square rounded-xl overflow-hidden bg-gray-50 mb-2">
-                        <img
+                        <DishImage
                           src={product.image}
                           alt={product.name}
                           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                          loading="lazy"
                         />
 
                         {product.fires && product.fires >= 2 && (
@@ -715,10 +715,12 @@ export default function LandingPage() {
                 {/* Hotel Photo Container (Empty Placeholder for Coming Soon hotels as requested) */}
                 <div className="relative aspect-square rounded-xl overflow-hidden mb-2 bg-gray-50 flex items-center justify-center border border-gray-100">
                   {hotel.hasCustomPhoto && hotel.image ? (
-                    <img 
-                      src={hotel.image} 
+                    <img
+                      src={hotel.image}
                       alt={hotel.name}
-                      className={`w-full h-full ${hotel.id === 'moms_magic' ? 'object-contain p-1.5' : 'object-cover'}`} 
+                      loading="lazy"
+                      decoding="async"
+                      className={`w-full h-full ${hotel.id === 'moms_magic' ? 'object-contain p-1.5' : 'object-cover'}`}
                     />
                   ) : (
                     /* Clean Empty Photo Box Placeholder */
@@ -804,9 +806,11 @@ export default function LandingPage() {
                         : 'border-gray-200 group-hover:border-blue-300 group-hover:scale-105'
                     }`}
                   >
-                    <img 
-                      src={cat.image} 
+                    <img
+                      src={cat.image}
                       alt={cat.name}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover rounded-full transition-transform group-hover:scale-110"
                     />
                   </div>
@@ -848,11 +852,10 @@ export default function LandingPage() {
                   >
                     {/* Food Image Container with Floating Pink "+" */}
                     <div className="relative aspect-square rounded-xl overflow-hidden bg-gray-50">
-                      <img
+                      <DishImage
                         src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover"
-                        loading="lazy"
                       />
 
                       {/* Floating Pink Add Button or Stepper */}
@@ -1050,11 +1053,10 @@ export default function LandingPage() {
                   >
                     {/* Food Image with Floating Plus Button */}
                     <div className="relative aspect-square rounded-xl overflow-hidden bg-gray-50 mb-2">
-                      <img
+                      <DishImage
                         src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                        loading="lazy"
                       />
 
                       {product.fires && product.fires >= 2 && (

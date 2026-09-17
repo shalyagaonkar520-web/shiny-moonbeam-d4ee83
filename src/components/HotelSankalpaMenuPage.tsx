@@ -158,7 +158,7 @@ export default function HotelSankalpaMenuPage() {
         <div className="relative rounded-3xl overflow-hidden shadow-lg border border-emerald-100 bg-white">
           <div className="relative h-44 sm:h-56 w-full overflow-hidden">
             <img
-              src="/hotel_sankalpa.jpg"
+              src="/hotel_sankalpa.webp"
               alt="Hotel Sankalpa Restaurant"
               className="w-full h-full object-cover"
             />

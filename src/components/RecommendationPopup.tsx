@@ -5,6 +5,7 @@ import { Product } from '../types';
 import { RecommendationResult, recordComboClick } from '../utils/recommendationEngine';
 import { useCartStore } from '../store/cartStore';
 import toast from 'react-hot-toast';
+import DishImage from './DishImage';
 
 interface Props {
   result: RecommendationResult | null;
@@ -89,7 +90,7 @@ export default function RecommendationPopup({ result, triggerId, onClose }: Prop
                 >
                   {/* Small image */}
                   <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-black/40">
-                    <img
+                    <DishImage
                       src={item.image}
                       alt={item.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"

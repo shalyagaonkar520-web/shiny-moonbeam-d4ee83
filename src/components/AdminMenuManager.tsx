@@ -4,6 +4,7 @@ import { Plus, Edit2, Trash2, Save, X, Search, Loader2, Sparkles } from 'lucide-
 import { useMenuStore } from '../store/menuStore';
 import { Product } from '../types';
 import toast from 'react-hot-toast';
+import DishImage from './DishImage';
 
 export default function AdminMenuManager() {
   const { menuItems, isLoading, seedMenuIfEmpty, addMenuItem, updateMenuItem, deleteMenuItem } = useMenuStore();
@@ -149,11 +150,7 @@ export default function AdminMenuManager() {
             >
               <div className="flex gap-4">
                 <div className="w-20 h-20 rounded-2xl bg-white/5 overflow-hidden shrink-0 border border-white/10">
-                  {item.image ? (
-                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white/20 text-[10px]">No Image</div>
-                  )}
+                  <DishImage src={item.image} alt={item.name} />
                 </div>
                 <div>
                   <h4 className="text-white font-bold text-sm leading-tight">{item.name}</h4>

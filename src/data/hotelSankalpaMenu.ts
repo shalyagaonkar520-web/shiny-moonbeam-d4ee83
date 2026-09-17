@@ -1,5 +1,5 @@
 // Hotel Sankalpa - Pure Veg Heritage Feasts, full menu.
-// 100 items across 10 categories. Every item is vegetarian.
+// 85 items across 9 categories. Every item is vegetarian.
 // Item names and prices are taken from the restaurant's own menu and must not be altered.
 // Dish photos are resolved through the centralized map in ./sankalpaMenuImages.
 
@@ -35,12 +35,6 @@ export const HOTEL_SANKALPA_MENU: SankalpaMenuCategory[] = [
         name: 'Aloo Jeera',
         price: 130,
         image: SANKALPA_MENU_IMAGES['Aloo Jeera'],
-        isVeg: true
-      },
-      {
-        name: 'Capsicum Masala',
-        price: 150,
-        image: SANKALPA_MENU_IMAGES['Capsicum Masala'],
         isVeg: true
       },
       {
@@ -98,12 +92,6 @@ export const HOTEL_SANKALPA_MENU: SankalpaMenuCategory[] = [
         isVeg: true
       },
       {
-        name: 'Veg Kurma',
-        price: 150,
-        image: SANKALPA_MENU_IMAGES['Veg Kurma'],
-        isVeg: true
-      },
-      {
         name: 'Kaju Masala',
         price: 220,
         image: SANKALPA_MENU_IMAGES['Kaju Masala'],
@@ -119,12 +107,6 @@ export const HOTEL_SANKALPA_MENU: SankalpaMenuCategory[] = [
         name: 'Paneer Kadai',
         price: 220,
         image: SANKALPA_MENU_IMAGES['Paneer Kadai'],
-        isVeg: true
-      },
-      {
-        name: 'Paneer Burji',
-        price: 220,
-        image: SANKALPA_MENU_IMAGES['Paneer Burji'],
         isVeg: true
       },
       {
@@ -194,12 +176,6 @@ export const HOTEL_SANKALPA_MENU: SankalpaMenuCategory[] = [
         isVeg: true
       },
       {
-        name: 'Babycorn Manchurian',
-        price: 130,
-        image: SANKALPA_MENU_IMAGES['Babycorn Manchurian'],
-        isVeg: true
-      },
-      {
         name: 'Mushroom Manchurian',
         price: 150,
         image: SANKALPA_MENU_IMAGES['Mushroom Manchurian'],
@@ -236,27 +212,9 @@ export const HOTEL_SANKALPA_MENU: SankalpaMenuCategory[] = [
         isVeg: true
       },
       {
-        name: 'Paneer Crispy',
-        price: 150,
-        image: SANKALPA_MENU_IMAGES['Paneer Crispy'],
-        isVeg: true
-      },
-      {
-        name: 'Mushroom 65',
-        price: 150,
-        image: SANKALPA_MENU_IMAGES['Mushroom 65'],
-        isVeg: true
-      },
-      {
         name: 'Masala Papad',
         price: 30,
         image: SANKALPA_MENU_IMAGES['Masala Papad'],
-        isVeg: true
-      },
-      {
-        name: 'Mushroom Chilly',
-        price: 150,
-        image: SANKALPA_MENU_IMAGES['Mushroom Chilly'],
         isVeg: true
       },
       {
@@ -269,18 +227,6 @@ export const HOTEL_SANKALPA_MENU: SankalpaMenuCategory[] = [
         name: 'Paneer 65',
         price: 150,
         image: SANKALPA_MENU_IMAGES['Paneer 65'],
-        isVeg: true
-      },
-      {
-        name: 'Babycorn 65',
-        price: 150,
-        image: SANKALPA_MENU_IMAGES['Babycorn 65'],
-        isVeg: true
-      },
-      {
-        name: 'Babycorn Chilly',
-        price: 150,
-        image: SANKALPA_MENU_IMAGES['Babycorn Chilly'],
         isVeg: true
       },
       {
@@ -374,12 +320,6 @@ export const HOTEL_SANKALPA_MENU: SankalpaMenuCategory[] = [
         isVeg: true
       },
       {
-        name: 'Mushroom Fried Rice',
-        price: 150,
-        image: SANKALPA_MENU_IMAGES['Mushroom Fried Rice'],
-        isVeg: true
-      },
-      {
         name: 'Onion Chilli Fried Rice',
         price: 150,
         image: SANKALPA_MENU_IMAGES['Onion Chilli Fried Rice'],
@@ -419,12 +359,6 @@ export const HOTEL_SANKALPA_MENU: SankalpaMenuCategory[] = [
         name: 'Butter Plain Dosa',
         price: 70,
         image: SANKALPA_MENU_IMAGES['Butter Plain Dosa'],
-        isVeg: true
-      },
-      {
-        name: 'Paneer Dosa',
-        price: 100,
-        image: SANKALPA_MENU_IMAGES['Paneer Dosa'],
         isVeg: true
       },
       {
@@ -470,12 +404,6 @@ export const HOTEL_SANKALPA_MENU: SankalpaMenuCategory[] = [
         isVeg: true
       },
       {
-        name: 'Shira',
-        price: 40,
-        image: SANKALPA_MENU_IMAGES['Shira'],
-        isVeg: true
-      },
-      {
         name: 'Upma',
         price: 30,
         image: SANKALPA_MENU_IMAGES['Upma'],
@@ -491,12 +419,6 @@ export const HOTEL_SANKALPA_MENU: SankalpaMenuCategory[] = [
         name: 'Idli + Vada (1+1)',
         price: 50,
         image: SANKALPA_MENU_IMAGES['Idli + Vada (1+1)'],
-        isVeg: true
-      },
-      {
-        name: 'Buns (1 pc)',
-        price: 35,
-        image: SANKALPA_MENU_IMAGES['Buns (1 pc)'],
         isVeg: true
       },
       {
@@ -656,27 +578,9 @@ export const HOTEL_SANKALPA_MENU: SankalpaMenuCategory[] = [
         isVeg: true
       },
       {
-        name: 'North Thali',
-        price: 200,
-        image: SANKALPA_MENU_IMAGES['North Thali'],
-        isVeg: true
-      },
-      {
         name: 'South Thali',
         price: 120,
         image: SANKALPA_MENU_IMAGES['South Thali'],
-        isVeg: true
-      }
-    ]
-  },
-  {
-    title: 'Extra',
-    icon: '➕',
-    items: [
-      {
-        name: 'Roti + Bhaji',
-        price: 60,
-        image: SANKALPA_MENU_IMAGES['Roti + Bhaji'],
         isVeg: true
       }
     ]

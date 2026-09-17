@@ -7,22 +7,22 @@ import { useSEO } from '../utils/seo';
 
 const GALLERY = [
   {
-    url: '/media__1779029850131.jpg',
+    url: '/media__1779029850131.webp',
     label: 'Butterfly Birthday Theme 🦋',
     desc: 'Elegant butterfly + balloon arch with neon glow',
   },
   {
-    url: '/media__1779029850152.jpg',
+    url: '/media__1779029850152.webp',
     label: 'Pink Balloon Royale 🩷',
     desc: 'Pink & gold balloon setup with glitter backdrop',
   },
   {
-    url: '/media__1779029850273.jpg',
+    url: '/media__1779029850273.webp',
     label: 'Black Silver Luxury 🖤',
     desc: 'Premium dark chrome balloon arrangement',
   },
   {
-    url: '/media__1779029850300.jpg',
+    url: '/media__1779029850300.webp',
     label: 'Golden Grand Setup ✨',
     desc: 'Opulent gold sequin backdrop with balloon arch',
   },

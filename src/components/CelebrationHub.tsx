@@ -9,19 +9,19 @@ import { useSEO } from '../utils/seo';
 
 const GALLERY_IMAGES = [
   {
-    url: '/media__1779029850131.jpg',
+    url: '/media__1779029850131.webp',
     label: 'Butterfly Birthday Theme',
   },
   {
-    url: '/media__1779029850152.jpg',
+    url: '/media__1779029850152.webp',
     label: 'Pink Balloon Setup',
   },
   {
-    url: '/media__1779029850273.jpg',
+    url: '/media__1779029850273.webp',
     label: 'Black Silver Luxury Setup',
   },
   {
-    url: '/media__1779029850300.jpg',
+    url: '/media__1779029850300.webp',
     label: 'Golden Birthday Setup',
   },
 ];
@@ -37,7 +37,7 @@ const CELEBRATION_CARDS = [
     glow: 'shadow-[0_0_40px_rgba(168,85,247,0.4)]',
     border: 'border-purple-500/30',
     bg: 'from-purple-900/40 to-pink-900/40',
-    image: '/media__1779029850131.jpg',
+    image: '/media__1779029850131.webp',
     tag: 'MOST POPULAR 🔥',
   },
   {
@@ -50,7 +50,7 @@ const CELEBRATION_CARDS = [
     glow: 'shadow-[0_0_40px_rgba(99,102,241,0.4)]',
     border: 'border-blue-400/30',
     bg: 'from-blue-900/40 to-indigo-900/40',
-    image: '/media__1779029850273.jpg',
+    image: '/media__1779029850273.webp',
     tag: 'TRENDING ⚡',
   },
   {
@@ -63,7 +63,7 @@ const CELEBRATION_CARDS = [
     glow: 'shadow-[0_0_40px_rgba(245,158,11,0.3)]',
     border: 'border-amber-500/30',
     bg: 'from-gray-900/60 to-amber-900/40',
-    image: '/media__1779029850300.jpg',
+    image: '/media__1779029850300.webp',
     tag: 'PREMIUM ⭐',
   },
 ];

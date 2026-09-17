@@ -189,11 +189,11 @@ export default function HotelAlAminMenuPage() {
       <section className="relative w-full overflow-hidden bg-gray-900 border-b border-rose-100">
         <div className="relative h-56 sm:h-72 w-full">
           <img
-            src="/hotel_al_amin.jpg"
+            src="/hotel_al_amin.webp"
             alt="Hotel Al Amin"
             className="w-full h-full object-cover opacity-85 scale-105"
             onError={(e) => {
-              e.currentTarget.src = '/shawarma_new.png';
+              e.currentTarget.src = '/shawarma_new.webp';
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/60 to-black/30" />
@@ -454,7 +454,7 @@ export default function HotelAlAminMenuPage() {
                             loading="lazy"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => {
-                              e.currentTarget.src = '/shawarma_new.png';
+                              e.currentTarget.src = '/shawarma_new.webp';
                             }}
                           />
 

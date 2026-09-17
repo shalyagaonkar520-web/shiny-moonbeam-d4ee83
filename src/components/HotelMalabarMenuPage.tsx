@@ -20,6 +20,7 @@ import toast from 'react-hot-toast';
 import { playSound, SOUNDS } from '../utils/audio';
 import { HOTEL_MALABAR_MENU, MalabarMenuItem } from '../data/hotelMalabarMenu';
 import { useSEO } from '../utils/seo';
+import DishImage from './DishImage';
 
 const CATEGORY_ICONS: Record<string, string> = {
   'Fish Main Course': '🐟',
@@ -58,7 +59,7 @@ export default function HotelMalabarMenuPage() {
       hotelId: 'malabar',
       name: item.name,
       price: item.price,
-      image: item.image || '/hotel_malabar.jpg',
+      image: item.image || '/hotel_malabar.webp',
       category: categoryTitle,
       type: 'food',
       isVeg: !!item.isVeg,
@@ -183,7 +184,7 @@ export default function HotelMalabarMenuPage() {
         <div className="relative rounded-3xl overflow-hidden shadow-lg border border-blue-100 bg-white">
           <div className="relative h-44 sm:h-56 w-full overflow-hidden">
             <img
-              src="/hotel_malabar.jpg"
+              src="/hotel_malabar.webp"
               alt="Kaka's Hotel Malabar Restaurant"
               className="w-full h-full object-cover"
             />
@@ -387,11 +388,10 @@ export default function HotelMalabarMenuPage() {
 
                         {/* Dish Image + Add Button */}
                         <div className="relative w-28 h-28 shrink-0 rounded-2xl overflow-hidden bg-gray-100 border border-gray-100">
-                          <img
-                            src={item.image || '/hotel_malabar.jpg'}
+                          <DishImage
+                            src={item.image}
                             alt={item.name}
                             className="w-full h-full object-cover"
-                            loading="lazy"
                           />
 
                           {/* Add to Cart Overlay Button */}

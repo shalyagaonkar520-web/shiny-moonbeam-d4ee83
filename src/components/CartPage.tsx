@@ -9,6 +9,7 @@ import { calculateDeliveryCharge } from '../types';
 import { useSystemStore } from '../store/systemStore';
 import toast from 'react-hot-toast';
 import { useSEO } from '../utils/seo';
+import DishImage from './DishImage';
 
 export default function CartPage() {
   useSEO("Your Cart", "Review your selected items, apply promo codes, and complete your order details at Moms Magic.");
@@ -113,12 +114,14 @@ export default function CartPage() {
                     transition={{ delay: idx * 0.1 }}
                     className="relative group luxury-card rounded-[50px] p-8 flex flex-col md:flex-row items-center gap-10 border-white/5 hover:border-gold/30"
                   >
-                    {item.image && (
                     <div className="w-40 h-40 rounded-[40px] overflow-hidden border border-white/10 shadow-2xl relative shrink-0 group-hover:scale-105 transition-transform duration-700">
-                      <img src={item.image} alt={item.name} className="w-full h-full object-cover opacity-80" referrerPolicy="no-referrer" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-matte-black via-transparent to-transparent opacity-80" />
+                      <DishImage
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover opacity-80"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-matte-black via-transparent to-transparent opacity-80 pointer-events-none" />
                     </div>
-                    )}
 
                     <div className="flex-1 space-y-6 text-center md:text-left min-w-0">
                       <div>

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Tag, Sparkles, Truck, Flame, ArrowRight, Gift, Percent, Zap, ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import DishImage from './DishImage';
 
 export default function OffersPage() {
   const navigate = useNavigate();
@@ -87,7 +88,7 @@ export default function OffersPage() {
               >
                 {/* Image Side */}
                 <div className="w-full md:w-1/2 h-[300px] md:h-[500px] relative overflow-hidden rounded-[40px] md:rounded-none">
-                  <img src={offer.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="" />
+                  <DishImage src={offer.image} alt={offer.title ?? "Offer"} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
                   <div className={`absolute inset-0 bg-gradient-to-r ${offer.color} opacity-40 mix-blend-overlay`} />
                   <div className="absolute inset-0 bg-gradient-to-t from-dark-surface via-transparent to-transparent opacity-80" />
                   

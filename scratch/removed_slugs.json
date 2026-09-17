@@ -1,0 +1,62 @@
+[
+  {
+    "folder": "veg-main-course",
+    "slug": "capsicum-masala"
+  },
+  {
+    "folder": "veg-main-course",
+    "slug": "veg-kurma"
+  },
+  {
+    "folder": "veg-main-course",
+    "slug": "paneer-burji"
+  },
+  {
+    "folder": "veg-starter",
+    "slug": "babycorn-manchurian"
+  },
+  {
+    "folder": "veg-starter",
+    "slug": "paneer-crispy"
+  },
+  {
+    "folder": "veg-starter",
+    "slug": "mushroom-65"
+  },
+  {
+    "folder": "veg-starter",
+    "slug": "mushroom-chilly"
+  },
+  {
+    "folder": "veg-starter",
+    "slug": "babycorn-65"
+  },
+  {
+    "folder": "veg-starter",
+    "slug": "babycorn-chilly"
+  },
+  {
+    "folder": "rice",
+    "slug": "mushroom-fried-rice"
+  },
+  {
+    "folder": "dosa",
+    "slug": "paneer-dosa"
+  },
+  {
+    "folder": "breakfast",
+    "slug": "shira"
+  },
+  {
+    "folder": "breakfast",
+    "slug": "buns-1-pc"
+  },
+  {
+    "folder": "thali",
+    "slug": "north-thali"
+  },
+  {
+    "folder": "extra",
+    "slug": "roti-bhaji"
+  }
+]

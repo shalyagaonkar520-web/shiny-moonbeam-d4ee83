@@ -1,7 +1,7 @@
 {
   "_comment": "Pexels source attribution for Hotel Sankalpa dish photos. Every photo was opened and visually checked against its dish before use, and every one is vegetarian. Photo URL pattern: https://www.pexels.com/photo/<pexelsId>/",
   "_license": "Pexels License - free to use, no attribution required. Recorded here for traceability.",
-  "totalItems": 100,
+  "totalItems": 85,
   "photos": [
     {
       "item": "Paneer Handi",
@@ -16,16 +16,12 @@
       "pexelsId": 5249331
     },
     {
-      "item": "Capsicum Masala",
-      "category": "Veg Main Course",
-      "file": "/images/menu/veg-main-course/capsicum-masala.jpg",
-      "pexelsId": 12737816
-    },
-    {
       "item": "Gobi Masala",
       "category": "Veg Main Course",
       "file": "/images/menu/veg-main-course/gobi-masala.jpg",
-      "pexelsId": 2116093
+      "pexelsId": 29684979,
+      "shows": "Cauliflower florets with potato and peas in a brown masala gravy, steel kadai",
+      "note": "Swapped: the kadai shot suits Gobi Masala, the potato-and-cauliflower bowl suits Aloo Gobi."
     },
     {
       "item": "Veg Keema",
@@ -76,12 +72,6 @@
       "pexelsId": 35041660
     },
     {
-      "item": "Veg Kurma",
-      "category": "Veg Main Course",
-      "file": "/images/menu/veg-main-course/veg-kurma.jpg",
-      "pexelsId": 18510422
-    },
-    {
       "item": "Kaju Masala",
       "category": "Veg Main Course",
       "file": "/images/menu/veg-main-course/kaju-masala.jpg",
@@ -98,13 +88,6 @@
       "category": "Veg Main Course",
       "file": "/images/menu/veg-main-course/paneer-kadai.jpg",
       "pexelsId": 28674562
-    },
-    {
-      "item": "Paneer Burji",
-      "category": "Veg Main Course",
-      "file": "/images/menu/veg-main-course/paneer-burji.jpg",
-      "pexelsId": 6327660,
-      "note": "Replaced after visual audit."
     },
     {
       "item": "Kaju Kurma",
@@ -152,7 +135,9 @@
       "item": "Aloo Gobi Masala",
       "category": "Veg Main Course",
       "file": "/images/menu/veg-main-course/aloo-gobi-masala.jpg",
-      "pexelsId": 29684979
+      "pexelsId": 2116093,
+      "shows": "Potato and cauliflower with beans and tomato in a turmeric masala, cropped to the bowl",
+      "note": "Swapped: the kadai shot suits Gobi Masala, the potato-and-cauliflower bowl suits Aloo Gobi."
     },
     {
       "item": "Aloo Pakoda",
@@ -167,16 +152,11 @@
       "pexelsId": 17390930
     },
     {
-      "item": "Babycorn Manchurian",
-      "category": "Veg Starter",
-      "file": "/images/menu/veg-starter/babycorn-manchurian.jpg",
-      "pexelsId": 28674530
-    },
-    {
       "item": "Mushroom Manchurian",
       "category": "Veg Starter",
       "file": "/images/menu/veg-starter/mushroom-manchurian.jpg",
-      "pexelsId": 8250339
+      "pexelsId": 29935504,
+      "note": "Replaced after visual audit."
     },
     {
       "item": "Mirchi Bhaji",
@@ -209,29 +189,10 @@
       "pexelsId": 35071828
     },
     {
-      "item": "Paneer Crispy",
-      "category": "Veg Starter",
-      "file": "/images/menu/veg-starter/paneer-crispy.jpg",
-      "pexelsId": 8585763
-    },
-    {
-      "item": "Mushroom 65",
-      "category": "Veg Starter",
-      "file": "/images/menu/veg-starter/mushroom-65.jpg",
-      "pexelsId": 38381640,
-      "note": "Replaced after visual audit."
-    },
-    {
       "item": "Masala Papad",
       "category": "Veg Starter",
       "file": "/images/menu/veg-starter/masala-papad.jpg",
       "pexelsId": 34347890
-    },
-    {
-      "item": "Mushroom Chilly",
-      "category": "Veg Starter",
-      "file": "/images/menu/veg-starter/mushroom-chilly.jpg",
-      "pexelsId": 35630309
     },
     {
       "item": "Paneer Chilly",
@@ -244,18 +205,6 @@
       "category": "Veg Starter",
       "file": "/images/menu/veg-starter/paneer-65.jpg",
       "pexelsId": 29631461
-    },
-    {
-      "item": "Babycorn 65",
-      "category": "Veg Starter",
-      "file": "/images/menu/veg-starter/babycorn-65.jpg",
-      "pexelsId": 3757707
-    },
-    {
-      "item": "Babycorn Chilly",
-      "category": "Veg Starter",
-      "file": "/images/menu/veg-starter/babycorn-chilly.jpg",
-      "pexelsId": 29631459
     },
     {
       "item": "Finger Chips",
@@ -342,12 +291,6 @@
       "pexelsId": 32489477
     },
     {
-      "item": "Mushroom Fried Rice",
-      "category": "Rice Items",
-      "file": "/images/menu/rice/mushroom-fried-rice.jpg",
-      "pexelsId": 10695973
-    },
-    {
       "item": "Onion Chilli Fried Rice",
       "category": "Rice Items",
       "file": "/images/menu/rice/onion-chilli-fried-rice.jpg",
@@ -382,12 +325,6 @@
       "category": "Dosa",
       "file": "/images/menu/dosa/butter-plain-dosa.jpg",
       "pexelsId": 39104603
-    },
-    {
-      "item": "Paneer Dosa",
-      "category": "Dosa",
-      "file": "/images/menu/dosa/paneer-dosa.jpg",
-      "pexelsId": 20422129
     },
     {
       "item": "Rava Dosa",
@@ -426,12 +363,6 @@
       "pexelsId": 38532723
     },
     {
-      "item": "Shira",
-      "category": "South Indian Breakfast",
-      "file": "/images/menu/breakfast/shira.jpg",
-      "pexelsId": 20689161
-    },
-    {
       "item": "Upma",
       "category": "South Indian Breakfast",
       "file": "/images/menu/breakfast/upma.jpg",
@@ -448,12 +379,6 @@
       "category": "South Indian Breakfast",
       "file": "/images/menu/breakfast/idli-vada-1-1.jpg",
       "pexelsId": 14831540
-    },
-    {
-      "item": "Buns (1 pc)",
-      "category": "South Indian Breakfast",
-      "file": "/images/menu/breakfast/buns-1-pc.jpg",
-      "pexelsId": 36388454
     },
     {
       "item": "Singal Puri",
@@ -588,22 +513,10 @@
       "pexelsId": 35539324
     },
     {
-      "item": "North Thali",
-      "category": "Thali",
-      "file": "/images/menu/thali/north-thali.jpg",
-      "pexelsId": 29148133
-    },
-    {
       "item": "South Thali",
       "category": "Thali",
       "file": "/images/menu/thali/south-thali.jpg",
       "pexelsId": 14132112
-    },
-    {
-      "item": "Roti + Bhaji",
-      "category": "Extra",
-      "file": "/images/menu/extra/roti-bhaji.jpg",
-      "pexelsId": 28579050
     }
   ]
 }

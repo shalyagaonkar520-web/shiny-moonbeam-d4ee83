@@ -41,7 +41,7 @@ export default function AboutFounder() {
           >
             <div className="relative z-10 rounded-[40px] overflow-hidden border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.5)] aspect-[3/4]">
               <img 
-                src="/founder.jpg" 
+                src="/founder.webp" 
                 alt="Shalya Gaonkar" 
                 className="w-full h-full object-cover"
               />
@@ -116,7 +116,7 @@ export default function AboutFounder() {
             className="md:order-2"
           >
             <div className="relative z-10 rounded-[40px] overflow-hidden border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.5)] aspect-[3/4]">
-              <img src="/partner.jpg" alt="Partner JIS" className="w-full h-full object-cover" />
+              <img src="/partner.webp" alt="Partner JIS" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
             </div>
           </motion.div>

@@ -21,6 +21,7 @@ import toast from 'react-hot-toast';
 import { playSound, SOUNDS } from '../utils/audio';
 import { HOTEL_COASTAL_CROWN_MENU, CoastalCrownMenuItem } from '../data/hotelCoastalCrownMenu';
 import { useSEO } from '../utils/seo';
+import DishImage from './DishImage';
 
 const CATEGORY_ICONS: Record<string, string> = {
   'Coastal Special': '🦐',
@@ -60,7 +61,7 @@ export default function HotelCoastalCrownMenuPage() {
       hotelId: 'coastal_crown',
       name: item.name,
       price: item.price,
-      image: item.image || '/hotel_coastal_crown_dining.jpg',
+      image: item.image || '/hotel_coastal_crown_dining.webp',
       category: categoryTitle,
       type: 'food',
       isVeg: !!item.isVeg,
@@ -185,7 +186,7 @@ export default function HotelCoastalCrownMenuPage() {
         <div className="relative rounded-3xl overflow-hidden shadow-lg border border-rose-100 bg-white">
           <div className="relative h-44 sm:h-56 w-full overflow-hidden">
             <img
-              src="/hotel_coastal_crown_dining.jpg"
+              src="/hotel_coastal_crown_dining.webp"
               alt="Coastal Crown Restaurant"
               className="w-full h-full object-cover"
             />
@@ -389,11 +390,10 @@ export default function HotelCoastalCrownMenuPage() {
 
                         {/* Dish Image + Add Button */}
                         <div className="relative w-28 h-28 shrink-0 rounded-2xl overflow-hidden bg-gray-100 border border-gray-100">
-                          <img
-                            src={item.image || '/hotel_coastal_crown_dining.jpg'}
+                          <DishImage
+                            src={item.image}
                             alt={item.name}
                             className="w-full h-full object-cover"
-                            loading="lazy"
                           />
 
                           {/* Add to Cart Overlay Button */}
