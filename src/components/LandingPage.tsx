@@ -54,9 +54,9 @@ const PARTNER_HOTELS = [
     id: 'mumtaz',
     name: "Hotel Mumtaz",
     tagline: "Multi-Cuisine & Biryani",
-    isOpen: false,
+    isOpen: true,
     badge: "View Menu",
-    deliveryTime: "Ordering Coming Soon",
+    deliveryTime: "20-25 mins",
     image: "/hotel_mumtaz.webp",
     hasCustomPhoto: true
   },
@@ -74,9 +74,9 @@ const PARTNER_HOTELS = [
     id: 'sankalpa',
     name: "Hotel Sankalpa",
     tagline: "Pure Veg Heritage Feasts",
-    isOpen: false,
+    isOpen: true,
     badge: "View Menu",
-    deliveryTime: "Ordering Coming Soon",
+    deliveryTime: "20-25 mins",
     image: "/hotel_sankalpa.webp",
     hasCustomPhoto: true
   },
