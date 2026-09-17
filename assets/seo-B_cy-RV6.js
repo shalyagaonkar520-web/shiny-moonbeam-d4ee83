@@ -1,1 +1,0 @@
-import{r as a}from"./vendor-react-DexxHlmr.js";function o(t,m){a.useEffect(()=>{if(document.title=t==="Moms Magic"?"Moms Magic":`${t} | Moms Magic`,m){let e=document.querySelector('meta[name="description"]');e||(e=document.createElement("meta"),e.setAttribute("name","description"),document.head.appendChild(e)),e.setAttribute("content",m)}},[t,m])}export{o as u};

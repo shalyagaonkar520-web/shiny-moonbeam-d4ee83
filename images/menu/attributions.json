@@ -1,0 +1,609 @@
+{
+  "_comment": "Pexels source attribution for Hotel Sankalpa dish photos. Every photo was opened and visually checked against its dish before use, and every one is vegetarian. Photo URL pattern: https://www.pexels.com/photo/<pexelsId>/",
+  "_license": "Pexels License - free to use, no attribution required. Recorded here for traceability.",
+  "totalItems": 100,
+  "photos": [
+    {
+      "item": "Paneer Handi",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/paneer-handi.jpg",
+      "pexelsId": 36460902
+    },
+    {
+      "item": "Aloo Jeera",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/aloo-jeera.jpg",
+      "pexelsId": 5249331
+    },
+    {
+      "item": "Capsicum Masala",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/capsicum-masala.jpg",
+      "pexelsId": 12737816
+    },
+    {
+      "item": "Gobi Masala",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/gobi-masala.jpg",
+      "pexelsId": 2116093
+    },
+    {
+      "item": "Veg Keema",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/veg-keema.jpg",
+      "pexelsId": 35267277
+    },
+    {
+      "item": "Veg Makkanwala",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/veg-makkanwala.jpg",
+      "pexelsId": 33430561
+    },
+    {
+      "item": "Kaju Kolhapuri",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/kaju-kolhapuri.jpg",
+      "pexelsId": 29685056
+    },
+    {
+      "item": "Mix Veg",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/mix-veg.jpg",
+      "pexelsId": 13823417
+    },
+    {
+      "item": "Veg Kolhapuri",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/veg-kolhapuri.jpg",
+      "pexelsId": 28867523
+    },
+    {
+      "item": "Mushroom Butter Masala",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/mushroom-butter-masala.jpg",
+      "pexelsId": 35041661
+    },
+    {
+      "item": "Tomato Masala",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/tomato-masala.jpg",
+      "pexelsId": 35267278
+    },
+    {
+      "item": "Mushroom Masala",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/mushroom-masala.jpg",
+      "pexelsId": 35041660
+    },
+    {
+      "item": "Veg Kurma",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/veg-kurma.jpg",
+      "pexelsId": 18510422
+    },
+    {
+      "item": "Kaju Masala",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/kaju-masala.jpg",
+      "pexelsId": 34217288
+    },
+    {
+      "item": "Paneer Masala",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/paneer-masala.jpg",
+      "pexelsId": 12737799
+    },
+    {
+      "item": "Paneer Kadai",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/paneer-kadai.jpg",
+      "pexelsId": 28674562
+    },
+    {
+      "item": "Paneer Burji",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/paneer-burji.jpg",
+      "pexelsId": 6327660,
+      "note": "Replaced after visual audit."
+    },
+    {
+      "item": "Kaju Kurma",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/kaju-kurma.jpg",
+      "pexelsId": 28674560
+    },
+    {
+      "item": "Paneer Tikka (Main Course)",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/paneer-tikka-main-course.jpg",
+      "pexelsId": 27254878
+    },
+    {
+      "item": "Mushroom Tikka Masala",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/mushroom-tikka-masala.jpg",
+      "pexelsId": 35041663
+    },
+    {
+      "item": "Kaju Paneer Masala",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/kaju-paneer-masala.jpg",
+      "pexelsId": 11115801
+    },
+    {
+      "item": "Paneer Tawa",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/paneer-tawa.jpg",
+      "pexelsId": 20689162
+    },
+    {
+      "item": "Veg Kadai",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/veg-kadai.jpg",
+      "pexelsId": 15014923
+    },
+    {
+      "item": "Paneer Butter Masala",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/paneer-butter-masala.jpg",
+      "pexelsId": 11188417
+    },
+    {
+      "item": "Aloo Gobi Masala",
+      "category": "Veg Main Course",
+      "file": "/images/menu/veg-main-course/aloo-gobi-masala.jpg",
+      "pexelsId": 29684979
+    },
+    {
+      "item": "Aloo Pakoda",
+      "category": "Veg Starter",
+      "file": "/images/menu/veg-starter/aloo-pakoda.jpg",
+      "pexelsId": 36739323
+    },
+    {
+      "item": "Onion Pakoda",
+      "category": "Veg Starter",
+      "file": "/images/menu/veg-starter/onion-pakoda.jpg",
+      "pexelsId": 17390930
+    },
+    {
+      "item": "Babycorn Manchurian",
+      "category": "Veg Starter",
+      "file": "/images/menu/veg-starter/babycorn-manchurian.jpg",
+      "pexelsId": 28674530
+    },
+    {
+      "item": "Mushroom Manchurian",
+      "category": "Veg Starter",
+      "file": "/images/menu/veg-starter/mushroom-manchurian.jpg",
+      "pexelsId": 8250339
+    },
+    {
+      "item": "Mirchi Bhaji",
+      "category": "Veg Starter",
+      "file": "/images/menu/veg-starter/mirchi-bhaji.jpg",
+      "pexelsId": 31150219
+    },
+    {
+      "item": "Roasted Papad",
+      "category": "Veg Starter",
+      "file": "/images/menu/veg-starter/roasted-papad.jpg",
+      "pexelsId": 34739831
+    },
+    {
+      "item": "Fried Papad",
+      "category": "Veg Starter",
+      "file": "/images/menu/veg-starter/fried-papad.jpg",
+      "pexelsId": 34428635
+    },
+    {
+      "item": "Gobi Manchurian",
+      "category": "Veg Starter",
+      "file": "/images/menu/veg-starter/gobi-manchurian.jpg",
+      "pexelsId": 35071824
+    },
+    {
+      "item": "Gobi Chilly",
+      "category": "Veg Starter",
+      "file": "/images/menu/veg-starter/gobi-chilly.jpg",
+      "pexelsId": 35071828
+    },
+    {
+      "item": "Paneer Crispy",
+      "category": "Veg Starter",
+      "file": "/images/menu/veg-starter/paneer-crispy.jpg",
+      "pexelsId": 8585763
+    },
+    {
+      "item": "Mushroom 65",
+      "category": "Veg Starter",
+      "file": "/images/menu/veg-starter/mushroom-65.jpg",
+      "pexelsId": 38381640,
+      "note": "Replaced after visual audit."
+    },
+    {
+      "item": "Masala Papad",
+      "category": "Veg Starter",
+      "file": "/images/menu/veg-starter/masala-papad.jpg",
+      "pexelsId": 34347890
+    },
+    {
+      "item": "Mushroom Chilly",
+      "category": "Veg Starter",
+      "file": "/images/menu/veg-starter/mushroom-chilly.jpg",
+      "pexelsId": 35630309
+    },
+    {
+      "item": "Paneer Chilly",
+      "category": "Veg Starter",
+      "file": "/images/menu/veg-starter/paneer-chilly.jpg",
+      "pexelsId": 29631468
+    },
+    {
+      "item": "Paneer 65",
+      "category": "Veg Starter",
+      "file": "/images/menu/veg-starter/paneer-65.jpg",
+      "pexelsId": 29631461
+    },
+    {
+      "item": "Babycorn 65",
+      "category": "Veg Starter",
+      "file": "/images/menu/veg-starter/babycorn-65.jpg",
+      "pexelsId": 3757707
+    },
+    {
+      "item": "Babycorn Chilly",
+      "category": "Veg Starter",
+      "file": "/images/menu/veg-starter/babycorn-chilly.jpg",
+      "pexelsId": 29631459
+    },
+    {
+      "item": "Finger Chips",
+      "category": "Veg Starter",
+      "file": "/images/menu/veg-starter/finger-chips.jpg",
+      "pexelsId": 8272619
+    },
+    {
+      "item": "Tomato Rice",
+      "category": "Rice Items",
+      "file": "/images/menu/rice/tomato-rice.jpg",
+      "pexelsId": 31109627
+    },
+    {
+      "item": "Jeera Rice",
+      "category": "Rice Items",
+      "file": "/images/menu/rice/jeera-rice.jpg",
+      "pexelsId": 28674713
+    },
+    {
+      "item": "Ghee Rice",
+      "category": "Rice Items",
+      "file": "/images/menu/rice/ghee-rice.jpg",
+      "pexelsId": 34159107
+    },
+    {
+      "item": "Masala Rice",
+      "category": "Rice Items",
+      "file": "/images/menu/rice/masala-rice.jpg",
+      "pexelsId": 7592749
+    },
+    {
+      "item": "Curd Rice",
+      "category": "Rice Items",
+      "file": "/images/menu/rice/curd-rice.jpg",
+      "pexelsId": 29684991
+    },
+    {
+      "item": "Paneer Pulao",
+      "category": "Rice Items",
+      "file": "/images/menu/rice/paneer-pulao.jpg",
+      "pexelsId": 9609859
+    },
+    {
+      "item": "Peas Pulao",
+      "category": "Rice Items",
+      "file": "/images/menu/rice/peas-pulao.jpg",
+      "pexelsId": 35552983
+    },
+    {
+      "item": "Peas Panner Pulav",
+      "category": "Rice Items",
+      "file": "/images/menu/rice/peas-paneer-pulav.jpg",
+      "pexelsId": 16872037
+    },
+    {
+      "item": "Veg Biryani",
+      "category": "Rice Items",
+      "file": "/images/menu/rice/veg-biryani.jpg",
+      "pexelsId": 7593267
+    },
+    {
+      "item": "Mushroom Biryani",
+      "category": "Rice Items",
+      "file": "/images/menu/rice/mushroom-biryani.jpg",
+      "pexelsId": 15058968
+    },
+    {
+      "item": "Lemon Rice",
+      "category": "Rice Items",
+      "file": "/images/menu/rice/lemon-rice.jpg",
+      "pexelsId": 4595316
+    },
+    {
+      "item": "Veg Fried Rice",
+      "category": "Rice Items",
+      "file": "/images/menu/rice/veg-fried-rice.jpg",
+      "pexelsId": 35071826
+    },
+    {
+      "item": "Paneer Fried Rice",
+      "category": "Rice Items",
+      "file": "/images/menu/rice/paneer-fried-rice.jpg",
+      "pexelsId": 32489477
+    },
+    {
+      "item": "Mushroom Fried Rice",
+      "category": "Rice Items",
+      "file": "/images/menu/rice/mushroom-fried-rice.jpg",
+      "pexelsId": 10695973
+    },
+    {
+      "item": "Onion Chilli Fried Rice",
+      "category": "Rice Items",
+      "file": "/images/menu/rice/onion-chilli-fried-rice.jpg",
+      "pexelsId": 7593230
+    },
+    {
+      "item": "Daal Khichdi",
+      "category": "Rice Items",
+      "file": "/images/menu/rice/daal-khichdi.jpg",
+      "pexelsId": 6363501
+    },
+    {
+      "item": "Butter Masala Dosa",
+      "category": "Dosa",
+      "file": "/images/menu/dosa/butter-masala-dosa.jpg",
+      "pexelsId": 12392915
+    },
+    {
+      "item": "Plain Dosa",
+      "category": "Dosa",
+      "file": "/images/menu/dosa/plain-dosa.jpg",
+      "pexelsId": 20422121
+    },
+    {
+      "item": "Set Dosa",
+      "category": "Dosa",
+      "file": "/images/menu/dosa/set-dosa.jpg",
+      "pexelsId": 17869140
+    },
+    {
+      "item": "Butter Plain Dosa",
+      "category": "Dosa",
+      "file": "/images/menu/dosa/butter-plain-dosa.jpg",
+      "pexelsId": 39104603
+    },
+    {
+      "item": "Paneer Dosa",
+      "category": "Dosa",
+      "file": "/images/menu/dosa/paneer-dosa.jpg",
+      "pexelsId": 20422129
+    },
+    {
+      "item": "Rava Dosa",
+      "category": "Dosa",
+      "file": "/images/menu/dosa/rava-dosa.jpg",
+      "pexelsId": 28107046
+    },
+    {
+      "item": "Khali Dosa",
+      "category": "Dosa",
+      "file": "/images/menu/dosa/khali-dosa.jpg",
+      "pexelsId": 35351659
+    },
+    {
+      "item": "Uttappa",
+      "category": "Dosa",
+      "file": "/images/menu/dosa/uttappa.jpg",
+      "pexelsId": 36854500
+    },
+    {
+      "item": "Masala Dosa",
+      "category": "Dosa",
+      "file": "/images/menu/dosa/masala-dosa.jpg",
+      "pexelsId": 20689305
+    },
+    {
+      "item": "Idli Vada (2+1)",
+      "category": "South Indian Breakfast",
+      "file": "/images/menu/breakfast/idli-vada-2-1.jpg",
+      "pexelsId": 37867687
+    },
+    {
+      "item": "Buns",
+      "category": "South Indian Breakfast",
+      "file": "/images/menu/breakfast/buns.jpg",
+      "pexelsId": 38532723
+    },
+    {
+      "item": "Shira",
+      "category": "South Indian Breakfast",
+      "file": "/images/menu/breakfast/shira.jpg",
+      "pexelsId": 20689161
+    },
+    {
+      "item": "Upma",
+      "category": "South Indian Breakfast",
+      "file": "/images/menu/breakfast/upma.jpg",
+      "pexelsId": 20408458
+    },
+    {
+      "item": "Idli (2 pcs)",
+      "category": "South Indian Breakfast",
+      "file": "/images/menu/breakfast/idli-2-pcs.jpg",
+      "pexelsId": 36854501
+    },
+    {
+      "item": "Idli + Vada (1+1)",
+      "category": "South Indian Breakfast",
+      "file": "/images/menu/breakfast/idli-vada-1-1.jpg",
+      "pexelsId": 14831540
+    },
+    {
+      "item": "Buns (1 pc)",
+      "category": "South Indian Breakfast",
+      "file": "/images/menu/breakfast/buns-1-pc.jpg",
+      "pexelsId": 36388454
+    },
+    {
+      "item": "Singal Puri",
+      "category": "South Indian Breakfast",
+      "file": "/images/menu/breakfast/singal-puri.jpg",
+      "pexelsId": 8617361
+    },
+    {
+      "item": "Vada (2 pcs)",
+      "category": "South Indian Breakfast",
+      "file": "/images/menu/breakfast/vada-2-pcs.jpg",
+      "pexelsId": 37421009
+    },
+    {
+      "item": "Roti",
+      "category": "Tandoori",
+      "file": "/images/menu/tandoori/roti.jpg",
+      "pexelsId": 12427834
+    },
+    {
+      "item": "Naan",
+      "category": "Tandoori",
+      "file": "/images/menu/tandoori/naan.jpg",
+      "pexelsId": 35066813
+    },
+    {
+      "item": "Butter Naan",
+      "category": "Tandoori",
+      "file": "/images/menu/tandoori/butter-naan.jpg",
+      "pexelsId": 12737664
+    },
+    {
+      "item": "Butter Garlic Naan",
+      "category": "Tandoori",
+      "file": "/images/menu/tandoori/butter-garlic-naan.jpg",
+      "pexelsId": 30203311
+    },
+    {
+      "item": "Garlic Naan",
+      "category": "Tandoori",
+      "file": "/images/menu/tandoori/garlic-naan.jpg",
+      "pexelsId": 10337726
+    },
+    {
+      "item": "Aloo Parota",
+      "category": "Tandoori",
+      "file": "/images/menu/tandoori/aloo-parota.jpg",
+      "pexelsId": 33428723
+    },
+    {
+      "item": "Butter Kulcha",
+      "category": "Tandoori",
+      "file": "/images/menu/tandoori/butter-kulcha.jpg",
+      "pexelsId": 15119269
+    },
+    {
+      "item": "Butter Parota",
+      "category": "Tandoori",
+      "file": "/images/menu/tandoori/butter-parota.jpg",
+      "pexelsId": 9609857
+    },
+    {
+      "item": "Masala Roti",
+      "category": "Tandoori",
+      "file": "/images/menu/tandoori/masala-roti.jpg",
+      "pexelsId": 38163958
+    },
+    {
+      "item": "Tandoori Parota",
+      "category": "Tandoori",
+      "file": "/images/menu/tandoori/tandoori-parota.jpg",
+      "pexelsId": 20446390
+    },
+    {
+      "item": "Butter Roti",
+      "category": "Tandoori",
+      "file": "/images/menu/tandoori/butter-roti.jpg",
+      "pexelsId": 12737800
+    },
+    {
+      "item": "Paneer Tikka (Tandoori Counter)",
+      "category": "Tandoori",
+      "file": "/images/menu/tandoori/paneer-tikka-tandoori.jpg",
+      "pexelsId": 33430558
+    },
+    {
+      "item": "Daal Butter Fry",
+      "category": "Daal",
+      "file": "/images/menu/daal/daal-butter-fry.jpg",
+      "pexelsId": 38108860
+    },
+    {
+      "item": "Daal Kolhapuri",
+      "category": "Daal",
+      "file": "/images/menu/daal/daal-kolhapuri.jpg",
+      "pexelsId": 28674710
+    },
+    {
+      "item": "Daal Fry",
+      "category": "Daal",
+      "file": "/images/menu/daal/daal-fry.jpg",
+      "pexelsId": 17200447
+    },
+    {
+      "item": "Daal Tadka",
+      "category": "Daal",
+      "file": "/images/menu/daal/daal-tadka.jpg",
+      "pexelsId": 33430562
+    },
+    {
+      "item": "Daal Paneer",
+      "category": "Daal",
+      "file": "/images/menu/daal/daal-paneer.jpg",
+      "pexelsId": 30203314
+    },
+    {
+      "item": "Tomato Soup",
+      "category": "Soup",
+      "file": "/images/menu/soup/tomato-soup.jpg",
+      "pexelsId": 12338625
+    },
+    {
+      "item": "Veg Manchow Soup",
+      "category": "Soup",
+      "file": "/images/menu/soup/veg-manchow-soup.jpg",
+      "pexelsId": 25325508
+    },
+    {
+      "item": "Rice South Thali",
+      "category": "Thali",
+      "file": "/images/menu/thali/rice-south-thali.jpg",
+      "pexelsId": 35539324
+    },
+    {
+      "item": "North Thali",
+      "category": "Thali",
+      "file": "/images/menu/thali/north-thali.jpg",
+      "pexelsId": 29148133
+    },
+    {
+      "item": "South Thali",
+      "category": "Thali",
+      "file": "/images/menu/thali/south-thali.jpg",
+      "pexelsId": 14132112
+    },
+    {
+      "item": "Roti + Bhaji",
+      "category": "Extra",
+      "file": "/images/menu/extra/roti-bhaji.jpg",
+      "pexelsId": 28579050
+    }
+  ]
+}
