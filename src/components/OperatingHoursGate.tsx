@@ -16,9 +16,9 @@ export default function OperatingHoursGate({ children }: { children: React.React
     const now = new Date();
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-    // 12:30 PM = 12 * 60 + 30 = 750
+    // 12:00 PM = 12 * 60 = 720
     // 10:45 PM = 22 * 60 + 45 = 1365
-    const openMinutes = 12 * 60 + 30; // 750
+    const openMinutes = 12 * 60; // 720
     const closeMinutes = 22 * 60 + 45; // 1365
 
     return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
@@ -26,9 +26,9 @@ export default function OperatingHoursGate({ children }: { children: React.React
 
   const getNextOpenTarget = (now: Date) => {
     let target = new Date(now);
-    target.setHours(12, 30, 0, 0);
+    target.setHours(12, 0, 0, 0);
 
-    // If current time is past 12:30 PM today, next opening is tomorrow at 12:30 PM
+    // If current time is past 12:00 PM today, next opening is tomorrow at 12:00 PM
     if (now.getTime() >= target.getTime()) {
       target.setDate(target.getDate() + 1);
     }
@@ -115,7 +115,7 @@ export default function OperatingHoursGate({ children }: { children: React.React
           </h1>
           <p className="text-xs sm:text-sm font-medium text-gray-600 max-w-xs mx-auto leading-relaxed">
             Mom's Magic accepts food orders daily strictly from{' '}
-            <span className="font-bold text-[#e11d48]">12:30 PM</span> to{' '}
+            <span className="font-bold text-[#e11d48]">12:00 PM</span> to{' '}
             <span className="font-bold text-[#e11d48]">10:45 PM</span>.
           </p>
         </div>
@@ -153,7 +153,7 @@ export default function OperatingHoursGate({ children }: { children: React.React
           <div className="bg-rose-50/60 border border-rose-100 rounded-2xl p-3 text-center">
             <span className="text-[10px] font-black uppercase tracking-wider text-gray-500 block mb-0.5">Opens Daily</span>
             <p className="text-base sm:text-lg font-black text-gray-900">
-              12:30 <span className="text-xs font-bold text-[#e11d48]">PM</span>
+              12:00 <span className="text-xs font-bold text-[#e11d48]">PM</span>
             </p>
           </div>
           <div className="bg-rose-50/60 border border-rose-100 rounded-2xl p-3 text-center">
