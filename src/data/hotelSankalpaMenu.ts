@@ -1,5 +1,5 @@
 // Hotel Sankalpa - Pure Veg Heritage Feasts, full menu.
-// 85 items across 9 categories. Every item is vegetarian.
+// 84 items across 9 categories. Every item is vegetarian.
 // Item names and prices are taken from the restaurant's own menu and must not be altered.
 // Dish photos are resolved through the centralized map in ./sankalpaMenuImages.
 
@@ -398,9 +398,9 @@ export const HOTEL_SANKALPA_MENU: SankalpaMenuCategory[] = [
         isVeg: true
       },
       {
-        name: 'Buns',
+        name: 'Buns (2 pcs)',
         price: 60,
-        image: SANKALPA_MENU_IMAGES['Buns'],
+        image: SANKALPA_MENU_IMAGES['Buns (2 pcs)'],
         isVeg: true
       },
       {
@@ -416,15 +416,9 @@ export const HOTEL_SANKALPA_MENU: SankalpaMenuCategory[] = [
         isVeg: true
       },
       {
-        name: 'Idli + Vada (1+1)',
-        price: 50,
-        image: SANKALPA_MENU_IMAGES['Idli + Vada (1+1)'],
-        isVeg: true
-      },
-      {
-        name: 'Singal Puri',
-        price: 50,
-        image: SANKALPA_MENU_IMAGES['Singal Puri'],
+        name: 'Puri',
+        price: 60,
+        image: SANKALPA_MENU_IMAGES['Puri'],
         isVeg: true
       },
       {

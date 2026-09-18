@@ -71,11 +71,10 @@ export const SANKALPA_MENU_IMAGES: Record<string, string> = {
 
   // South Indian Breakfast
   'Idli Vada (2+1)': '/images/menu/breakfast/idli-vada-2-1.jpg',
-  'Buns': '/images/menu/breakfast/buns.jpg',
+  'Buns (2 pcs)': '/images/menu/breakfast/buns.jpg',
   'Upma': '/images/menu/breakfast/upma.jpg',
   'Idli (2 pcs)': '/images/menu/breakfast/idli-2-pcs.jpg',
-  'Idli + Vada (1+1)': '/images/menu/breakfast/idli-vada-1-1.jpg',
-  'Singal Puri': '/images/menu/breakfast/singal-puri.jpg',
+  'Puri': '/images/menu/breakfast/singal-puri.jpg',
   'Vada (2 pcs)': '/images/menu/breakfast/vada-2-pcs.jpg',
 
   // Tandoori

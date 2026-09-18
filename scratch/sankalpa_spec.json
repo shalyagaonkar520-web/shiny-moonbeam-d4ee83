@@ -382,7 +382,7 @@
           "shows": "a plate with two white steamed idlis and one medu vada, sambar and chutney"
         },
         {
-          "name": "Buns",
+          "name": "Buns (2 pcs)",
           "price": 60,
           "slug": "buns",
           "shows": "Mangalore banana buns, soft puffed deep fried sweet bread with chutney"
@@ -400,14 +400,8 @@
           "shows": "two plain white steamed idlis with sambar and coconut chutney"
         },
         {
-          "name": "Idli + Vada (1+1)",
-          "price": 50,
-          "slug": "idli-vada-1-1",
-          "shows": "one idli and one medu vada on a plate with chutney"
-        },
-        {
-          "name": "Singal Puri",
-          "price": 50,
+          "name": "Puri",
+          "price": 60,
           "slug": "singal-puri",
           "shows": "puffed deep fried puri bread served with potato bhaji"
         },
