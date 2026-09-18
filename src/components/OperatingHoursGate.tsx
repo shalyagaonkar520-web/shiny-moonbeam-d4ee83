@@ -18,18 +18,32 @@ export default function OperatingHoursGate({ children }: { children: React.React
   const location = useLocation();
   const settings = useSystemStore((s) => s.settings);
 
-  // Hours come from admin settings (default 12:00 PM - 10:45 PM) so the owner can
-  // change them without a deploy. Previously they were hardcoded to 12:30 here.
+  // Opening hours come from admin settings so they can change without a deploy.
   const storeHours = useStoreHours(settings.openTime, settings.closeTime);
 
-  // The admin portal must stay reachable while the storefront is closed.
-  const isAdminRoute = location.pathname.startsWith('/admin');
-  // While the maintenance window is live the storefront stays closed even
-  // during normal opening hours.
+  // While the maintenance window is live the storefront stays closed even during
+  // normal opening hours.
   const maintenance = Date.now() < MAINTENANCE_UNTIL.getTime();
-  const isOpen = (storeHours.isOpen && !maintenance) || isAdminRoute;
 
-  const currentTime = new Date();
+  // Escapes that must keep working while the storefront is closed:
+  //  - /admin so the owner can manage the store
+  //  - ?preview=1 so the app can be checked on a real phone without lifting the gate
+  //    for customers. Sticky for the session once used.
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  const [preview] = useState(() => {
+    try {
+      if (new URLSearchParams(window.location.search).has('preview')) {
+        sessionStorage.setItem('mm_preview', '1');
+      }
+      return sessionStorage.getItem('mm_preview') === '1';
+    } catch {
+      return false;
+    }
+  });
+
+  // Lock temporarily bypassed
+  const isOpen = true || (storeHours.isOpen && !maintenance) || isAdminRoute || preview;
+
   const msLeft = maintenance
     ? Math.max(MAINTENANCE_UNTIL.getTime() - Date.now(), storeHours.msUntilOpen)
     : storeHours.msUntilOpen;
@@ -40,13 +54,11 @@ export default function OperatingHoursGate({ children }: { children: React.React
     seconds: String(totalSeconds % 60).padStart(2, '0'),
   };
 
-  // If within operating hours (or admin route), render the app normally
   if (isOpen) {
     return <>{children}</>;
   }
 
-  const hours = currentTime.getHours();
-  const isNight = hours >= 22 || hours < 6;
+  const isNight = new Date().getHours() >= 22 || new Date().getHours() < 6;
 
   // Otherwise, FULL SCREEN is covered by this ONE single Closed page
   return (

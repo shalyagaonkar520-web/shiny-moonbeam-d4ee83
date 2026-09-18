@@ -125,7 +125,8 @@ export default function DeliveryDashboard() {
       const past: any[] = [];
       
       snapshot.forEach((docSnap) => {
-        const o = { id: docSnap.id, ...docSnap.data() };
+        // Firestore returns DocumentData, so annotate to keep the status reads typed.
+        const o: any = { id: docSnap.id, ...docSnap.data() };
         if (o.status === 'delivered' || o.status === 'completed' || o.status === 'cancelled') {
           past.push(o);
         } else {

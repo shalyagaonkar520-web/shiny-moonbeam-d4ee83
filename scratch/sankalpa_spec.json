@@ -19,37 +19,37 @@
         },
         {
           "name": "Gobi Masala",
-          "price": 140,
+          "price": 120,
           "slug": "gobi-masala",
           "shows": "cauliflower florets in a thick red onion tomato gravy"
         },
         {
           "name": "Veg Keema",
-          "price": 150,
+          "price": 120,
           "slug": "veg-keema",
           "shows": "finely minced mixed vegetables cooked dry like a keema, no meat"
         },
         {
           "name": "Veg Makkanwala",
-          "price": 150,
+          "price": 130,
           "slug": "veg-makkanwala",
           "shows": "mixed vegetables in a creamy orange butter tomato gravy"
         },
         {
           "name": "Kaju Kolhapuri",
-          "price": 220,
+          "price": 200,
           "slug": "kaju-kolhapuri",
           "shows": "whole cashew nuts in a fiery deep red Kolhapuri gravy"
         },
         {
           "name": "Mix Veg",
-          "price": 150,
+          "price": 130,
           "slug": "mix-veg",
           "shows": "mixed vegetable curry with carrot, beans, peas and cauliflower"
         },
         {
           "name": "Veg Kolhapuri",
-          "price": 150,
+          "price": 130,
           "slug": "veg-kolhapuri",
           "shows": "mixed vegetables in a spicy deep red Kolhapuri masala"
         },
@@ -73,43 +73,43 @@
         },
         {
           "name": "Kaju Masala",
-          "price": 220,
+          "price": 200,
           "slug": "kaju-masala",
           "shows": "whole cashew nuts in a rich onion tomato masala gravy"
         },
         {
           "name": "Paneer Masala",
-          "price": 180,
+          "price": 170,
           "slug": "paneer-masala",
           "shows": "paneer cubes in a classic brown onion tomato masala gravy"
         },
         {
           "name": "Paneer Kadai",
-          "price": 220,
+          "price": 200,
           "slug": "paneer-kadai",
           "shows": "paneer with bell peppers in a semi dry kadai masala"
         },
         {
           "name": "Kaju Kurma",
-          "price": 220,
+          "price": 200,
           "slug": "kaju-kurma",
           "shows": "cashew nuts in a pale creamy mild korma gravy"
         },
         {
           "name": "Paneer Tikka (Main Course)",
-          "price": 220,
+          "price": 200,
           "slug": "paneer-tikka-main-course",
           "shows": "charred paneer tikka cubes in a thick masala gravy"
         },
         {
           "name": "Mushroom Tikka Masala",
-          "price": 220,
+          "price": 200,
           "slug": "mushroom-tikka-masala",
           "shows": "charred mushrooms in a creamy red tikka masala gravy"
         },
         {
           "name": "Kaju Paneer Masala",
-          "price": 220,
+          "price": 200,
           "slug": "kaju-paneer-masala",
           "shows": "cashew nuts and paneer cubes together in a rich creamy gravy"
         },
@@ -133,7 +133,7 @@
         },
         {
           "name": "Aloo Gobi Masala",
-          "price": 140,
+          "price": 120,
           "slug": "aloo-gobi-masala",
           "shows": "potato and cauliflower cooked together dry with turmeric and coriander"
         }
@@ -146,7 +146,7 @@
       "items": [
         {
           "name": "Aloo Pakoda",
-          "price": 40,
+          "price": 30,
           "slug": "aloo-pakoda",
           "shows": "deep fried potato fritters in gram flour batter, golden and crisp"
         },
@@ -158,31 +158,31 @@
         },
         {
           "name": "Mushroom Manchurian",
-          "price": 150,
+          "price": 120,
           "slug": "mushroom-manchurian",
           "shows": "fried mushrooms in a dark glossy Indo Chinese manchurian sauce"
         },
         {
           "name": "Mirchi Bhaji",
-          "price": 40,
+          "price": 30,
           "slug": "mirchi-bhaji",
           "shows": "large green chillies dipped in gram flour batter and deep fried"
         },
         {
           "name": "Roasted Papad",
-          "price": 25,
+          "price": 20,
           "slug": "roasted-papad",
           "shows": "plain roasted papadum discs, dry and blistered, no toppings"
         },
         {
           "name": "Fried Papad",
-          "price": 25,
+          "price": 20,
           "slug": "fried-papad",
           "shows": "deep fried puffed papadum, golden and bubbly, no toppings"
         },
         {
           "name": "Gobi Manchurian",
-          "price": 80,
+          "price": 70,
           "slug": "gobi-manchurian",
           "shows": "crispy fried cauliflower in a dark red glossy manchurian sauce"
         },
@@ -231,7 +231,7 @@
         },
         {
           "name": "Jeera Rice",
-          "price": 90,
+          "price": 80,
           "slug": "jeera-rice",
           "shows": "white basmati rice tempered with cumin seeds and coriander"
         },
@@ -249,7 +249,7 @@
         },
         {
           "name": "Curd Rice",
-          "price": 100,
+          "price": 80,
           "slug": "curd-rice",
           "shows": "white curd rice with mustard tempering, curry leaves and pomegranate"
         },
@@ -273,7 +273,7 @@
         },
         {
           "name": "Veg Biryani",
-          "price": 110,
+          "price": 100,
           "slug": "veg-biryani",
           "shows": "vegetarian biryani with carrot, beans, peas, no meat and no egg"
         },
@@ -285,13 +285,13 @@
         },
         {
           "name": "Lemon Rice",
-          "price": 110,
+          "price": 90,
           "slug": "lemon-rice",
           "shows": "bright yellow lemon rice with peanuts and curry leaves"
         },
         {
           "name": "Veg Fried Rice",
-          "price": 130,
+          "price": 120,
           "slug": "veg-fried-rice",
           "shows": "Indo Chinese vegetable fried rice with diced carrot, beans, spring onion"
         },
@@ -328,13 +328,13 @@
         },
         {
           "name": "Plain Dosa",
-          "price": 50,
+          "price": 40,
           "slug": "plain-dosa",
           "shows": "plain golden crisp dosa rolled, with chutney and sambar, no filling"
         },
         {
           "name": "Set Dosa",
-          "price": 70,
+          "price": 60,
           "slug": "set-dosa",
           "shows": "a stack of small soft spongy set dosas with chutney"
         },
@@ -352,19 +352,19 @@
         },
         {
           "name": "Khali Dosa",
-          "price": 70,
+          "price": 60,
           "slug": "khali-dosa",
           "shows": "soft thick plain dosa without filling, served folded with chutney"
         },
         {
           "name": "Uttappa",
-          "price": 80,
+          "price": 70,
           "slug": "uttappa",
           "shows": "thick soft uttapam pancake topped with onion, tomato and coriander"
         },
         {
           "name": "Masala Dosa",
-          "price": 70,
+          "price": 60,
           "slug": "masala-dosa",
           "shows": "classic crisp masala dosa with yellow potato filling, sambar and chutney"
         }
@@ -377,13 +377,13 @@
       "items": [
         {
           "name": "Idli Vada (2+1)",
-          "price": 70,
+          "price": 60,
           "slug": "idli-vada-2-1",
           "shows": "a plate with two white steamed idlis and one medu vada, sambar and chutney"
         },
         {
           "name": "Buns",
-          "price": 70,
+          "price": 60,
           "slug": "buns",
           "shows": "Mangalore banana buns, soft puffed deep fried sweet bread with chutney"
         },
@@ -492,7 +492,7 @@
         },
         {
           "name": "Paneer Tikka (Tandoori Counter)",
-          "price": 220,
+          "price": 200,
           "slug": "paneer-tikka-tandoori",
           "shows": "skewered charred paneer tikka cubes with onion and capsicum, dry tandoori starter"
         }
@@ -505,25 +505,25 @@
       "items": [
         {
           "name": "Daal Butter Fry",
-          "price": 130,
+          "price": 120,
           "slug": "daal-butter-fry",
           "shows": "yellow dal fry finished with a pat of butter melting on top"
         },
         {
           "name": "Daal Kolhapuri",
-          "price": 130,
+          "price": 120,
           "slug": "daal-kolhapuri",
           "shows": "spicy deep red Kolhapuri style lentil dal"
         },
         {
           "name": "Daal Fry",
-          "price": 110,
+          "price": 100,
           "slug": "daal-fry",
           "shows": "classic yellow dal fry with onion tomato and coriander"
         },
         {
           "name": "Daal Tadka",
-          "price": 130,
+          "price": 120,
           "slug": "daal-tadka",
           "shows": "yellow dal with a ghee tempering of cumin, garlic and dried red chilli"
         },

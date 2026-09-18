@@ -322,7 +322,9 @@ export default function HotelMalabarMenuPage() {
             return (
               <section
                 key={category.title}
-                ref={(el) => (sectionRefs.current[category.title] = el)}
+                ref={(el) => {
+                  sectionRefs.current[category.title] = el;
+                }}
                 className="scroll-mt-36"
               >
                 {/* Category Header */}

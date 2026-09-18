@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&family=Poppins:wght@400;600;800&display=swap');
+/* Fonts are loaded from index.html with preconnect. A CSS @import here was
+   render-blocking and serialised: the browser had to fetch and parse this file
+   before it even discovered the font request. */
 @import "tailwindcss";
 
 @theme {
@@ -34,6 +36,53 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior-y: none;
+  }
+
+  /* --- Touch and scroll smoothness ------------------------------------ */
+
+  html {
+    /* Kills the ~300ms tap delay some mobile browsers still apply. */
+    touch-action: manipulation;
+  }
+
+  /* No grey flash box when tapping a card or button on Android/iOS. */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Long menus render 85-100 cards. Letting the browser skip the work for
+     sections that are far off screen keeps scrolling smooth on a phone. */
+  section {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 600px;
+  }
+
+  /* The home grid now lists every hotel's food (230+ cards). Skipping render
+     work for cards that are far off screen keeps scrolling smooth on a phone;
+     `auto` lets the browser remember each card's real height after first paint
+     so the scrollbar does not jump. */
+  .dish-card-cv {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 270px;
+  }
+
+  /* Images should never stretch or squash their card. */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Honour the OS "reduce motion" setting instead of animating regardless. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 
   h1, h2, h3, h4, h5, h6 {

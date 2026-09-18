@@ -1,0 +1,34 @@
+import { chromium } from 'playwright';
+import http from 'http'; import fs from 'fs'; import path from 'path';
+const ROOT=path.resolve('dist');
+const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.jpg':'image/jpeg','.png':'image/png','.svg':'image/svg+xml','.ico':'image/x-icon','.webmanifest':'application/manifest+json'};
+const srv=http.createServer((q,r)=>{let p=decodeURIComponent(q.url.split('?')[0]);let f=path.join(ROOT,p);
+ if(!fs.existsSync(f)||fs.statSync(f).isDirectory())f=path.join(ROOT,'index.html');
+ r.writeHead(200,{'Content-Type':MIME[path.extname(f)]||'application/octet-stream'});fs.createReadStream(f).pipe(r);});
+await new Promise(r=>srv.listen(4184,r));
+const b=await chromium.launch();
+const ctx=await b.newContext({viewport:{width:390,height:844}});
+const page=await ctx.newPage();
+const cdp=await ctx.newCDPSession(page);
+await cdp.send('Network.enable');
+await cdp.send('Network.emulateNetworkConditions',{offline:false,latency:150,downloadThroughput:1.6*1024*1024/8,uploadThroughput:750*1024/8});
+await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});
+let bytes=0; page.on('response',async r=>{try{bytes+=(await r.body()).length;}catch{}});
+const t0=Date.now();
+await page.goto('http://localhost:4184/?preview=1',{waitUntil:'domcontentloaded'});
+await page.waitForSelector('.dish-card-cv',{timeout:40000});
+const paint=await page.evaluate(()=>{const e=performance.getEntriesByType('paint').find(p=>p.name==='first-contentful-paint');return e?Math.round(e.startTime):null;});
+console.log('Slow-4G + 4x CPU throttle, 390px viewport');
+console.log('  FCP:', paint, 'ms');
+console.log('  first cards painted at:', Date.now()-t0, 'ms');
+await page.waitForTimeout(2500);
+console.log('  transferred:', Math.round(bytes/1024), 'KB');
+const imgs=await page.evaluate(()=>[...document.images].filter(i=>i.complete&&i.naturalWidth>0).length);
+const total=await page.evaluate(()=>document.images.length);
+console.log('  images decoded / in DOM:', imgs, '/', total, '(lazy: only the visible ones should load)');
+const nodes=await page.evaluate(()=>document.querySelectorAll('*').length);
+console.log('  DOM nodes:', nodes);
+// scroll responsiveness
+const s0=Date.now(); for(let i=0;i<20;i++){await page.mouse.wheel(0,2000);await page.waitForTimeout(16);}
+console.log('  20 wheel scrolls took:', Date.now()-s0, 'ms');
+await b.close(); srv.close();

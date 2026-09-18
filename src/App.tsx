@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import SiteClosedGate from './components/SiteClosedGate';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Toaster, toast } from 'react-hot-toast';
 import { useEffect, Suspense, lazy } from 'react';
@@ -7,7 +8,8 @@ import { requestForToken, onMessageListener } from './firebase';
 // Components
 const LandingPage = lazy(() => import('./components/LandingPage'));
 const CategoryPage = lazy(() => import('./components/CategoryPage'));
-const CartPage = lazy(() => import('./components/CartPage'));
+// CartPage is not routed: /cart redirects to /checkout. Import removed so the
+// bundler stops emitting a chunk nothing ever loads.
 const Checkout = lazy(() => import('./components/Checkout'));
 const ProfilePage = lazy(() => import('./components/ProfilePage'));
 const TrackingPage = lazy(() => import('./components/TrackingPage'));
@@ -159,6 +161,7 @@ export default function App() {
           }
         }}
       />
+      <SiteClosedGate>
       <OperatingHoursGate>
         <LocationPicker />
         <InstallAppModal />
@@ -202,6 +205,7 @@ export default function App() {
           <BottomNav />
         </div>
       </OperatingHoursGate>
+      </SiteClosedGate>
     </Router>
   );
 }

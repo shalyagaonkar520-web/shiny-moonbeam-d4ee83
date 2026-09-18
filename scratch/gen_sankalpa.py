@@ -28,7 +28,7 @@ export const SANKALPA_MENU_IMAGES: Record<string, string> = {{{chr(10).join(rows
 }};
 
 // Shown only if a dish photo ever fails to load.
-export const SANKALPA_FALLBACK_IMAGE = '/hotel_sankalpa.jpg';
+export const SANKALPA_FALLBACK_IMAGE = '/hotel_sankalpa.webp';
 
 export function getSankalpaDishImage(itemName: string): string {{
   return SANKALPA_MENU_IMAGES[itemName] || SANKALPA_FALLBACK_IMAGE;

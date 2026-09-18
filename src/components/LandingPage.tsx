@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useMenuStore } from '../store/menuStore';
 import { useCartStore } from '../store/cartStore';
+import { useLiveHotelStore } from '../store/liveHotelStore';
 import { useSystemStore } from '../store/systemStore';
 import { useLocationStore } from '../store/locationStore';
 import { useAuthStore } from '../store/authStore';
@@ -17,6 +18,7 @@ import toast from 'react-hot-toast';
 import { playSound, SOUNDS } from '../utils/audio';
 import { useSEO } from '../utils/seo';
 import DishImage from './DishImage';
+import { PARTNER_HOTEL_PRODUCTS } from '../data/partnerHotelItems';
 
 const getStableRating = (id: string | number) => {
   const str = String(id);
@@ -164,6 +166,12 @@ export default function LandingPage() {
   const [showHelpToOrder, setShowHelpToOrder] = useState(false);
   const openInstallModal = useInstallModalStore(state => state.openModal);
   const bestsellersRef = useRef<HTMLDivElement>(null);
+  // The home grid lists every hotel's menu (230+ dishes). Rendering them all at
+  // once costs about 6,500 DOM nodes and made scrolling noticeably heavier on a
+  // phone, so cards are appended a page at a time as the user reaches the end.
+  const PAGE_SIZE = 40;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const adminToken = localStorage.getItem('moms_magic_admin_token');
   const userPhone = localStorage.getItem('moms_magic_user_phone');
@@ -192,7 +200,17 @@ export default function LandingPage() {
     return () => clearInterval(bannerTimer);
   }, []);
 
+  // Live availability from JIS Kitchen. A hotel deactivated there, or one
+  // whose kitchen switched itself off, must close here too.
+  const isHotelOpen = useLiveHotelStore((s) => s.isOpen);
+  useEffect(() => useLiveHotelStore.getState().subscribe(), []);
+
   const handleHotelClick = (hotel: typeof PARTNER_HOTELS[0]) => {
+    if (!isHotelOpen(hotel.id)) {
+      toast(hotel.name + ' is not taking orders right now.');
+      return;
+    }
+
     if (hotel.id === 'mumtaz') {
       navigate('/hotel-mumtaz');
       return;
@@ -240,7 +258,9 @@ export default function LandingPage() {
       return;
     }
     playSound(SOUNDS.ADD_TO_CART);
-    addItem(product);
+    // Presentation-only fields on partner hotel items must not reach the cart.
+    const { hotelName, hotelPath, showHotelBadge, ...cartProduct } = product;
+    addItem(cartProduct);
     toast.success(`${product.name} added! 🍽️`, {
       style: {
         background: '#FFFFFF',
@@ -255,8 +275,28 @@ export default function LandingPage() {
     });
   };
 
-  // Products
-  const allProducts = [...menuItems];
+  // Products.
+  // `menuItems` is Hotel Al Amin's menu, so it stays first and its cards carry
+  // no hotel badge; PARTNER_HOTEL_PRODUCTS then adds Sankalpa followed by the
+  // remaining hotels, each badged with the hotel that cooks it.
+  const allProducts = [...menuItems, ...PARTNER_HOTEL_PRODUCTS];
+
+  /** Hotel name to print on a card, or null for Al Amin / Mom's Magic items. */
+  const hotelBadgeOf = (product: any): string | null =>
+    product?.showHotelBadge ? product.hotelName : null;
+
+  /**
+   * Card blurb. Hotel menus that ship no real description fall back to
+   * "<Hotel> <Dish>", which would just repeat the badge and the title, so
+   * those are dropped rather than printed a second time.
+   */
+  const blurbOf = (product: any): string | null => {
+    const text: string | undefined = product?.description;
+    if (!text) return null;
+    const filler = `${product.hotelName} ${product.name}`;
+    if (text === filler || text.replace(/^Authentic /, '') === filler) return null;
+    return text;
+  };
 
   // Bestsellers under 149
   const bestsellersUnder149 = allProducts.filter(item => {
@@ -324,6 +364,30 @@ export default function LandingPage() {
     return true;
   });
 
+  const visibleProducts = filteredProducts.slice(0, visibleCount);
+  const hasMoreProducts = filteredProducts.length > visibleCount;
+
+  // Any change of filter, tab or search starts the list again from the top.
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [searchQuery, dietFilter, selectedMindCategory, selectedCategoryTab]);
+
+  // Append the next page when the sentinel below the grid scrolls into view.
+  useEffect(() => {
+    const sentinel = loadMoreRef.current;
+    if (!sentinel || !hasMoreProducts) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((count) => count + PAGE_SIZE);
+        }
+      },
+      { rootMargin: '600px' }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMoreProducts, visibleProducts.length]);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#fff1f4]/70 via-[#fff8fa]/60 to-[#ffffff] text-gray-900 font-sans pb-36">
       
@@ -337,7 +401,7 @@ export default function LandingPage() {
             {/* Left: Location Dropdown */}
             <div 
               onClick={openLocationPicker}
-              className="flex flex-col cursor-pointer group select-none max-w-[170px] sm:max-w-xs"
+              className="flex flex-col cursor-pointer group select-none min-w-0 flex-1 max-w-[170px] sm:max-w-xs"
             >
               <div className="flex items-center gap-1">
                 <span className="text-xs sm:text-[13px] font-black tracking-tight flex items-center gap-1 group-hover:text-amber-300 transition-colors">
@@ -359,7 +423,7 @@ export default function LandingPage() {
                 title="Install Mom's Magic App"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>Install</span>
+                <span className="hidden sm:inline">Install</span>
               </button>
 
               <button
@@ -368,7 +432,8 @@ export default function LandingPage() {
                 className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white font-bold text-xs border border-white/30 active:scale-95 transition-all cursor-pointer shadow-xs"
                 title="Need Help with Ordering?"
               >
-                <span>Help? ❓</span>
+                <span className="hidden sm:inline">Help?</span>
+                <span aria-hidden="true">❓</span>
               </button>
 
               {/* SIGN IN / LOGIN ADDED AT SIDE OF HELP */}
@@ -380,7 +445,8 @@ export default function LandingPage() {
                   title="Sign In / Login to Mom's Magic"
                 >
                   <LogIn className="w-3.5 h-3.5 text-blue-950" />
-                  <span>Sign In / Login</span>
+                  <span className="hidden sm:inline">Sign In / Login</span>
+                  <span className="sm:hidden">Sign In</span>
                 </button>
               ) : (
                 <button
@@ -574,14 +640,14 @@ export default function LandingPage() {
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                {filteredProducts.map((product) => {
+                {visibleProducts.map((product) => {
                   const inCart = cartItems.find(i => i.id === product.id);
                   const originalPrice = Math.round(product.price * 1.25);
 
                   return (
                     <div
                       key={product.id}
-                      className="bg-white rounded-2xl p-2.5 sm:p-3 border border-rose-100 shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden text-left"
+                      className="dish-card-cv bg-white rounded-2xl p-2.5 sm:p-3 border border-rose-100 shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden text-left"
                     >
                       {/* Food Image with Floating Plus Button */}
                       <div className="relative aspect-square rounded-xl overflow-hidden bg-gray-50 mb-2">
@@ -590,6 +656,12 @@ export default function LandingPage() {
                           alt={product.name}
                           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                         />
+
+                        {hotelBadgeOf(product) && (
+                          <span className="absolute top-1.5 left-1.5 z-10 max-w-[90%] truncate bg-black/70 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs">
+                            {hotelBadgeOf(product)}
+                          </span>
+                        )}
 
                         {product.fires && product.fires >= 2 && (
                           <span className="absolute top-1.5 left-1.5 bg-rose-500 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs flex items-center gap-0.5">
@@ -680,6 +752,16 @@ export default function LandingPage() {
                     </div>
                   );
                 })}
+                  {hasMoreProducts && (
+                    <div ref={loadMoreRef} className="col-span-2 flex justify-center py-4">
+                      <button
+                        onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+                        className="text-xs font-bold text-[#1836c2] bg-blue-50 hover:bg-blue-100 px-5 py-2.5 rounded-full transition-colors cursor-pointer"
+                      >
+                        Show more dishes ({filteredProducts.length - visibleCount} left)
+                      </button>
+                    </div>
+                  )}
               </div>
             )}
           </section>
@@ -701,15 +783,19 @@ export default function LandingPage() {
 
           {/* Horizontal Scroll of Rounded Hotel Boxes */}
           <div className="flex items-stretch gap-3 overflow-x-auto no-scrollbar py-1">
-            {PARTNER_HOTELS.map((hotel) => (
+            {PARTNER_HOTELS.map((hotel) => {
+              const liveOpen = isHotelOpen(hotel.id);
+              return (
               <motion.div
                 key={hotel.id}
-                whileTap={{ scale: 0.96 }}
+                whileTap={{ scale: liveOpen ? 0.96 : 1 }}
                 onClick={() => handleHotelClick(hotel)}
-                className={`w-[130px] sm:w-[145px] rounded-2xl p-2.5 flex flex-col justify-between shrink-0 cursor-pointer transition-all bg-white border ${
-                  hotel.isOpen 
-                    ? 'border-blue-600/30 shadow-md shadow-blue-500/5 ring-1 ring-blue-500/20' 
-                    : 'border-gray-200 hover:border-blue-300 shadow-sm'
+                className={`w-[130px] sm:w-[145px] rounded-2xl p-2.5 flex flex-col justify-between shrink-0 transition-all bg-white border ${
+                  !liveOpen
+                    ? 'border-gray-200 opacity-60 cursor-not-allowed grayscale'
+                    : hotel.isOpen
+                    ? 'border-blue-600/30 shadow-md shadow-blue-500/5 ring-1 ring-blue-500/20 cursor-pointer'
+                    : 'border-gray-200 hover:border-blue-300 shadow-sm cursor-pointer'
                 }`}
               >
                 {/* Hotel Photo Container (Empty Placeholder for Coming Soon hotels as requested) */}
@@ -732,9 +818,16 @@ export default function LandingPage() {
                     </div>
                   )}
 
-                  {/* Status Badge */}
+                  {/* CLOSED overrides anything the hardcoded card claims. */}
+                  {!liveOpen && (
+                    <span className="absolute inset-x-1.5 bottom-1.5 text-[8px] font-black uppercase tracking-wider px-1.5 py-1 rounded-full bg-red-500 text-white text-center">
+                      Closed
+                    </span>
+                  )}
                   <span className={`absolute top-1.5 right-1.5 text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shadow-xs ${
-                    hotel.isOpen
+                    !liveOpen
+                      ? 'bg-gray-400 text-white'
+                      : hotel.isOpen
                       ? 'bg-emerald-500 text-white'
                       : hotel.id === 'mumtaz' || hotel.id === 'sankalpa'
                       ? 'bg-blue-600 text-white'
@@ -765,7 +858,8 @@ export default function LandingPage() {
                   </div>
                 </div>
               </motion.div>
-            ))}
+            );
+            })}
           </div>
         </section>
 
@@ -857,6 +951,12 @@ export default function LandingPage() {
                         alt={product.name}
                         className="w-full h-full object-cover"
                       />
+
+                      {hotelBadgeOf(product) && (
+                        <span className="absolute top-1.5 left-1.5 z-10 max-w-[90%] truncate bg-black/70 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs">
+                          {hotelBadgeOf(product)}
+                        </span>
+                      )}
 
                       {/* Floating Pink Add Button or Stepper */}
                       <div className="absolute bottom-1.5 right-1.5 z-20">
@@ -1042,14 +1142,14 @@ export default function LandingPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3 sm:gap-4 mt-3">
-              {filteredProducts.map((product) => {
+              {visibleProducts.map((product) => {
                 const inCart = cartItems.find(i => i.id === product.id);
                 const originalPrice = Math.round(product.price * 1.25);
 
                 return (
                   <div
                     key={product.id}
-                    className="bg-white rounded-2xl p-2.5 sm:p-3 border border-gray-200/80 shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden text-left"
+                    className="dish-card-cv bg-white rounded-2xl p-2.5 sm:p-3 border border-gray-200/80 shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden text-left"
                   >
                     {/* Food Image with Floating Plus Button */}
                     <div className="relative aspect-square rounded-xl overflow-hidden bg-gray-50 mb-2">
@@ -1058,6 +1158,12 @@ export default function LandingPage() {
                         alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                       />
+
+                      {hotelBadgeOf(product) && (
+                        <span className="absolute top-1.5 left-1.5 z-10 max-w-[90%] truncate bg-black/70 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs">
+                          {hotelBadgeOf(product)}
+                        </span>
+                      )}
 
                       {product.fires && product.fires >= 2 && (
                         <span className="absolute top-1.5 left-1.5 bg-rose-500 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs flex items-center gap-0.5">
@@ -1128,9 +1234,9 @@ export default function LandingPage() {
                           {product.name}
                         </h4>
                         
-                        {product.description && (
+                        {blurbOf(product) && (
                           <p className="text-[10px] text-gray-500 line-clamp-1 mt-0.5">
-                            {product.description}
+                            {blurbOf(product)}
                           </p>
                         )}
                       </div>
@@ -1157,6 +1263,16 @@ export default function LandingPage() {
                   </div>
                 );
               })}
+                {hasMoreProducts && (
+                  <div ref={loadMoreRef} className="col-span-2 flex justify-center py-4">
+                    <button
+                      onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+                      className="text-xs font-bold text-[#1836c2] bg-blue-50 hover:bg-blue-100 px-5 py-2.5 rounded-full transition-colors cursor-pointer"
+                    >
+                      Show more dishes ({filteredProducts.length - visibleCount} left)
+                    </button>
+                  </div>
+                )}
             </div>
           )}
         </section>

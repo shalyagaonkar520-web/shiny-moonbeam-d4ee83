@@ -48,6 +48,7 @@ const DEFAULT_SETTINGS: AdminSettings = {
   ],
   taxRate: 5,
   deliveryFee: 40,
+  coupons: [],
   minOrderValue: 150
 };
 

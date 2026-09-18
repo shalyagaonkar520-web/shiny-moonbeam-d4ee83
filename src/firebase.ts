@@ -1,5 +1,4 @@
 import { initializeApp } from 'firebase/app';
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { getFirestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
@@ -15,69 +14,102 @@ const firebaseConfig = {
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
-export const messaging = getMessaging(app);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 
 /**
+ * Firebase Cloud Messaging is loaded lazily and defensively.
+ *
+ * This module used to run `getMessaging(app)` at import time. That call throws on
+ * any browser without the Push API, which includes Safari on iOS unless the app is
+ * installed to the home screen. A throw at module scope takes the whole bundle
+ * down, so the app rendered a blank page on those devices instead of just losing
+ * notifications. Loading it on demand also keeps firebase/messaging out of the
+ * first paint.
+ */
+async function getMessagingIfSupported() {
+  try {
+    if (typeof window === 'undefined') return null;
+    if (!('serviceWorker' in navigator) || !('Notification' in window)) return null;
+
+    const { getMessaging, isSupported } = await import('firebase/messaging');
+    if (!(await isSupported())) return null;
+    return getMessaging(app);
+  } catch (err) {
+    console.warn('Push messaging is unavailable on this browser:', err);
+    return null;
+  }
+}
+
+/**
  * Requests browser notification permission, registers the service worker,
  * retrieves the FCM registration token, and saves it to Firestore.
+ *
+ * Safe to call anywhere: it resolves to null rather than throwing when the
+ * browser cannot do push at all.
  */
 export const requestForToken = async (): Promise<string | null> => {
   try {
-    if (!('serviceWorker' in navigator)) {
-      console.warn('Service workers are not supported in this browser.');
+    const messaging = await getMessagingIfSupported();
+    if (!messaging) return null;
+
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      console.warn('Notification permission was not granted (status:', permission, ').');
       return null;
     }
 
-    const permission = await Notification.requestPermission();
-    if (permission === 'granted') {
-      // Use the active PWA service worker (sw.js) which imports /firebase-messaging-sw.js
-      const registration = await navigator.serviceWorker.ready;
+    const { getToken } = await import('firebase/messaging');
+    const registration = await navigator.serviceWorker.ready;
 
-      // Get FCM token
-      const currentToken = await getToken(messaging, {
-        serviceWorkerRegistration: registration,
-        vapidKey: 'BEGabbTzNBXMxN2aid3HvFe6ehKGSJnS7JrwVaE79ySe9HhgLQ6UkmdfZpumQzeMRC3lGq5pdTJzgSfOFshxRSI',
-      });
+    const currentToken = await getToken(messaging, {
+      serviceWorkerRegistration: registration,
+      vapidKey: 'BEGabbTzNBXMxN2aid3HvFe6ehKGSJnS7JrwVaE79ySe9HhgLQ6UkmdfZpumQzeMRC3lGq5pdTJzgSfOFshxRSI',
+    });
 
-      if (currentToken) {
-        console.log('FCM Registration Token retrieved successfully:', currentToken);
-
-        // Save token to Firestore deviceTokens collection.
-        // Using the token as the document ID prevents duplicate entries.
-        const tokenDocRef = doc(db, 'deviceTokens', currentToken);
-        await setDoc(
-          tokenDocRef,
-          {
-            token: currentToken,
-            createdAt: serverTimestamp(),
-            lastUpdated: serverTimestamp(),
-            userAgent: navigator.userAgent,
-            platform: navigator.platform,
-          },
-          { merge: true }
-        );
-
-        return currentToken;
-      } else {
-        console.warn('No registration token available. Request permission to generate one.');
-      }
-    } else {
-      console.warn('Notification permission was not granted (status:', permission, ').');
+    if (!currentToken) {
+      console.warn('No registration token available.');
+      return null;
     }
+
+    // Save token to Firestore deviceTokens collection.
+    // Using the token as the document ID prevents duplicate entries.
+    await setDoc(
+      doc(db, 'deviceTokens', currentToken),
+      {
+        token: currentToken,
+        createdAt: serverTimestamp(),
+        lastUpdated: serverTimestamp(),
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+      },
+      { merge: true }
+    );
+
+    return currentToken;
   } catch (error) {
-    console.error('An error occurred while getting FCM token or saving to Firestore:', error);
+    console.error('An error occurred while getting the FCM token:', error);
+    return null;
   }
-  return null;
 };
 
 /**
  * Subscribes to foreground push notification events.
- * Returns an unsubscribe function.
+ * Returns an unsubscribe function (a no-op where push is unsupported).
  */
 export const onMessageListener = (callback: (payload: any) => void) => {
-  return onMessage(messaging, (payload) => {
-    callback(payload);
-  });
+  let unsubscribe: (() => void) | null = null;
+  let cancelled = false;
+
+  (async () => {
+    const messaging = await getMessagingIfSupported();
+    if (!messaging || cancelled) return;
+    const { onMessage } = await import('firebase/messaging');
+    unsubscribe = onMessage(messaging, (payload) => callback(payload));
+  })();
+
+  return () => {
+    cancelled = true;
+    if (unsubscribe) unsubscribe();
+  };
 };
