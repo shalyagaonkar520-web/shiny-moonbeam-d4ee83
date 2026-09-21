@@ -49,7 +49,7 @@ const PARTNER_HOTELS = [
     isOpen: true,
     badge: "Open Now",
     deliveryTime: "10-15 mins",
-    image: "/logo.png",
+    image: "/logo-sm.webp",
     hasCustomPhoto: true
   },
   {

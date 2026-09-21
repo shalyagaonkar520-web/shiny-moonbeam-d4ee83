@@ -8,7 +8,11 @@ import {defineConfig, loadEnv} from 'vite';
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
-    base: './',
+    // Must be absolute. With './' the asset URLs in index.html are relative, so
+    // a nested route like /celebration/design or /track/<orderId> asked the
+    // server for /celebration/assets/index-*.js, got index.html back from the
+    // history fallback, and died on "Unexpected token '<'" with a blank page.
+    base: '/',
     plugins: [
       react(), 
       tailwindcss(),

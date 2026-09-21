@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { notifyTelegram } from '../lib/notifyTelegram';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Send, Sparkles, ChevronLeft as ArrowLeft, ChevronRight as ArrowRight } from 'lucide-react';
@@ -103,9 +104,7 @@ export default function CelebrationDesign() {
 
     const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 
-    // ── Telegram Notification (dual-path) ──
-    const TELEGRAM_BOT_TOKEN = '8828362126:AAGbOzb8Q9Jhi29Bp6sQ_Q6hRo4Xj2SGfQg';
-    const TELEGRAM_CHAT_ID = '-1003803637741';
+    // Telegram notification; the server proxy holds the bot token.
     const escHtml = (s: string) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const tgMessage = [
       `🎉 <b>NEW CELEBRATION ENQUIRY!</b> 🎉`,
@@ -120,22 +119,7 @@ export default function CelebrationDesign() {
       `🌟 <b>Moms Magic</b> - Celebration Booking`,
     ].join('\n');
 
-    const sendTgDirect = async () => {
-      const r = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: tgMessage, parse_mode: 'HTML' })
-      });
-      if (!r.ok) { const d = await r.json(); throw new Error(d.description); }
-    };
-    try {
-      const pr = await fetch('/api/send-telegram', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: tgMessage }), keepalive: true,
-        signal: AbortSignal.timeout(8000)
-      });
-      if (!pr.ok) await sendTgDirect();
-    } catch { try { await sendTgDirect(); } catch (e) { console.error('Telegram failed:', e); } }
-    // ────────────────────────────────────────
+    await notifyTelegram(tgMessage);
 
     setTimeout(() => {
       setSending(false);

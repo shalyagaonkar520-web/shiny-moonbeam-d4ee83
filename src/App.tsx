@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'r
 import SiteClosedGate from './components/SiteClosedGate';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Toaster, toast } from 'react-hot-toast';
-import { useEffect, Suspense, lazy } from 'react';
+import { useEffect, useCallback, Suspense, lazy } from 'react';
 import { requestForToken, onMessageListener } from './firebase';
 
 // Components
@@ -23,8 +23,9 @@ const HotelSankalpaMenuPage = lazy(() => import('./components/HotelSankalpaMenuP
 import BottomNav from './components/BottomNav';
 import BottomCartBar from './components/BottomCartBar';
 import CityGateway from './components/CityGateway';
-import LocationPicker from './components/LocationPicker';
-import InstallAppModal from './components/InstallAppModal';
+// Both render null until opened, so they are kept out of the app-shell chunk.
+const LocationPicker = lazy(() => import('./components/LocationPicker'));
+const InstallAppModal = lazy(() => import('./components/InstallAppModal'));
 import FoodLoader from './components/FoodLoader';
 import OperatingHoursGate from './components/OperatingHoursGate';
 import { useInstallModalStore } from './store/installModalStore';
@@ -88,13 +89,8 @@ export default function App() {
     };
   }, [listenSettings, listenToMenu]);
 
-  // Request notification permissions, register service worker, and setup foreground listener on mount
-  useEffect(() => {
-    // Request permission & save token to Firestore
-    requestForToken();
-
-    // Listen for foreground push notifications
-    const unsubscribe = onMessageListener((payload) => {
+  // Toast for a push that arrives while the app is open.
+  const handlePushPayload = useCallback((payload: any) => {
       console.log('Foreground FCM notification received:', payload);
       
       // Render premium Swish-themed notification Toast matching app styles
@@ -110,7 +106,7 @@ export default function App() {
                 <div className="flex-shrink-0 pt-0.5">
                   <img
                     className="h-10 w-10 rounded-full object-cover border border-[#4CD964]/20"
-                    src={payload.notification?.image || '/logo.png'}
+                    src={payload.notification?.image || '/logo-sm.webp'}
                     alt="Notification Icon"
                   />
                 </div>
@@ -136,14 +132,35 @@ export default function App() {
         ),
         { duration: 6000 }
       );
-    });
+  }, []);
+
+  // Push notifications are set up once the browser is idle. Doing it on mount
+  // pulled firebase messaging + installations into the first paint and popped
+  // the permission prompt while the page was still rendering.
+  useEffect(() => {
+    let unsubscribe: (() => void) | undefined;
+    let cancelled = false;
+
+    const setUpPush = () => {
+      if (cancelled) return;
+      requestForToken();
+      unsubscribe = onMessageListener(handlePushPayload);
+    };
+
+    const idle = (window as any).requestIdleCallback;
+    const handle = idle
+      ? idle(setUpPush, { timeout: 4000 })
+      : window.setTimeout(setUpPush, 2500);
 
     return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
+      cancelled = true;
+      const cancelIdle = (window as any).cancelIdleCallback;
+      if (idle && cancelIdle) cancelIdle(handle);
+      else clearTimeout(handle);
+      unsubscribe?.();
     };
   }, []);
+
 
   return (
     <Router>
@@ -163,8 +180,11 @@ export default function App() {
       />
       <SiteClosedGate>
       <OperatingHoursGate>
-        <LocationPicker />
-        <InstallAppModal />
+        {/* Lazy, so they need their own boundary; neither shows anything until opened. */}
+        <Suspense fallback={null}>
+          <LocationPicker />
+          <InstallAppModal />
+        </Suspense>
         
         <div className="min-h-screen bg-gradient-to-b from-[#fff5f7] via-[#fff9fb] to-[#ffffff] text-gray-900 font-sans relative flex flex-col selection:bg-rose-500/20">
 
@@ -196,6 +216,9 @@ export default function App() {
                   <Route path="/login" element={<AuthPage />} />
                   <Route path="/signin" element={<AuthPage />} />
                   <Route path="/signup" element={<AuthPage />} />
+                  {/* A mistyped or stale URL rendered an empty page with only a
+                      "No routes matched" warning in the console. */}
+                  <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </Suspense>
             </PageTransition>

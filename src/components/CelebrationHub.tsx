@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { notifyTelegram } from '../lib/notifyTelegram';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Cake, PartyPopper, Sparkles, X, Wand2, Hammer, Send } from 'lucide-react';
@@ -119,9 +120,7 @@ export default function CelebrationHub() {
 
     const waUrl = `https://wa.me/919606001790?text=${encodeURIComponent(message)}`;
 
-    // ── Telegram Notification (dual-path) ──
-    const TELEGRAM_BOT_TOKEN = '8828362126:AAGbOzb8Q9Jhi29Bp6sQ_Q6hRo4Xj2SGfQg';
-    const TELEGRAM_CHAT_ID = '-1003803637741';
+    // Telegram notification; the server proxy holds the bot token.
     const escHtml = (s: string) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const tgMessage = [
       `🎈 <b>NEW PARTY SETUP BOOKING!</b> 🎈`,
@@ -134,22 +133,7 @@ export default function CelebrationHub() {
       `🌟 <b>Moms Magic</b> - Celebration Hub`,
     ].join('\n');
 
-    const sendTgDirect = async () => {
-      const r = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: tgMessage, parse_mode: 'HTML' })
-      });
-      if (!r.ok) { const d = await r.json(); throw new Error(d.description); }
-    };
-    try {
-      const pr = await fetch('/api/send-telegram', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: tgMessage }), keepalive: true,
-        signal: AbortSignal.timeout(8000)
-      });
-      if (!pr.ok) await sendTgDirect();
-    } catch { try { await sendTgDirect(); } catch (e) { console.error('Telegram failed:', e); } }
-    // ────────────────────────────────────────
+    await notifyTelegram(tgMessage);
 
     toast.success('Opening WhatsApp to send reference! 🚀', {
       style: { background: '#0E0E18', color: '#a78bfa', border: '1px solid #7c3aed' }

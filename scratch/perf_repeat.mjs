@@ -1,0 +1,31 @@
+import { chromium } from 'playwright';
+import http from 'http'; import fs from 'fs'; import path from 'path';
+const ROOT=path.resolve(process.argv[2]||'dist');
+const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.jpg':'image/jpeg','.png':'image/png','.svg':'image/svg+xml','.ico':'image/x-icon','.webmanifest':'application/manifest+json'};
+const srv=http.createServer((q,r)=>{let p=decodeURIComponent(q.url.split('?')[0]);let f=path.join(ROOT,p);
+ if(!fs.existsSync(f)||fs.statSync(f).isDirectory())f=path.join(ROOT,'index.html');
+ r.writeHead(200,{'Content-Type':MIME[path.extname(f)]||'application/octet-stream'});fs.createReadStream(f).pipe(r);});
+const PORT=4200+Math.floor(Math.random()*300);
+await new Promise(r=>srv.listen(PORT,r));
+const b=await chromium.launch();
+const fcps=[],cards=[],bytes=[];
+for(let run=0;run<5;run++){
+  const ctx=await b.newContext({viewport:{width:390,height:844}});
+  const page=await ctx.newPage();
+  const cdp=await ctx.newCDPSession(page);
+  await cdp.send('Network.enable');
+  await cdp.send('Network.emulateNetworkConditions',{offline:false,latency:150,downloadThroughput:1.6*1024*1024/8,uploadThroughput:750*1024/8});
+  await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});
+  let n=0; page.on('response',async r=>{try{n+=(await r.body()).length;}catch{}});
+  const t0=Date.now();
+  await page.goto(`http://localhost:${PORT}/?preview=1`,{waitUntil:'domcontentloaded'});
+  await page.waitForSelector('.dish-card-cv',{timeout:60000});
+  const paint=await page.evaluate(()=>{const e=performance.getEntriesByType('paint').find(p=>p.name==='first-contentful-paint');return e?Math.round(e.startTime):null;});
+  fcps.push(paint); cards.push(Date.now()-t0);
+  await page.waitForTimeout(1200); bytes.push(Math.round(n/1024));
+  await ctx.close();
+}
+const med=a=>[...a].sort((x,y)=>x-y)[Math.floor(a.length/2)];
+console.log(`${process.argv[3]||'build'}:  FCP median ${med(fcps)} ms  (runs: ${fcps.join(', ')})`);
+console.log(`${' '.repeat((process.argv[3]||'build').length)}   cards median ${med(cards)} ms  |  transfer median ${med(bytes)} KB`);
+await b.close(); srv.close();

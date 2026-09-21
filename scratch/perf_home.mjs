@@ -5,7 +5,7 @@ const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json
 const srv=http.createServer((q,r)=>{let p=decodeURIComponent(q.url.split('?')[0]);let f=path.join(ROOT,p);
  if(!fs.existsSync(f)||fs.statSync(f).isDirectory())f=path.join(ROOT,'index.html');
  r.writeHead(200,{'Content-Type':MIME[path.extname(f)]||'application/octet-stream'});fs.createReadStream(f).pipe(r);});
-await new Promise(r=>srv.listen(4184,r));
+await new Promise(r=>srv.listen(4195,r));
 const b=await chromium.launch();
 const ctx=await b.newContext({viewport:{width:390,height:844}});
 const page=await ctx.newPage();
@@ -15,7 +15,7 @@ await cdp.send('Network.emulateNetworkConditions',{offline:false,latency:150,dow
 await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});
 let bytes=0; page.on('response',async r=>{try{bytes+=(await r.body()).length;}catch{}});
 const t0=Date.now();
-await page.goto('http://localhost:4184/?preview=1',{waitUntil:'domcontentloaded'});
+await page.goto('http://localhost:4195/?preview=1',{waitUntil:'domcontentloaded'});
 await page.waitForSelector('.dish-card-cv',{timeout:40000});
 const paint=await page.evaluate(()=>{const e=performance.getEntriesByType('paint').find(p=>p.name==='first-contentful-paint');return e?Math.round(e.startTime):null;});
 console.log('Slow-4G + 4x CPU throttle, 390px viewport');

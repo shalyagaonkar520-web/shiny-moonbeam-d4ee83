@@ -1,5 +1,9 @@
-const TELEGRAM_BOT_TOKEN = '8828362126:AAGbOzb8Q9Jhi29Bp6sQ_Q6hRo4Xj2SGfQg';
-const TELEGRAM_CHAT_ID = '-1003803637741';
+// Credentials come from the environment. They were previously hardcoded here
+// and in three client components, which published the bot token in the browser
+// bundle and in this public repo. Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID
+// in the hosting provider's environment variables.
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -12,6 +16,12 @@ export default async function handler(req, res) {
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
+  }
+
+  // Without this the fetch below would hit /botundefined/ and fail obscurely.
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+    console.error('TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID are not configured');
+    return res.status(500).json({ success: false, error: 'Notifications are not configured' });
   }
 
   try {

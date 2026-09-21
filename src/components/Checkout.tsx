@@ -16,9 +16,8 @@ import { db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { getItemHotelTag, getItemHotel, getOrderHotelName, getOrderHotelId, groupItemsByHotel } from '../utils/orderHotels';
 import DishImage from './DishImage';
+import { notifyTelegram } from '../lib/notifyTelegram';
 
-const TELEGRAM_BOT_TOKEN = '8828362126:AAGbOzb8Q9Jhi29Bp6sQ_Q6hRo4Xj2SGfQg';
-const TELEGRAM_CHAT_ID   = '-1003803637741';
 // Every order -- food and bulk alike -- goes to this one WhatsApp number.
 const WHATSAPP_ORDER_NUMBER = '919606001790';
 
@@ -30,48 +29,7 @@ const GAP = '__GAP__';
 const escHtml = (s: string) =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-// Sends a Telegram message. Tries server proxy first, falls back to direct API call.
-async function sendTelegramMessage(text: string): Promise<void> {
-  const payload = JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text, parse_mode: 'HTML' });
-
-  const direct = () =>
-    fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: payload,
-    }).then(async (r) => {
-      if (!r.ok) {
-        const d = await r.json().catch(() => ({}));
-        throw new Error((d as any).description || 'Telegram direct error');
-      }
-    });
-
-  const proxyWithTimeout = (): Promise<boolean> =>
-    new Promise((resolve) => {
-      const timer = setTimeout(() => resolve(false), 8000);
-      fetch('/api/send-telegram', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
-        keepalive: true,
-      })
-        .then((r) => { clearTimeout(timer); resolve(r.ok); })
-        .catch(() => { clearTimeout(timer); resolve(false); });
-    });
-
-  try {
-    const proxyOk = await proxyWithTimeout();
-    if (!proxyOk) {
-      await direct();
-    }
-  } catch {
-    try {
-      await direct();
-    } catch (e) {
-      console.error('Telegram notification error:', e);
-    }
-  }
-}
+const sendTelegramMessage = (text: string) => notifyTelegram(text);
 
 export default function Checkout() {
   useSEO('Cart & Checkout', 'Review your cart with zero hidden fees and finalize delivery at Mom\'s Magic.');
@@ -622,7 +580,7 @@ export default function Checkout() {
           <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
             <div className="w-11 h-11 rounded-full overflow-hidden border border-rose-100 shadow-xs shrink-0 bg-rose-50 p-1 flex items-center justify-center">
               <img
-                src="/logo.png"
+                src="/logo-sm.webp"
                 alt="Mom's Magic"
                 className="w-full h-full object-contain"
               />
