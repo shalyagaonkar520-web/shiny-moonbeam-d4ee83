@@ -20,7 +20,7 @@ export default function FeedbackPage() {
     }
     const stars = '⭐'.repeat(rating);
     const feedbackMsg = `Hi Moms Magic! I would like to share my feedback:\nRating: ${stars}\nComments: ${feedback}`;
-    const waUrl = `https://wa.me/917483187572?text=${encodeURIComponent(feedbackMsg)}`;
+    const waUrl = `https://wa.me/919606001790?text=${encodeURIComponent(feedbackMsg)}`;
     
     toast.success('Thank you! Redirecting to WhatsApp to send feedback... 🚀', {
       icon: '⭐',

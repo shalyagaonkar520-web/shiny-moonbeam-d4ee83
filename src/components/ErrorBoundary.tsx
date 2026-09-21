@@ -55,7 +55,7 @@ export default class ErrorBoundary extends React.Component<
             Reload the app
           </button>
           <a
-            href="tel:+917483187572"
+            href="tel:+919606001790"
             className="block mt-3 text-xs font-bold text-gray-400 hover:text-[#e11d48]"
           >
             Or call the kitchen to order

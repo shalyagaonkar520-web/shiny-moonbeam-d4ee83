@@ -19,8 +19,8 @@ import DishImage from './DishImage';
 
 const TELEGRAM_BOT_TOKEN = '8828362126:AAGbOzb8Q9Jhi29Bp6sQ_Q6hRo4Xj2SGfQg';
 const TELEGRAM_CHAT_ID   = '-1003803637741';
-const WHATSAPP_BULK_NUMBER = '917483187572';
-const WHATSAPP_FOOD_NUMBER = '919606001790';
+// Every order -- food and bulk alike -- goes to this one WhatsApp number.
+const WHATSAPP_ORDER_NUMBER = '919606001790';
 
 // Marker for a deliberate blank line in an order message. Conditional lines collapse
 // to '' and get filtered out; without this sentinel the filter also ate every blank
@@ -191,9 +191,7 @@ export default function Checkout() {
     const userPhone  = localStorage.getItem('moms_magic_user_phone');
     const isAdmin =
       adminToken === 'mock-jwt-admin-token-123456' ||
-      userPhone === '+917483187572' ||
       userPhone === '+919606001790' ||
-      userPhone === '7483187572' ||
       userPhone === '9606001790';
 
     // Time lock / closure restrictions removed - always open
@@ -386,7 +384,7 @@ export default function Checkout() {
 
       const waMsg    = buildWaMessage(paymentId);
       const tgMsg    = buildTgMessage(paymentId);
-      const waNumber = isBulkOrder ? WHATSAPP_BULK_NUMBER : WHATSAPP_FOOD_NUMBER;
+      const waNumber = WHATSAPP_ORDER_NUMBER;
       const waUrl    = `https://wa.me/${waNumber}?text=${encodeURIComponent(waMsg)}`;
 
       try {

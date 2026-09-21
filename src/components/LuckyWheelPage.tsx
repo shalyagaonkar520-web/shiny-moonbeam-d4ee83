@@ -148,7 +148,7 @@ export default function LuckyWheelPage() {
   };
   
   const handleClaim = () => {
-    let cleanPhone = '+917483187572'; // Admin Phone to send claim to
+    let cleanPhone = '+919606001790'; // Admin Phone to send claim to
     let message = `Hello Moms Magic! 🎡\n\nI just spun the Lucky Wheel and won: *${wonPrize}*! 🎉\n\nMy Phone Number: ${phone}\nOTP Code Used: ${code.toUpperCase()}`;
     const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
     window.location.href = waUrl;

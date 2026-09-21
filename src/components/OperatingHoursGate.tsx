@@ -163,7 +163,7 @@ export default function OperatingHoursGate({ children }: { children: React.React
             Planning a birthday or event feast? Contact us on WhatsApp anytime for advance bookings!
           </p>
           <a
-            href="https://wa.me/917483187572?text=Hi%20Mom%27s%20Magic%2C%20I%20want%20to%20place%20an%20advance%20party%20or%20cake%20order"
+            href="https://wa.me/919606001790?text=Hi%20Mom%27s%20Magic%2C%20I%20want%20to%20place%20an%20advance%20party%20or%20cake%20order"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-1.5 py-2 px-4 bg-emerald-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md shadow-emerald-600/20 hover:bg-emerald-700 transition-all"
@@ -176,7 +176,7 @@ export default function OperatingHoursGate({ children }: { children: React.React
         {/* Direct Contact Support Buttons */}
         <div className="flex items-center justify-center gap-2.5 pt-1">
           <a
-            href="https://wa.me/917483187572?text=Hi%20Mom%27s%20Magic%2C%20I%20have%20an%20inquiry"
+            href="https://wa.me/919606001790?text=Hi%20Mom%27s%20Magic%2C%20I%20have%20an%20inquiry"
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-xs font-extrabold rounded-xl transition-colors shadow-xs"
@@ -185,7 +185,7 @@ export default function OperatingHoursGate({ children }: { children: React.React
             <span>WhatsApp</span>
           </a>
           <a
-            href="tel:+917483187572"
+            href="tel:+919606001790"
             className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 px-3 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-[#e11d48] text-xs font-extrabold rounded-xl transition-colors shadow-xs"
           >
             <Phone className="w-3.5 h-3.5" />

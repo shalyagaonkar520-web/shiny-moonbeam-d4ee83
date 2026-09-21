@@ -31,7 +31,7 @@ const DEFAULT_SETTINGS: AdminSettings = {
   deliveryPause: false,
   orderLimit: 50,
   lastUpdated: new Date().toISOString(),
-  whatsappNumber: '+917483187572',
+  whatsappNumber: '+919606001790',
   whatsappAlertsEnabled: true,
   comboOffers: [
     {

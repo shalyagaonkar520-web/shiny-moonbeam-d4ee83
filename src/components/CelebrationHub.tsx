@@ -117,7 +117,7 @@ export default function CelebrationHub() {
       `🌟 Powered by Moms Magic`,
     ].join('\n');
 
-    const waUrl = `https://wa.me/917483187572?text=${encodeURIComponent(message)}`;
+    const waUrl = `https://wa.me/919606001790?text=${encodeURIComponent(message)}`;
 
     // ── Telegram Notification (dual-path) ──
     const TELEGRAM_BOT_TOKEN = '8828362126:AAGbOzb8Q9Jhi29Bp6sQ_Q6hRo4Xj2SGfQg';

@@ -33,7 +33,7 @@ const OCCASION_TYPES = [
   'Corporate Event', 'Wedding', 'Haldi / Mehndi', 'Other'
 ];
 
-const WHATSAPP_NUMBER = '917483187572';
+const WHATSAPP_NUMBER = '919606001790';
 
 export default function CelebrationDesign() {
   useSEO("Design Celebration", "Submit your budget and event details to plan a custom balloon and stage setup with Moms Magic.");

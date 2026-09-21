@@ -235,7 +235,7 @@ export default function ProfilePage() {
           </button>
         </form>
 
-        {/* 2. Customer Support & Help Section (Numbers: 7483187572, 9483235488) */}
+        {/* 2. Customer Support & Help Section (Numbers: 9606001790, 9483235488) */}
         <div className="bg-white rounded-[26px] p-4 sm:p-5 border border-rose-100/90 shadow-sm space-y-3.5 text-left">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-rose-50 text-[#e11d48] flex items-center justify-center shrink-0">
@@ -259,19 +259,19 @@ export default function ProfilePage() {
                   Kitchen Support 1
                 </span>
                 <span className="text-xs sm:text-sm font-black text-gray-900">
-                  +91 7483187572
+                  +91 9606001790
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
                 <a
-                  href="tel:+917483187572"
+                  href="tel:+919606001790"
                   className="p-2 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-colors shadow-xs flex items-center justify-center"
                   title="Call Now"
                 >
                   <Phone className="w-3.5 h-3.5" />
                 </a>
                 <a
-                  href="https://wa.me/917483187572?text=Hi%2C%20I%20need%20help%20with%20Mom%27s%20Magic!"
+                  href="https://wa.me/919606001790?text=Hi%2C%20I%20need%20help%20with%20Mom%27s%20Magic!"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-2 rounded-xl bg-[#25D366] text-white hover:bg-[#20bd5a] transition-colors shadow-xs flex items-center justify-center"

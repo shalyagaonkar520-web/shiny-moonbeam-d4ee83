@@ -176,9 +176,7 @@ export default function LandingPage() {
   const adminToken = localStorage.getItem('moms_magic_admin_token');
   const userPhone = localStorage.getItem('moms_magic_user_phone');
   const isAdmin = adminToken === 'mock-jwt-admin-token-123456' || 
-                  userPhone === '+917483187572' || 
                   userPhone === '+919606001790' || 
-                  userPhone === '7483187572' || 
                   userPhone === '9606001790';
 
   // Time lock restriction removed - store is always open
@@ -1324,22 +1322,22 @@ export default function LandingPage() {
               </p>
 
               <div className="mt-5 space-y-3">
-                {/* Number 1: 7483187572 */}
+                {/* Number 1: 9606001790 */}
                 <div className="p-3.5 rounded-2xl bg-gradient-to-br from-rose-50/70 to-pink-50/40 border border-rose-100 flex items-center justify-between shadow-xs">
                   <div>
                     <span className="text-[10px] font-bold text-rose-600 uppercase tracking-wider block">Kitchen Support 1</span>
-                    <span className="text-sm sm:text-base font-black text-gray-900">+91 7483187572</span>
+                    <span className="text-sm sm:text-base font-black text-gray-900">+91 9606001790</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <a
-                      href="tel:+917483187572"
+                      href="tel:+919606001790"
                       className="p-2.5 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-colors shadow-sm flex items-center justify-center"
                       title="Call Now"
                     >
                       <Phone className="w-4 h-4" />
                     </a>
                     <a
-                      href="https://wa.me/917483187572?text=Hi%2C%20I%20need%20help%20to%20order%20food%20from%20Mom%27s%20Magic!"
+                      href="https://wa.me/919606001790?text=Hi%2C%20I%20need%20help%20to%20order%20food%20from%20Mom%27s%20Magic!"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-2.5 rounded-xl bg-[#25D366] text-white hover:bg-[#20bd5a] transition-colors shadow-sm flex items-center justify-center"
