@@ -1,0 +1,26 @@
+import { chromium, devices } from 'playwright';
+import http from 'http'; import fs from 'fs'; import path from 'path';
+const ROOT=path.resolve('dist');
+const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.jpg':'image/jpeg','.png':'image/png','.svg':'image/svg+xml','.ico':'image/x-icon','.webmanifest':'application/manifest+json'};
+const srv=http.createServer((q,r)=>{let p=decodeURIComponent(q.url.split('?')[0]);let f=path.join(ROOT,p);
+ if(!fs.existsSync(f)||fs.statSync(f).isDirectory())f=path.join(ROOT,'index.html');
+ r.writeHead(200,{'Content-Type':MIME[path.extname(f)]||'application/octet-stream'});fs.createReadStream(f).pipe(r);});
+await new Promise(r=>srv.listen(4320,r));
+const b=await chromium.launch();
+const ctx=await b.newContext({...devices['Pixel 5']});
+const page=await ctx.newPage();
+let htmlRequests=0;
+page.on('request',r=>{ if(r.resourceType()==='document') htmlRequests++; });
+await page.goto('http://localhost:4320/?preview=1',{waitUntil:'domcontentloaded'});
+await page.waitForSelector('.dish-card-cv',{timeout:25000});
+// a marker that only survives if the page is never reloaded
+await page.evaluate(()=>{ window.__aliveSince = Date.now(); });
+await page.waitForTimeout(16000);
+const survived=await page.evaluate(()=>typeof window.__aliveSince==='number');
+const flag=await page.evaluate(()=>{try{return sessionStorage.getItem('mm_selfheal_done');}catch(e){return null;}});
+console.log('=== healthy app, 16s past the 12s watchdog window ===');
+console.log('  document requests (1 = never reloaded):', htmlRequests);
+console.log('  in-page marker survived:', survived, '(true = no reload)');
+console.log('  self-heal flag:', flag===null?'not set (correct)':flag);
+console.log('  cards rendered:', await page.evaluate(()=>document.querySelectorAll('.dish-card-cv').length));
+await b.close(); srv.close();

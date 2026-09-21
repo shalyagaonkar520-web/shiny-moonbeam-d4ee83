@@ -52,7 +52,7 @@ const DEFAULT_SETTINGS: AdminSettings = {
   minOrderValue: 150
 };
 
-import { db } from '../firebase';
+import { db, firebaseReady } from '../firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 
 export const useSystemStore = create<SystemState>((set, get) => ({
@@ -71,6 +71,9 @@ export const useSystemStore = create<SystemState>((set, get) => ({
   },
 
   listenSettings: () => {
+    // Firebase may have failed to initialise; the app still runs from the
+    // bundled defaults, so skip the listener instead of throwing on a null db.
+    if (!firebaseReady) return () => {};
     const docRef = doc(db, 'system/settings');
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {

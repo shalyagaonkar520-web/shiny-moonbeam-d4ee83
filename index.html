@@ -117,5 +117,48 @@
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Self-heal watchdog.
+      //
+      // If the app has not mounted a few seconds after load, the page is stuck on
+      // the boot screen above -- which is what a phone shows when a service worker
+      // is serving a cached shell whose JS no longer exists, or when the bundle
+      // throws before React renders. Without this the phone stays broken through
+      // every reload, because the same bad shell is served from cache each time.
+      //
+      // So: unregister the service workers, drop the caches and reload once. The
+      // sessionStorage flag means this happens a single time per tab, never a loop.
+      (function () {
+        var GRACE_MS = 12000;
+        var FLAG = 'mm_selfheal_done';
+        setTimeout(function () {
+          var root = document.getElementById('root');
+          if (root && root.hasAttribute('data-app-ready')) return;
+          try {
+            if (sessionStorage.getItem(FLAG)) return;
+            sessionStorage.setItem(FLAG, '1');
+          } catch (e) { return; }
+
+          var jobs = [];
+          if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+            jobs.push(
+              navigator.serviceWorker.getRegistrations().then(function (rs) {
+                return Promise.all(rs.map(function (r) { return r.unregister(); }));
+              })
+            );
+          }
+          if (window.caches && caches.keys) {
+            jobs.push(
+              caches.keys().then(function (ks) {
+                return Promise.all(ks.map(function (k) { return caches.delete(k); }));
+              })
+            );
+          }
+          Promise.all(jobs)
+            .catch(function () {})
+            .then(function () { location.reload(); });
+        }, GRACE_MS);
+      })();
+    </script>
   </body>
 </html>

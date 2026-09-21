@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db, firebaseReady } from '../firebase';
 
 /**
  * The JIS Kitchen kill switch.
@@ -17,6 +17,7 @@ export default function SiteClosedGate({ children }: { children: React.ReactNode
   const [closed, setClosed] = useState(false);
 
   useEffect(() => {
+    if (!firebaseReady) return;
     const unsub = onSnapshot(
       doc(db, 'system', 'settings'),
       (snap) => {

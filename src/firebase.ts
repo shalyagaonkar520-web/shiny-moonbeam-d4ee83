@@ -2,20 +2,39 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
-};
+import { firebaseConfig } from './firebaseConfig';
 
-// Initialize Firebase
-export const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-export const auth = getAuth(app);
+// Initialising Firebase must never be able to take the app down.
+//
+// `getAuth()` throws synchronously on a bad config (e.g. auth/invalid-api-key
+// when an env var is missing), and a throw at module scope aborts the whole
+// bundle: React never mounts and every visitor sees the loading screen for
+// ever. Ordering, the menu and the hotel pages do not need Firebase to render,
+// so a failure here degrades those features instead of blanking the site.
+let _app: ReturnType<typeof initializeApp> | null = null;
+let _db: ReturnType<typeof getFirestore> | null = null;
+let _auth: ReturnType<typeof getAuth> | null = null;
+
+export let firebaseReady = false;
+
+try {
+  _app = initializeApp(firebaseConfig);
+  _db = getFirestore(_app);
+  _auth = getAuth(_app);
+  firebaseReady = true;
+} catch (error) {
+  console.error(
+    'Firebase failed to initialise; the app will run without cloud sync.',
+    error
+  );
+}
+
+// Callers are written against the SDK types. Keeping the casts here means a
+// failed init surfaces as a rejected Firebase call at the point of use, which
+// each caller already handles, rather than as a crash during import.
+export const app = _app as ReturnType<typeof initializeApp>;
+export const db = _db as ReturnType<typeof getFirestore>;
+export const auth = _auth as ReturnType<typeof getAuth>;
 
 /**
  * Firebase Cloud Messaging is loaded lazily and defensively.

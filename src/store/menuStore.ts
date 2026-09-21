@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { db } from '../firebase';
+import { db, firebaseReady } from '../firebase';
 import { collection, onSnapshot, doc, setDoc, deleteDoc, getDocs } from 'firebase/firestore';
 import { Product } from '../types';
 import { MENU_ITEMS as FALLBACK_MENU } from '../data/menuItems';
@@ -22,6 +22,9 @@ export const useMenuStore = create<MenuState>((set, get) => ({
   error: null,
 
   listenToMenu: () => {
+    // Firebase may have failed to initialise; the app still runs from the
+    // bundled defaults, so skip the listener instead of throwing on a null db.
+    if (!firebaseReady) return () => {};
     const colRef = collection(db, 'menu');
     const unsubscribe = onSnapshot(colRef, (snapshot) => {
       if (!snapshot.empty) {
