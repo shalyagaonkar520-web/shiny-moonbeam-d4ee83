@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- viewport-fit=cover is required for env(safe-area-inset-*) to report real
+         values; without it the UI sits under the notch and the gesture bar once
+         this runs full-screen as an installed app or in an Android WebView. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Moms Magic</title>
     
     <!-- PWA / Mobile Meta Tags -->

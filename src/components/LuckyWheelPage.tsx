@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { openExternal } from '../lib/openExternal';
 import { notifyTelegram } from '../lib/notifyTelegram';
 import { motion } from 'framer-motion';
 import { db } from '../firebase';
@@ -169,7 +170,7 @@ export default function LuckyWheelPage() {
         '🌟 <b>Moms Magic</b> - Lucky Wheel',
       ].join('\n')
     );
-    window.location.href = waUrl;
+    openExternal(waUrl);
   };
 
   return (

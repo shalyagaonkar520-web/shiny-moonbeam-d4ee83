@@ -66,6 +66,22 @@
     contain-intrinsic-size: auto 270px;
   }
 
+  /* Wrapped as an Android app (or installed to the home screen) the page runs
+     edge to edge, so the bottom nav lands under the gesture bar and the header
+     under the notch. These insets are 0 in a normal browser tab, so the same
+     CSS is correct everywhere. */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  /* Page content clears the fixed bars plus whatever the system bar takes. */
+  body {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
   /* Images should never stretch or squash their card. */
   img {
     max-width: 100%;

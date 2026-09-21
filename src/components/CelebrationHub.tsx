@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { openExternal } from '../lib/openExternal';
 import { notifyTelegram } from '../lib/notifyTelegram';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -139,10 +140,7 @@ export default function CelebrationHub() {
       style: { background: '#0E0E18', color: '#a78bfa', border: '1px solid #7c3aed' }
     });
     setTimeout(() => {
-      const newWindow = window.open(waUrl, '_blank');
-      if (!newWindow) {
-        window.location.href = waUrl;
-      }
+      openExternal(waUrl);
       setShowModal(false);
       setBudget('');
     }, 800);

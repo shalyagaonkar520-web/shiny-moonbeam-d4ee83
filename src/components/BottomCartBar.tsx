@@ -22,7 +22,7 @@ export default function BottomCartBar() {
           initial={{ y: 60, opacity: 0, scale: 0.95 }}
           animate={{ y: 0, opacity: 1, scale: 1 }}
           exit={{ y: 60, opacity: 0, scale: 0.95 }}
-          className="fixed bottom-[64px] md:bottom-6 left-3 right-3 md:left-1/2 md:-translate-x-1/2 md:max-w-md z-[95] pointer-events-auto"
+          className="fixed bottom-[calc(64px+env(safe-area-inset-bottom,0px))] md:bottom-6 left-3 right-3 md:left-1/2 md:-translate-x-1/2 md:max-w-md z-[95] pointer-events-auto"
         >
           <motion.div 
             whileHover={{ y: -2 }}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { openExternal } from '../lib/openExternal';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import { useBulkOrderStore } from '../store/bulkOrderStore';
@@ -437,17 +438,10 @@ export default function Checkout() {
       playSound(SOUNDS.ORDER_SUCCESS);
       toast.success('🎉 Order confirmed! Opening WhatsApp to send order...');
 
-      const link = document.createElement('a');
-      link.href = waUrl;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      setTimeout(() => {
-        window.location.href = waUrl;
-      }, 500);
+      // One hand-off. The old code clicked an anchor and then navigated the page
+      // to the same URL 500ms later, which inside an Android WebView loaded
+      // WhatsApp's web page over the app instead of opening WhatsApp.
+      openExternal(waUrl);
     };
 
     if (payableAmount > 0 && paymentMethod === 'online') {

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { openExternal } from '../lib/openExternal';
 import { notifyTelegram } from '../lib/notifyTelegram';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -45,7 +46,7 @@ export default function FeedbackPage() {
     });
     
     setTimeout(() => {
-      window.location.href = waUrl;
+      openExternal(waUrl);
     }, 1500);
   };
 

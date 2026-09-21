@@ -10,7 +10,7 @@ export default function BottomNav() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-white/95 backdrop-blur-xl border-t border-rose-100 shadow-[0_-4px_25px_rgba(244,63,94,0.06)] py-1.5 px-4 sm:px-6">
+    <nav className="safe-bottom fixed bottom-0 left-0 right-0 z-[100] bg-white/95 backdrop-blur-xl border-t border-rose-100 shadow-[0_-4px_25px_rgba(244,63,94,0.06)] py-1.5 px-4 sm:px-6">
       <div className="max-w-md mx-auto flex items-center justify-between">
         
         {/* 1. Food (Home) */}

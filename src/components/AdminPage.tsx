@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { openExternal } from '../lib/openExternal';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Power, ShieldAlert, Clock, Save, Phone, Bell, Loader2, 
@@ -491,7 +492,7 @@ export default function AdminPage() {
       
       toast.success(`Status updated! Redirecting to WhatsApp...`);
       setTimeout(() => {
-        window.location.href = waUrl;
+        openExternal(waUrl);
       }, 500);
     } catch (err) {
       toast.error('Failed to update order status');
