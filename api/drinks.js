@@ -1,6 +1,24 @@
 import fs from 'fs';
 import path from 'path';
 
+// Shared admin check.
+//
+// This used to accept any Authorization header containing the literal
+// 'mock-jwt-admin-token-123456', a string committed to a public repo -- so
+// anyone who read the source could call this endpoint. It now compares against
+// ADMIN_API_TOKEN from the environment and refuses every request when that is
+// not set, rather than falling back to something guessable.
+function isAuthorisedAdmin(authHeader) {
+  const expected = process.env.ADMIN_API_TOKEN;
+  if (!expected) return false;
+  if (!authHeader || typeof authHeader !== 'string') return false;
+  const supplied = authHeader.replace(/^Bearer\s+/i, '').trim();
+  const a = Buffer.from(supplied);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) return false;
+  return require('crypto').timingSafeEqual(a, b);
+}
+
 export default function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -45,7 +63,7 @@ export default function handler(req, res) {
   // Auth helper
   const checkAuth = () => {
     const authHeader = req.headers['authorization'];
-    return authHeader && authHeader.includes('mock-jwt-admin-token-123456');
+    return isAuthorisedAdmin(authHeader);
   };
 
   // Handle POST (Add / Edit)

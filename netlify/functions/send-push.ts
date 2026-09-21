@@ -19,6 +19,23 @@ if (!admin.apps.length) {
   }
 }
 
+import crypto from 'crypto';
+
+// Shared admin check. This used to accept any Authorization header containing
+// the literal 'mock-jwt-admin-token-123456', a string committed to a public
+// repo, so anyone who read the source could call this endpoint. It compares
+// against ADMIN_API_TOKEN from the environment and refuses every request when
+// that is not set, rather than falling back to something guessable.
+function isAuthorisedAdmin(authHeader?: string | null): boolean {
+  const expected = process.env.ADMIN_API_TOKEN;
+  if (!expected || !authHeader) return false;
+  const supplied = authHeader.replace(/^Bearer\s+/i, '').trim();
+  const a = Buffer.from(supplied);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
+}
+
 export const handler: Handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -41,7 +58,7 @@ export const handler: Handler = async (event) => {
 
   // Validate admin token/access
   const authHeader = event.headers['authorization'];
-  if (!authHeader || !authHeader.includes('mock-jwt-admin-token-123456')) {
+  if (!isAuthorisedAdmin(authHeader)) {
     return {
       statusCode: 401,
       headers,

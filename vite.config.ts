@@ -110,15 +110,21 @@ export default defineConfig(({mode}) => {
                 try {
                   const data = JSON.parse(body);
                   const { email = '', password = '' } = data;
-                  if (email.trim().toLowerCase() === 'shalyagaonkar@gmail.com' && password.trim() === 'Shalya@2004') {
+                  // Dev-server mock only; it never ships. Credentials come from
+                  // ADMIN_EMAIL / ADMIN_PASSWORD so none are written in the repo.
+                  const devEmail = env.ADMIN_EMAIL || '';
+                  const devPassword = env.ADMIN_PASSWORD || '';
+                  if (devEmail && devPassword &&
+                      email.trim().toLowerCase() === devEmail.trim().toLowerCase() &&
+                      password.trim() === devPassword) {
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({
                       success: true,
-                      token: 'mock-jwt-admin-token-123456',
+                      token: env.ADMIN_API_TOKEN || 'dev-token',
                       user: {
                         id: 'admin-1',
-                        name: 'Shalya Gaonkar',
-                        email: 'shalyagaonkar@gmail.com',
+                        name: 'Admin',
+                        email: devEmail,
                         role: 'super_admin'
                       }
                     }));
@@ -150,7 +156,8 @@ export default defineConfig(({mode}) => {
             // Handle POST Admin Settings
             if (req.url && req.url.includes('/api/settings') && req.method === 'POST') {
               const authHeader = req.headers['authorization'];
-              if (!authHeader || !authHeader.includes('mock-jwt-admin-token-123456')) {
+              const devToken = env.ADMIN_API_TOKEN || 'dev-token';
+              if (!authHeader || !authHeader.includes(devToken)) {
                 res.writeHead(401, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ success: false, message: 'Unauthorized access' }));
                 return;

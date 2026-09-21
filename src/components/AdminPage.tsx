@@ -103,7 +103,7 @@ export default function AdminPage() {
     }
 
     setSendingNotification(true);
-    const token = localStorage.getItem('moms_magic_admin_token') || 'mock-jwt-admin-token-123456';
+    const token = localStorage.getItem('moms_magic_admin_token') || '';
     toast.loading('Broadcasting push notifications...', { id: 'push-broadcast' });
 
     try {
@@ -573,21 +573,44 @@ export default function AdminPage() {
     
     setIsLoggingIn(true);
 
-    // Hardcoded Admin Bypass
-    if (email.trim().toLowerCase() === 'shalyagaonkar@gmail.com' && password.trim() === 'Shalya@2004') {
-      const adminUser = {
-        id: 'hardcoded-admin-123',
-        name: 'Admin',
-        email: 'shalyagaonkar@gmail.com',
-        role: 'super_admin' as const
-      };
-      
-      setUser(adminUser);
-      localStorage.setItem('moms_magic_admin_token', 'mock-jwt-admin-token-123456');
-      toast.success(`Welcome back, Admin!`);
-      setIsLoggingIn(false);
-      return;
+    // Credentials are checked by /api/admin-login, which reads ADMIN_EMAIL and
+    // ADMIN_PASSWORD from the hosting environment. They used to be compared
+    // here, so the real email and password were literals in the bundle every
+    // visitor downloads. If that endpoint is not configured it answers 501 and
+    // we fall through to Firebase Auth, so there is always a way in.
+    try {
+      const response = await fetch('/api/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser({
+          id: 'env-admin',
+          name: 'Admin',
+          email: data.email || email.trim(),
+          role: 'super_admin' as const,
+        });
+        localStorage.setItem('moms_magic_admin_token', data.token);
+        toast.success('Welcome back, Admin!');
+        setIsLoggingIn(false);
+        return;
+      }
+
+      // 401 means the endpoint is configured and these credentials are wrong,
+      // so there is no point asking Firebase the same question.
+      if (response.status === 401) {
+        toast.error('Invalid admin credentials');
+        setIsLoggingIn(false);
+        return;
+      }
+    } catch {
+      // Endpoint unreachable (offline, or running without the serverless
+      // functions). Fall through to Firebase Auth.
     }
+
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
@@ -612,7 +635,7 @@ export default function AdminPage() {
   // Secure Settings Save Handler
   const handleSaveSettings = async (updates: Partial<typeof settings> = {}) => {
     setIsSaving(true);
-    const token = localStorage.getItem('moms_magic_admin_token') || 'mock-jwt-admin-token-123456';
+    const token = localStorage.getItem('moms_magic_admin_token') || '';
     
     // Combine edits
     const activeUpdates = { ...localSettings, ...updates };
@@ -628,7 +651,7 @@ export default function AdminPage() {
 
   // Toggling operational shortcuts directly
   const handleToggleState = async (key: keyof typeof settings, value: any) => {
-    const token = localStorage.getItem('moms_magic_admin_token') || 'mock-jwt-admin-token-123456';
+    const token = localStorage.getItem('moms_magic_admin_token') || '';
     
     // UI optimistic update first
     setLocalSettings(prev => ({ ...prev, [key]: value }));
@@ -643,7 +666,7 @@ export default function AdminPage() {
 
   // Emergency lockdown trigger
   const handleEmergencyTrigger = async () => {
-    const token = localStorage.getItem('moms_magic_admin_token') || 'mock-jwt-admin-token-123456';
+    const token = localStorage.getItem('moms_magic_admin_token') || '';
     const success = await triggerEmergencyStop(token);
     if (success) {
       toast.error('SYSTEM SHUTDOWN ACTIVATED! All ordering pipelines locked.', { icon: '🚨', duration: 4000 });
@@ -652,7 +675,7 @@ export default function AdminPage() {
 
   // Emergency lockdown reset
   const handleEmergencyReset = async () => {
-    const token = localStorage.getItem('moms_magic_admin_token') || 'mock-jwt-admin-token-123456';
+    const token = localStorage.getItem('moms_magic_admin_token') || '';
     const success = await resetEmergencyStop(token);
     if (success) {
       toast.success('System restored. Ordering channels online.', { icon: '✅' });

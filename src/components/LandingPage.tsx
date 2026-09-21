@@ -173,12 +173,6 @@ export default function LandingPage() {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  const adminToken = localStorage.getItem('moms_magic_admin_token');
-  const userPhone = localStorage.getItem('moms_magic_user_phone');
-  const isAdmin = adminToken === 'mock-jwt-admin-token-123456' || 
-                  userPhone === '+919606001790' || 
-                  userPhone === '9606001790';
-
   // Time lock restriction removed - store is always open
   const isClosed = false;
 

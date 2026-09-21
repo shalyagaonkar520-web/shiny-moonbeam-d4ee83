@@ -145,13 +145,6 @@ export default function Checkout() {
 
   // Check store open & restore saved user info
   React.useEffect(() => {
-    const adminToken = localStorage.getItem('moms_magic_admin_token');
-    const userPhone  = localStorage.getItem('moms_magic_user_phone');
-    const isAdmin =
-      adminToken === 'mock-jwt-admin-token-123456' ||
-      userPhone === '+919606001790' ||
-      userPhone === '9606001790';
-
     // Time lock / closure restrictions removed - always open
     const savedName    = localStorage.getItem('moms_magic_user_name');
     const savedPhone   = localStorage.getItem('moms_magic_user_phone');

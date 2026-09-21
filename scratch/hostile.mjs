@@ -5,8 +5,8 @@ const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json
 const srv=http.createServer((q,r)=>{let p=decodeURIComponent(q.url.split('?')[0]);let f=path.join(ROOT,p);
  if(!fs.existsSync(f)||fs.statSync(f).isDirectory())f=path.join(ROOT,'index.html');
  r.writeHead(200,{'Content-Type':MIME[path.extname(f)]||'application/octet-stream'});fs.createReadStream(f).pipe(r);});
-await new Promise(r=>srv.listen(4374,r));
-const B='http://localhost:4374';
+await new Promise(r=>srv.listen(4375,r));
+const B='http://localhost:4375';
 
 const SCENARIOS = [
   ['localStorage throws (private mode / blocked storage)', `

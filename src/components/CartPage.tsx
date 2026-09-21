@@ -22,12 +22,6 @@ export default function CartPage() {
   const rainySeasonFee = 5;
   const grandTotal = total + deliveryCharge + rainySeasonFee;
   
-  const adminToken = localStorage.getItem('moms_magic_admin_token');
-  const userPhone = localStorage.getItem('moms_magic_user_phone');
-  const isAdmin = adminToken === 'mock-jwt-admin-token-123456' || 
-                  userPhone === '+919606001790' || 
-                  userPhone === '9606001790';
-
   // Time lock and ordering restrictions removed - always open
   const isOrderingPaused = false;
 

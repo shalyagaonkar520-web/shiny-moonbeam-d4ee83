@@ -1,0 +1,138 @@
+rules_version = '2';
+
+// Firestore security rules for Mom's Magic.
+//
+// READ THIS BEFORE DEPLOYING -- these rules are the ONLY thing protecting your
+// data. The admin flag in the browser just decides which buttons are drawn;
+// AdminPage writes to Firestore directly from the client, so anyone can attempt
+// those writes with the browser console whatever the UI shows. Rules are what
+// actually stops them.
+//
+// Deploy:
+//   Firebase console -> Firestore Database -> Rules -> paste this -> Publish
+//   (or `firebase deploy --only firestore:rules` with the CLI)
+//
+// Before publishing you must do ONE of these, or the admin panel will no longer
+// be able to save anything:
+//   a) Firebase console -> Authentication -> Users -> Add user, with the email
+//      you log into /admin with. Then put that account's UID in ADMIN_UIDS
+//      below. Logging into /admin with that email and password signs you into
+//      Firebase Auth, so the rules recognise you.
+//   b) Or set a custom claim `admin: true` on that account and use the
+//      isAdminByClaim() helper instead.
+//
+// Test with the Rules Playground in the Firebase console before publishing.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- who counts as an admin -------------------------------------------
+
+    // Replace with the UID(s) from Firebase console -> Authentication -> Users.
+    function adminUids() {
+      return ['PUT-YOUR-ADMIN-UID-HERE'];
+    }
+
+    function isAdmin() {
+      return request.auth != null && request.auth.uid in adminUids();
+    }
+
+    // Alternative if you prefer custom claims over a hardcoded UID list.
+    function isAdminByClaim() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    // ---- the menu and store settings ---------------------------------------
+    // Everyone needs to read these to see the shop. Only an admin may change
+    // them, which is what stops a visitor rewriting your prices.
+
+    match /menu/{item} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /system/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /hotels/{hotel} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ---- orders -------------------------------------------------------------
+    // Customers order without signing in, so anyone may create an order. Reads
+    // are allowed because the tracking link (/track/<orderId>) has to work for
+    // a customer who is not signed in; the document id is a long random string,
+    // so it is unguessable in practice. Only an admin may change or delete an
+    // order, so a customer cannot mark their own order paid or delivered.
+
+    match /orders/{orderId} {
+      allow create: if true;
+      allow read: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // ---- delivery riders ----------------------------------------------------
+    // The tracking map reads a rider's position. A rider updates their own
+    // document; everything else is admin-only.
+
+    match /riders/{riderId} {
+      allow read: if true;
+      allow update: if isAdmin() || (request.auth != null && request.auth.uid == riderId);
+      allow create, delete: if isAdmin();
+    }
+
+    // ---- customer accounts --------------------------------------------------
+    // A signed-in customer may read and write only their own document.
+
+    match /users/{userId} {
+      allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == userId);
+    }
+
+    match /walletTransactions/{txId} {
+      allow read: if isAdmin() || (request.auth != null
+                    && resource.data.userId == request.auth.uid);
+      // Money must never be writable from the browser. Add credits with the
+      // Admin SDK from a server, or from the admin panel while signed in.
+      allow write: if isAdmin();
+    }
+
+    // ---- lucky wheel --------------------------------------------------------
+    // A spin may be recorded by anyone, but the prize table and the issued
+    // coupons are admin-only, otherwise a visitor could grant themselves one.
+
+    match /luckyWheelSpins/{spinId} {
+      allow create: if true;
+      allow read: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    match /luckyWheelCoupons/{couponId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ---- push notification tokens & install analytics ----------------------
+    // A device registers itself; only an admin reads the list.
+
+    match /deviceTokens/{tokenId} {
+      allow create, update: if true;
+      allow read, delete: if isAdmin();
+    }
+
+    match /pwaInstalls/{installId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ---- everything else ----------------------------------------------------
+    // Deny by default, so a collection added later is closed until rules for it
+    // are written deliberately.
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
