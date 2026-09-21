@@ -5,8 +5,8 @@ const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json
 const srv=http.createServer((q,r)=>{let p=decodeURIComponent(q.url.split('?')[0]);let f=path.join(ROOT,p);
  if(!fs.existsSync(f)||fs.statSync(f).isDirectory())f=path.join(ROOT,'index.html');
  r.writeHead(200,{'Content-Type':MIME[path.extname(f)]||'application/octet-stream'});fs.createReadStream(f).pipe(r);});
-await new Promise(r=>srv.listen(4198,r));
-const B='http://localhost:4198';
+await new Promise(r=>srv.listen(4199,r));
+const B='http://localhost:4199';
 const ROUTES=['/','/food','/grocery','/checkout','/profile','/bulk','/hotel-mumtaz','/hotel-al-amin',
  '/hotel-coastal-crown','/hotel-malabar','/hotel-sankalpa','/celebration','/celebration/design','/feedback',
  '/about','/orders','/spin','/login','/admin','/delivery','/track/test123','/no-such-page'];

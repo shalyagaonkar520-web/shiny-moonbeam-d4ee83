@@ -242,7 +242,7 @@ export const MENU_ITEMS: Product[] = [
   {
     "id": "rn-13",
     "name": "Triple Schezwan Rice",
-    "price": 199,
+    "price": 220,
     "category": "Rice & Noodles",
     "type": "food",
     "image": "/triple_schezwan_rice.webp",
@@ -253,7 +253,7 @@ export const MENU_ITEMS: Product[] = [
   {
     "id": "br-1",
     "name": "Kushka",
-    "price": 79,
+    "price": 99,
     "category": "Biryani",
     "type": "food",
     "image": "/kushka.webp",
@@ -264,7 +264,7 @@ export const MENU_ITEMS: Product[] = [
   {
     "id": "br-2",
     "name": "Egg Biryani",
-    "price": 129,
+    "price": 149,
     "category": "Biryani",
     "type": "food",
     "image": "/egg_biryani.webp",
@@ -287,7 +287,7 @@ export const MENU_ITEMS: Product[] = [
   {
     "id": "br-4",
     "name": "Chicken Biryani Half",
-    "price": 109,
+    "price": 129,
     "category": "Biryani",
     "type": "food",
     "image": "/chicken_biryani_new.webp",
@@ -300,7 +300,7 @@ export const MENU_ITEMS: Product[] = [
   {
     "id": "br-5",
     "name": "Chicken Biryani Full",
-    "price": 159,
+    "price": 179,
     "category": "Biryani",
     "type": "food",
     "image": "/chicken_biryani_new.webp",
@@ -349,7 +349,7 @@ export const MENU_ITEMS: Product[] = [
   {
     "id": "mt-1",
     "name": "Mutton Sukka",
-    "price": 220,
+    "price": 249,
     "category": "Mutton",
     "type": "food",
     "image": "/mutton_sukka.webp",
@@ -441,7 +441,7 @@ export const MENU_ITEMS: Product[] = [
   {
     "id": "st-8",
     "name": "Fish Fry",
-    "price": 199,
+    "price": 250,
     "category": "Starters",
     "type": "food",
     "image": "/fish_fry.webp",

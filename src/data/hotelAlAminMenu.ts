@@ -126,7 +126,7 @@ export const HOTEL_AL_AMIN_MENU: AlAminMenuCategory[] = [
       {
         "id": "alamin-br-1",
         "name": "Kushka",
-        "price": 79,
+        "price": 99,
         "image": "/kushka.webp",
         "description": "Aromatic basmati biryani rice cooked in authentic spices without meat.",
         "isVeg": true,
@@ -137,7 +137,7 @@ export const HOTEL_AL_AMIN_MENU: AlAminMenuCategory[] = [
       {
         "id": "alamin-br-2",
         "name": "Egg Biryani",
-        "price": 129,
+        "price": 149,
         "image": "/egg_biryani.webp",
         "description": "Fragrant dum biryani layered with spiced boiled eggs.",
         "isVeg": false,
@@ -159,7 +159,7 @@ export const HOTEL_AL_AMIN_MENU: AlAminMenuCategory[] = [
       {
         "id": "alamin-br-4",
         "name": "Chicken Biryani Half",
-        "price": 109,
+        "price": 129,
         "image": "/chicken_biryani_new.webp",
         "description": "Authentic dum chicken biryani made with long grain basmati rice and secret spices.",
         "isVeg": false,
@@ -170,7 +170,7 @@ export const HOTEL_AL_AMIN_MENU: AlAminMenuCategory[] = [
       {
         "id": "alamin-br-5",
         "name": "Chicken Biryani Full",
-        "price": 159,
+        "price": 179,
         "image": "/chicken_biryani_new.webp",
         "description": "Full portion of tender chicken cooked in rich and fragrant dum biryani.",
         "isVeg": false,
@@ -296,7 +296,7 @@ export const HOTEL_AL_AMIN_MENU: AlAminMenuCategory[] = [
       {
         "id": "alamin-st-8",
         "name": "Fish Fry",
-        "price": 199,
+        "price": 250,
         "image": "/fish_fry.webp",
         "description": "Fresh fish marinated in coastal spices and rawa-fried crisp.",
         "isVeg": false,
@@ -510,7 +510,7 @@ export const HOTEL_AL_AMIN_MENU: AlAminMenuCategory[] = [
       {
         "id": "alamin-rn-13",
         "name": "Triple Schezwan Rice",
-        "price": 199,
+        "price": 220,
         "image": "/triple_schezwan_rice.webp",
         "description": "Combination of fried rice, crispy fried noodles, and rich spicy gravy.",
         "isVeg": true,
@@ -526,7 +526,7 @@ export const HOTEL_AL_AMIN_MENU: AlAminMenuCategory[] = [
       {
         "id": "alamin-mt-1",
         "name": "Mutton Sukka",
-        "price": 220,
+        "price": 249,
         "image": "/mutton_sukka.webp",
         "description": "Dry mutton roast coated in roasted coastal spices and grated coconut.",
         "isVeg": false,
