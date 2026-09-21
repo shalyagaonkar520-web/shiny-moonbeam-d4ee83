@@ -65,7 +65,20 @@ export default function TrackingPage() {
         }
       }
     }, (error) => {
-      console.error("Firestore order subscription error:", error);
+      // This fires when Firestore is unreachable or the read is denied by
+      // security rules. It used to only log, leaving `loading` true, so the
+      // tracking link a customer gets after ordering sat on the loading
+      // animation for ever. Fall back to the copy saved at checkout, and
+      // whatever happens, stop loading so the page can render something.
+      console.error('Firestore order subscription error:', error);
+      try {
+        const stored = JSON.parse(localStorage.getItem('moms_magic_orders') || '[]');
+        const localOrder = stored.find((o: any) => o.id === orderId);
+        if (localOrder) setOrder(localOrder);
+      } catch {
+        /* storage unavailable; fall through to the not-found screen */
+      }
+      setLoading(false);
     });
 
     return () => unsubscribeOrder();
@@ -229,6 +242,35 @@ export default function TrackingPage() {
 
   if (loading) {
     return <FoodLoader />;
+  }
+
+  // Reached when the order is not in Firestore and not in this device's saved
+  // orders -- an old link, a different phone, or a read the rules refused.
+  if (!order) {
+    return (
+      <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-8 text-center gap-4">
+        <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-3xl">
+          🔍
+        </div>
+        <h1 className="text-lg font-black">Order not found</h1>
+        <p className="text-sm text-white/60 max-w-xs">
+          We couldn't load this order. It may have been placed on another device,
+          or the link may be out of date.
+        </p>
+        <button
+          onClick={() => navigate('/orders')}
+          className="mt-2 px-6 py-3 rounded-full bg-[#4CD964] text-black font-black text-sm active:scale-95 transition-transform"
+        >
+          See my orders
+        </button>
+        <button
+          onClick={() => navigate('/')}
+          className="text-xs font-bold text-white/50 underline"
+        >
+          Back to home
+        </button>
+      </div>
+    );
   }
 
   return (

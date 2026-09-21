@@ -12,8 +12,8 @@ const srv=http.createServer((q,r)=>{
   let f=path.join(ROOT,p);
   if(!fs.existsSync(f)||fs.statSync(f).isDirectory())f=path.join(ROOT,'index.html');
   r.writeHead(200,{'Content-Type':MIME[path.extname(f)]||'application/octet-stream'});fs.createReadStream(f).pipe(r);});
-await new Promise(r=>srv.listen(4362,r));
-const B='http://localhost:4362';
+await new Promise(r=>srv.listen(4364,r));
+const B='http://localhost:4364';
 const LOC={state:{deliveryLocation:{lat:14.9637,lng:74.7089,address:'Test Address, Yellapur',distance:1.2,isDeliverable:true}},version:0};
 
 async function newCtx(b){
