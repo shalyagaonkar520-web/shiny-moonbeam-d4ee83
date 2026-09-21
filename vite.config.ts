@@ -18,6 +18,11 @@ export default defineConfig(({mode}) => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
+        // The generated registerSW.js only tests `'serviceWorker' in navigator`.
+        // Some Android WebViews expose the key with an undefined value, so that
+        // test passes and `.register()` then throws. index.html registers the
+        // worker itself, checking the value.
+        injectRegister: false,
         includeAssets: ['favicon.ico', 'robots.txt', 'logo.png', 'pwa-icon-192.png', 'pwa-icon-512.png'],
         manifest: {
           name: "Mom's Magic",

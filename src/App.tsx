@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Toaster, toast } from 'react-hot-toast';
 import { useEffect, useCallback, Suspense, lazy } from 'react';
 import { requestForToken, onMessageListener } from './firebase';
+import { flushTelegramOutbox } from './lib/notifyTelegram';
 
 // Components
 const LandingPage = lazy(() => import('./components/LandingPage'));
@@ -145,6 +146,9 @@ export default function App() {
       if (cancelled) return;
       requestForToken();
       unsubscribe = onMessageListener(handlePushPayload);
+      // Redeliver any order notification that could not reach Telegram earlier,
+      // e.g. because the serverless function was cold or misconfigured.
+      flushTelegramOutbox();
     };
 
     const idle = (window as any).requestIdleCallback;

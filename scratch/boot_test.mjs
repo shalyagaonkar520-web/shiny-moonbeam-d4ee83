@@ -5,7 +5,7 @@ const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json
 const srv=http.createServer((q,r)=>{let p=decodeURIComponent(q.url.split('?')[0]);let f=path.join(ROOT,p);
  if(!fs.existsSync(f)||fs.statSync(f).isDirectory())f=path.join(ROOT,'index.html');
  r.writeHead(200,{'Content-Type':MIME[path.extname(f)]||'application/octet-stream'});fs.createReadStream(f).pipe(r);});
-await new Promise(r=>srv.listen(4300,r));
+await new Promise(r=>srv.listen(4302,r));
 const b=await chromium.launch();
 for (const [label, sabotage] of [
   ['normal boot', null],
@@ -20,7 +20,7 @@ for (const [label, sabotage] of [
     await ctx.route('**://*.firebaseio.com/**', r=>r.abort());
     await ctx.route('**://*.google.com/**', r=>r.abort());
   }
-  await page.goto('http://localhost:4300/?preview=1',{waitUntil:'domcontentloaded'});
+  await page.goto('http://localhost:4302/?preview=1',{waitUntil:'domcontentloaded'});
   let ok=false;
   try { await page.waitForSelector('.dish-card-cv',{timeout:25000}); ok=true; } catch {}
   const text=(await page.evaluate(()=>document.body.innerText)).trim();

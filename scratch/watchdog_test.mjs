@@ -5,7 +5,7 @@ const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json
 const srv=http.createServer((q,r)=>{let p=decodeURIComponent(q.url.split('?')[0]);let f=path.join(ROOT,p);
  if(!fs.existsSync(f)||fs.statSync(f).isDirectory())f=path.join(ROOT,'index.html');
  r.writeHead(200,{'Content-Type':MIME[path.extname(f)]||'application/octet-stream'});fs.createReadStream(f).pipe(r);});
-await new Promise(r=>srv.listen(4310,r));
+await new Promise(r=>srv.listen(4312,r));
 const b=await chromium.launch();
 
 // A) healthy app: watchdog must NOT reload
@@ -13,7 +13,7 @@ const b=await chromium.launch();
   const ctx=await b.newContext({...devices['Pixel 5']});
   const page=await ctx.newPage();
   let navs=0; page.on('framenavigated',f=>{if(f===page.mainFrame())navs++;});
-  await page.goto('http://localhost:4310/?preview=1',{waitUntil:'domcontentloaded'});
+  await page.goto('http://localhost:4312/?preview=1',{waitUntil:'domcontentloaded'});
   await page.waitForSelector('.dish-card-cv',{timeout:25000});
   const ready=await page.evaluate(()=>document.getElementById('root').hasAttribute('data-app-ready'));
   await page.waitForTimeout(15000);   // past the 12s grace window
@@ -31,7 +31,7 @@ const b=await chromium.launch();
   const page=await ctx.newPage();
   await ctx.route('**/assets/index-*.js', r=>r.abort());
   let reloads=0; page.on('framenavigated',f=>{if(f===page.mainFrame())reloads++;});
-  await page.goto('http://localhost:4310/?preview=1',{waitUntil:'domcontentloaded'});
+  await page.goto('http://localhost:4312/?preview=1',{waitUntil:'domcontentloaded'});
   const stuck=await page.evaluate(()=>document.body.innerText.includes('Preparing delicious food'));
   await page.waitForTimeout(16000);   // grace window + reload
   console.log('\n=== B. bundle unreachable (simulates a stale cached shell) ===');

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { notifyTelegram } from '../lib/notifyTelegram';
 import { motion } from 'framer-motion';
 import { db } from '../firebase';
 import { collection, doc, getDoc, getDocs, updateDoc, addDoc, query, where } from 'firebase/firestore';
@@ -151,6 +152,23 @@ export default function LuckyWheelPage() {
     let cleanPhone = '+919606001790'; // Admin Phone to send claim to
     let message = `Hello Moms Magic! 🎡\n\nI just spun the Lucky Wheel and won: *${wonPrize}*! 🎉\n\nMy Phone Number: ${phone}\nOTP Code Used: ${code.toUpperCase()}`;
     const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+
+    // A prize claim is free food leaving the kitchen, so it belongs on the order
+    // channel like every other order rather than only in WhatsApp.
+    const esc = (v: string) =>
+      String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    notifyTelegram(
+      [
+        '🎡 <b>LUCKY WHEEL PRIZE CLAIM!</b>',
+        '',
+        `🎁 <b>Prize:</b> ${esc(String(wonPrize))}`,
+        `📞 <b>Phone:</b> ${esc(phone)}`,
+        `🔢 <b>Code:</b> ${esc(code.toUpperCase())}`,
+        '',
+        '━━━━━━━━━━━━━━━━',
+        '🌟 <b>Moms Magic</b> - Lucky Wheel',
+      ].join('\n')
+    );
     window.location.href = waUrl;
   };
 

@@ -374,6 +374,10 @@ export default function LandingPage() {
   useEffect(() => {
     const sentinel = loadMoreRef.current;
     if (!sentinel || !hasMoreProducts) return;
+    // Very old browsers have no IntersectionObserver. Constructing one there
+    // threw inside this effect, which unmounted the tree and left a blank page;
+    // without it the "Show more dishes" button still reveals the rest.
+    if (typeof IntersectionObserver === 'undefined') return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { notifyTelegram } from '../lib/notifyTelegram';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Star, MessageSquare, ChevronLeft, Send } from 'lucide-react';
@@ -20,6 +21,22 @@ export default function FeedbackPage() {
     }
     const stars = '⭐'.repeat(rating);
     const feedbackMsg = `Hi Moms Magic! I would like to share my feedback:\nRating: ${stars}\nComments: ${feedback}`;
+
+    // Feedback goes to the order channel too, so nothing a customer sends
+    // depends on someone remembering to check WhatsApp.
+    const esc = (v: string) =>
+      String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    notifyTelegram(
+      [
+        '⭐ <b>NEW CUSTOMER FEEDBACK</b>',
+        '',
+        `⭐ <b>Rating:</b> ${rating}/5`,
+        `💬 <b>Comments:</b> ${esc(feedback.trim()) || '(none)'}`,
+        '',
+        '━━━━━━━━━━━━━━━━',
+        '🌟 <b>Moms Magic</b> - Feedback',
+      ].join('\n')
+    );
     const waUrl = `https://wa.me/919606001790?text=${encodeURIComponent(feedbackMsg)}`;
     
     toast.success('Thank you! Redirecting to WhatsApp to send feedback... 🚀', {

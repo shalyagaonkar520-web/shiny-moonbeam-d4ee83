@@ -116,8 +116,65 @@
         </div>
       </div>
     </div>
+    <script>
+      // Storage guard -- must run before the app module.
+      //
+      // The app reads localStorage in a lot of places (cart, saved orders, admin
+      // flag, zustand persist). On iOS Safari with "Block All Cookies", in some
+      // private/incognito modes and in restricted Android browsers, touching
+      // localStorage throws instead of returning null. One throw during module
+      // evaluation or render takes React down and the visitor sees a blank page.
+      //
+      // If real storage is unusable, swap in an in-memory stand-in with the same
+      // API. Everything then works for the length of the visit and simply does
+      // not persist, which is enormously better than a dead page.
+      (function () {
+        function memoryStorage() {
+          var data = Object.create(null);
+          return {
+            getItem: function (k) { return Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null; },
+            setItem: function (k, v) { data[k] = String(v); },
+            removeItem: function (k) { delete data[k]; },
+            clear: function () { data = Object.create(null); },
+            key: function (i) { return Object.keys(data)[i] || null; },
+            get length() { return Object.keys(data).length; }
+          };
+        }
+        ['localStorage', 'sessionStorage'].forEach(function (name) {
+          var usable = false;
+          try {
+            var probe = '__mm_probe__';
+            window[name].setItem(probe, '1');
+            window[name].removeItem(probe);
+            usable = true;
+          } catch (e) { usable = false; }
+          if (!usable) {
+            try {
+              Object.defineProperty(window, name, {
+                configurable: true,
+                get: (function () { var s = memoryStorage(); return function () { return s; }; })()
+              });
+            } catch (e) { /* cannot override; call sites still guard individually */ }
+          }
+        });
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
     <script>
+      // Service worker registration, replacing the generated registerSW.js so the
+      // check is on the value rather than just the key.
+      (function () {
+        if (!navigator.serviceWorker || typeof navigator.serviceWorker.register !== 'function') return;
+        window.addEventListener('load', function () {
+          try {
+            navigator.serviceWorker.register('/sw.js', { scope: '/' })
+              .catch(function (e) { console.warn('Service worker registration failed:', e); });
+          } catch (e) {
+            console.warn('Service worker registration threw:', e);
+          }
+        });
+      })();
+
       // Self-heal watchdog.
       //
       // If the app has not mounted a few seconds after load, the page is stuck on

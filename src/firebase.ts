@@ -49,7 +49,10 @@ export const auth = _auth as ReturnType<typeof getAuth>;
 async function getMessagingIfSupported() {
   try {
     if (typeof window === 'undefined') return null;
-    if (!('serviceWorker' in navigator) || !('Notification' in window)) return null;
+    // Check the values, not just the keys: some Android WebViews expose
+    // navigator.serviceWorker as undefined, which passes an `in` test and
+    // then throws on the first property access.
+    if (!navigator.serviceWorker || typeof window.Notification === 'undefined') return null;
 
     const { getMessaging, isSupported } = await import('firebase/messaging');
     if (!(await isSupported())) return null;
