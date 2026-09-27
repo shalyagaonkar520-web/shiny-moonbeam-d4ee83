@@ -1,64 +1,78 @@
-// Credentials come from the environment. They were previously hardcoded here
-// and in three client components, which published the bot token in the browser
-// bundle and in this public repo. Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID
-// in the hosting provider's environment variables.
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+import { adminDb } from './_firebaseAdmin.js';
+import { announceOnce } from './_orderMessage.js';
+
+// POST /api/send-telegram  { orderId, text? }
+//
+// Tells the team group about an order. This used to relay any text anyone
+// posted, which let strangers drop fake "PAID" orders or phishing links into
+// the kitchen's chat. Now, whenever the server can read Firestore, the text
+// in the request is ignored: the message is built from the saved order, and
+// each order is announced once (repeat calls are harmless).
+//
+// Anything else (party bookings, feedback, lucky-wheel claims, or an order
+// the browser could not save) is relayed as text: capped, rate limited, and
+// marked as unverified.
+
+const ORDER_ID = /^[0-9]{13}[A-Z2-9]{10}$/;
+const hits = new Map();
+
+function tooMany(ip) {
+  const now = Date.now();
+  const recent = (hits.get(ip) || []).filter((t) => now - t < 60_000);
+  recent.push(now);
+  hits.set(ip, recent);
+  return recent.length > 5;
+}
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Cache-Control', 'no-store');
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+  let body = req.body || {};
+  if (typeof body === 'string') {
+    try { body = JSON.parse(body); } catch { body = {}; }
+  }
+  const ip = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
+
+  // An order id that exists: announce the saved order (text ignored, once).
+  if (adminDb && ORDER_ID.test(String(body.orderId || ''))) {
+    if (tooMany(ip)) return res.status(429).json({ success: false, error: 'too_many_requests' });
+    try {
+      const snap = await adminDb.collection('orders').doc(String(body.orderId)).get();
+      if (snap.exists) {
+        await announceOnce(String(body.orderId));
+        return res.status(200).json({ success: true });
+      }
+    } catch (err) {
+      console.error('send-telegram failed', err);
+      return res.status(500).json({ success: false });
+    }
   }
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
+  // ---- everything else: party bookings, feedback, lucky-wheel claims, and an
+  // order the browser could not save. Relayed as text, capped, rate limited,
+  // and labelled so the team knows the server did not verify it.
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return res.status(500).json({ success: false, error: 'Notifications are not configured' });
+  if (tooMany(ip)) return res.status(429).json({ success: false, error: 'too_many_requests' });
 
-  // Without this the fetch below would hit /botundefined/ and fail obscurely.
-  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-    console.error('TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID are not configured');
-    return res.status(500).json({ success: false, error: 'Notifications are not configured' });
-  }
+  const raw = typeof body.text === 'string' ? body.text.slice(0, 3800) : '';
+  if (!raw) return res.status(400).json({ error: 'Missing message text' });
+  const text = adminDb ? `⚠️ <i>Sent from the app, not verified by the server</i>
+
+${raw}` : raw;
 
   try {
-    let text;
-    if (typeof req.body === 'string') {
-      try {
-        const parsed = JSON.parse(req.body);
-        text = parsed.text;
-      } catch (e) {}
-    } else if (req.body && typeof req.body === 'object') {
-      text = req.body.text;
-    }
-
-    if (!text) {
-      return res.status(400).json({ error: 'Missing message text' });
-    }
-
-    const tgResponse = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    const tg = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text,
-        parse_mode: 'HTML'
-      })
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML', disable_web_page_preview: true }),
     });
-
-    const tgData = await tgResponse.json();
-
-    if (!tgResponse.ok) {
-      console.error('Telegram API error:', tgData);
-      return res.status(502).json({ success: false, error: tgData.description || 'Telegram API error' });
-    }
-
+    if (!tg.ok) return res.status(502).json({ success: false });
     return res.status(200).json({ success: true });
   } catch (err) {
     console.error('Telegram send failed:', err);
-    return res.status(500).json({ success: false, error: 'Internal server error' });
+    return res.status(500).json({ success: false });
   }
 }

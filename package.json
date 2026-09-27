@@ -7,11 +7,15 @@
   "scripts": {
     "dev": "vite",
     "start": "vite",
+    "prebuild": "node scripts/build-catalog.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "test": "node tests/server.test.mjs",
+    "test:e2e": "node tests/checkout.e2e.cjs",
+    "test:rules": "npx -y firebase-tools@13 emulators:exec --only firestore --project demo-momsmagic \"node tests/rules.test.mjs\""
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

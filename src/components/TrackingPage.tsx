@@ -29,6 +29,7 @@ interface TrackView {
   items: Array<{ name: string; qty: number; price?: number }>;
   amount: number;
   paymentMethod: string | null;
+  paymentStatus: string | null;
   address: string;
   dest: LatLng | null;
   riderId: string | null;
@@ -57,6 +58,7 @@ function fromRaw(o: any): TrackView {
     })),
     amount: Number(o.payableAmount ?? o.grandTotal ?? 0),
     paymentMethod: o.paymentMethod || null,
+    paymentStatus: o.paymentStatus || null,
     address: o.deliveryLocation?.address || '',
     dest: isLatLng(o.deliveryLocation) ? { lat: o.deliveryLocation.lat, lng: o.deliveryLocation.lng } : null,
     riderId: o.riderId || null,
@@ -77,6 +79,7 @@ function fromApi(o: any, prev: TrackView | null): TrackView {
       : prev?.items || [],
     amount: o.amount ?? prev?.amount ?? 0,
     paymentMethod: o.paymentMethod ?? prev?.paymentMethod ?? null,
+    paymentStatus: o.paymentStatus ?? prev?.paymentStatus ?? null,
     address: o.delivery?.address || prev?.address || '',
     dest: isLatLng(o.delivery) ? { lat: o.delivery.lat, lng: o.delivery.lng } : prev?.dest || null,
     riderId: prev?.riderId || null,
@@ -578,7 +581,7 @@ export default function TrackingPage() {
             </ul>
             <div className="pt-3 border-t border-dashed border-gray-200 flex items-center justify-between">
               <span className="text-xs font-bold text-gray-500">
-                {view.paymentMethod === 'cod' ? 'Cash on delivery' : view.paymentMethod === 'online' ? 'Paid online' : view.paymentMethod === 'wallet' ? 'Paid from wallet' : 'Total'}
+                {view.paymentMethod === 'cod' ? 'Cash on delivery' : view.paymentMethod === 'online' ? (view.paymentStatus === 'completed' ? 'Paid online' : 'Online payment pending') : view.paymentMethod === 'wallet' ? 'Paid from wallet' : 'Total'}
                 {itemsTotal > 0 && view.amount > itemsTotal ? ' · incl. delivery' : ''}
               </span>
               <span className="text-base font-black text-gray-900">₹{view.amount}</span>

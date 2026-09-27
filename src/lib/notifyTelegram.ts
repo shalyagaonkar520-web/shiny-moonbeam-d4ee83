@@ -23,6 +23,8 @@ const MAX_AGE_MS = 3 * 24 * 60 * 60 * 1000;
 
 interface QueuedMessage {
   text: string;
+  /** Lets the server announce the saved order once, whatever the retries. */
+  orderId?: string;
   queuedAt: number;
 }
 
@@ -47,13 +49,13 @@ function writeQueue(messages: QueuedMessage[]): void {
   }
 }
 
-function enqueue(text: string): void {
+function enqueue(text: string, orderId?: string): void {
   const fresh = readQueue().filter((m) => Date.now() - m.queuedAt < MAX_AGE_MS);
-  fresh.push({ text, queuedAt: Date.now() });
+  fresh.push({ text, orderId, queuedAt: Date.now() });
   writeQueue(fresh);
 }
 
-function postOnce(text: string): Promise<boolean> {
+function postOnce(text: string, orderId?: string): Promise<boolean> {
   return new Promise((resolve) => {
     // AbortSignal.timeout is missing on older iOS Safari, so the timeout is a
     // plain timer that resolves false rather than aborting the request.
@@ -61,14 +63,17 @@ function postOnce(text: string): Promise<boolean> {
     fetch(ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
+      // The server builds the team message from the saved order when it can,
+      // and announces each order once, so retries cannot duplicate it.
+      body: JSON.stringify({ text, orderId }),
       // Checkout navigates to WhatsApp about half a second after sending, so
       // the request has to be allowed to outlive the page.
       keepalive: true,
     })
       .then((response) => {
         clearTimeout(timer);
-        resolve(response.ok);
+        // A 4xx will fail the same way on every retry; don't queue it.
+        resolve(response.ok || (response.status >= 400 && response.status < 500));
       })
       .catch(() => {
         clearTimeout(timer);
@@ -84,12 +89,12 @@ function postOnce(text: string): Promise<boolean> {
  * which is also being sent over WhatsApp. On failure the message is queued and
  * retried by `flushTelegramOutbox()` on a later page load.
  */
-export async function notifyTelegram(text: string): Promise<boolean> {
+export async function notifyTelegram(text: string, orderId?: string): Promise<boolean> {
   for (let attempt = 0; attempt < ATTEMPTS; attempt++) {
-    if (await postOnce(text)) return true;
+    if (await postOnce(text, orderId)) return true;
   }
   console.error('Telegram notification failed; queued for retry');
-  enqueue(text);
+  enqueue(text, orderId);
   return false;
 }
 
@@ -109,7 +114,7 @@ export async function flushTelegramOutbox(): Promise<void> {
   for (const message of pending) {
     // One attempt each: if the endpoint is down, retrying here just delays the
     // page. The next page load will try again.
-    const sent = await postOnce(message.text);
+    const sent = await postOnce(message.text, message.orderId);
     if (!sent) stillFailing.push(message);
   }
 

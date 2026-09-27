@@ -15,6 +15,10 @@ import { toStage } from './_orderStage.js';
 
 const ORDER_ID_PATTERN = /^[A-Za-z0-9_-]{6,100}$/;
 const SITE = 'https://momsmagic.shop';
+// Paid to the assigned rider for each delivered order.
+const RIDER_FEE_PER_DELIVERY = 40;
+// Deliveries before this were credited by the old in-app counter.
+const RIDER_CREDIT_FROM = '2026-09-27T00:00:00.000Z';
 
 const MESSAGES = {
   preparing: { title: 'Order accepted 👩‍🍳', body: 'The kitchen is preparing your food.' },
@@ -50,12 +54,43 @@ export default async function handler(req, res) {
       if (!snap.exists) return { skip: 'order_not_found' };
       const order = snap.data();
       const stage = toStage(order);
+      const updates = {};
+
+      // Rider pay is credited here, once per order, when it really becomes
+      // delivered. It used to be a counter the rider's phone rewrote itself,
+      // which could be double-counted or set to any value.
+      // deliveredAt is written by staff/rider status changes (setOrderStage),
+      // which the rules only allow for the assigned rider or an admin.
+      if (
+        stage === 'delivered' && order.riderId && !order.riderCredited && !order.riderCreditedAt &&
+        // Only deliveries made after server-side crediting went live: older
+        // orders were paid by the old app counter and must not pay again.
+        String(order.deliveredAt || '') >= RIDER_CREDIT_FROM
+      ) {
+        const riderRef = adminDb.collection('riders').doc(String(order.riderId));
+        const riderSnap = await tx.get(riderRef);
+        if (riderSnap.exists) {
+          tx.update(riderRef, {
+            earnings: FieldValue.increment(RIDER_FEE_PER_DELIVERY),
+            deliveredCount: FieldValue.increment(1),
+          });
+          updates.riderCredited = true;
+          updates.riderCreditedAt = new Date().toISOString();
+          updates.riderCommission = RIDER_FEE_PER_DELIVERY;
+        }
+      }
+
       const token = order.customerPushToken;
-      if (!MESSAGES[stage]) return { skip: 'nothing_to_send', stage };
-      if (!token) return { skip: 'no_device_token', stage };
-      if ((order.notifiedStages || []).includes(stage)) return { skip: 'already_sent', stage };
-      tx.update(orderRef, { notifiedStages: FieldValue.arrayUnion(stage) });
-      return { stage, token };
+      let result;
+      if (!MESSAGES[stage]) result = { skip: 'nothing_to_send', stage };
+      else if (!token) result = { skip: 'no_device_token', stage };
+      else if ((order.notifiedStages || []).includes(stage)) result = { skip: 'already_sent', stage };
+      else {
+        updates.notifiedStages = FieldValue.arrayUnion(stage);
+        result = { stage, token };
+      }
+      if (Object.keys(updates).length) tx.update(orderRef, updates);
+      return result;
     });
 
     if (claim.skip) return res.status(200).json({ ok: true, sent: false, reason: claim.skip, stage: claim.stage });

@@ -33,8 +33,15 @@ service cloud.firestore {
       return ['PUT-YOUR-ADMIN-UID-HERE'];
     }
 
+    // The admin login (api/admin-login.js) signs the owner in with a Firebase
+    // custom token carrying admin: true, so either check makes an admin.
     function isAdmin() {
-      return request.auth != null && request.auth.uid in adminUids();
+      return request.auth != null
+        && (request.auth.uid in adminUids() || request.auth.token.admin == true);
+    }
+
+    function changes(keys) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
     }
 
     // Alternative if you prefer custom claims over a hardcoded UID list.
@@ -75,12 +82,42 @@ service cloud.firestore {
     // Only an admin may change or delete an order, so a customer cannot mark
     // their own order paid or delivered.
 
+    // Orders are normally written by /api/place-order with the Admin SDK (which
+    // bypasses these rules and prices them from the menu). The browser path
+    // below is only the fallback, and it can never create a paid order:
+    // "completed" is set solely by the server after Razorpay's signature check.
     match /orders/{orderId} {
-      allow create: if true;
-      allow get: if true;
+      allow create: if request.resource.data.paymentStatus in ['pending', 'unverified']
+                    && request.resource.data.paymentMethod in ['cod', 'online']
+                    && request.resource.data.get('paymentId', null) == null
+                    && request.resource.data.status == 'pending'
+                    && request.resource.data.get('orderStatus', 'NEW') == 'NEW'
+                    // Fields only the server or staff may set. Without this a
+                    // browser could create an order already "delivered" to
+                    // itself as rider, or pose as a server-priced, paid order.
+                    && !request.resource.data.keys().hasAny([
+                         'riderId', 'riderStatus', 'riderCredited', 'riderCreditedAt', 'riderCommission',
+                         'serverPriced', 'razorpayOrderId', 'paidAt', 'telegramSentAt', 'notifiedStages',
+                         'priceFlags', 'outForDeliveryAt', 'deliveredAt', 'customerRating']);
+      // Reading an order is limited to staff, its rider and its signed-in
+      // customer: an order holds a name, phone and home address. Guests track
+      // through /api/track, which returns a trimmed copy.
+      allow get: if isAdmin()
+                 || (request.auth != null
+                     && (resource.data.get('riderId', '') == request.auth.uid
+                         || resource.data.get('userId', '') == request.auth.uid));
       allow list: if isAdmin()
                   || (request.auth != null && resource.data.riderId == request.auth.uid);
       allow update, delete: if isAdmin();
+      // The assigned rider may move their order along, touching status fields only.
+      // They may accept, start, deliver or hand it back, but not assign it to
+      // someone else or invent a status.
+      allow update: if request.auth != null
+                    && resource.data.riderId == request.auth.uid
+                    && changes(['status', 'orderStatus', 'riderStatus', 'riderId', 'outForDeliveryAt', 'deliveredAt'])
+                    && request.resource.data.riderId in [request.auth.uid, '']
+                    && request.resource.data.status in ['pending', 'Confirmed', 'Preparing', 'Out For Delivery', 'delivered']
+                    && request.resource.data.orderStatus in ['NEW', 'ACCEPTED', 'OUT_FOR_DELIVERY', 'DELIVERED'];
     }
 
     // ---- delivery riders ----------------------------------------------------
@@ -92,15 +129,31 @@ service cloud.firestore {
     match /riders/{riderId} {
       allow get: if true;
       allow list: if isAdmin();
-      allow update: if isAdmin() || (request.auth != null && request.auth.uid == riderId);
+      // A rider may go online/offline and report their position -- nothing
+      // else: name and phone appear in the admin map, and earnings are credited
+      // on the server (/api/notify-order) when an order is delivered.
+      allow update: if isAdmin()
+                    || (request.auth != null && request.auth.uid == riderId
+                        && changes(['status', 'currentLocation', 'lastUpdated', 'fcmToken']));
       allow create, delete: if isAdmin();
     }
 
     // ---- customer accounts --------------------------------------------------
     // A signed-in customer may read and write only their own document.
 
+    // A customer manages their own profile, but money fields are server/admin
+    // only: otherwise updateDoc(users/<me>, {walletBalance: 99999}) from the
+    // browser console would be free food.
     match /users/{userId} {
-      allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == userId);
+      allow read, delete: if isAdmin() || (request.auth != null && request.auth.uid == userId);
+      allow create: if isAdmin()
+                    || (request.auth != null && request.auth.uid == userId
+                        && request.resource.data.get('walletBalance', 0) == 0
+                        && request.resource.data.get('rewardPoints', 0) == 0);
+      allow update: if isAdmin()
+                    || (request.auth != null && request.auth.uid == userId
+                        && !request.resource.data.diff(resource.data).affectedKeys()
+                             .hasAny(['walletBalance', 'rewardPoints', 'welcomeBonusClaimed', 'uid']));
     }
 
     match /walletTransactions/{txId} {
@@ -121,6 +174,10 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // Readable as before: the spin page looks a code up with a query, so
+    // blocking list would break it. Codes are still listable, and spins are
+    // decided in the browser -- moving both behind a server endpoint is the
+    // real fix.
     match /luckyWheelCoupons/{couponId} {
       allow read: if true;
       allow write: if isAdmin();
@@ -142,6 +199,19 @@ service cloud.firestore {
     // ---- everything else ----------------------------------------------------
     // Deny by default, so a collection added later is closed until rules for it
     // are written deliberately.
+
+    // Server-only record of each Razorpay order (which order group, how much).
+    // Clients must never write it: payments are verified against it.
+    match /payments/{razorpayOrderId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Post-delivery ratings, written by /api/rate-order with the Admin SDK.
+    match /ratings/{orderId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
 
     match /{document=**} {
       allow read, write: if false;

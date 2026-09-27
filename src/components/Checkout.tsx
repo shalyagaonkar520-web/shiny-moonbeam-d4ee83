@@ -20,6 +20,21 @@ import { doc, setDoc } from 'firebase/firestore';
 import { getItemHotelTag, getItemHotel, getOrderHotelName, getOrderHotelId, groupItemsByHotel } from '../utils/orderHotels';
 import DishImage from './DishImage';
 import { notifyTelegram } from '../lib/notifyTelegram';
+import { couponDiscountFor, couponGivesFreeDelivery, istHour, normaliseIndianMobile, CouponRule } from '../lib/pricing';
+import {
+  placeOrderOnServer,
+  verifyPaymentOnServer,
+  orderErrorMessage,
+  loadRazorpay,
+  preconnectRazorpay,
+} from '../lib/checkoutApi';
+
+// Publishable Razorpay key id (safe in the browser). The server returns the
+// key that matches the order it created; this is the fallback path's key.
+const RAZORPAY_KEY_ID = 'rzp_live_T1Y1yu09Jbjo6b';
+
+// { orderId, at } of an online payment that was opened but not finished here.
+const PENDING_PAYMENT_KEY = 'moms_magic_pending_payment';
 
 // Every order -- food and bulk alike -- goes to this one WhatsApp number.
 const WHATSAPP_ORDER_NUMBER = '919606001790';
@@ -32,8 +47,6 @@ const GAP = '__GAP__';
 const escHtml = (s: string) =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-const sendTelegramMessage = (text: string) => notifyTelegram(text);
-
 const ID_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
 function randomIdSuffix(length: number): string {
@@ -45,11 +58,15 @@ function randomIdSuffix(length: number): string {
 export default function Checkout() {
   useSEO('Cart & Checkout', 'Review your cart with zero hidden fees and finalize delivery at Mom\'s Magic.');
   const navigate = useNavigate();
-  const isBulkOrder = localStorage.getItem('moms_magic_order_type') === 'bulk';
 
   const { items: cartItems, total: cartTotal, clearCart, updateQuantity } = useCartStore();
   const bulkStore = useBulkOrderStore();
   const { bulkItems, getGrandTotal: getBulkTotal, cake, decoration, additionalServices, resetBulkOrder } = bulkStore;
+  // Party mode comes from what is actually in the party list. It used to be a
+  // localStorage flag set just by opening the Cakes tab, which then turned
+  // every later normal order into an "event order" (no packaging fee, no
+  // prices on the ticket, cart never cleared).
+  const isBulkOrder = bulkItems.length > 0;
 
   const { selectedCity } = useCityStore();
   const { deliveryLocation, openLocationPicker } = useLocationStore();
@@ -78,31 +95,26 @@ export default function Checkout() {
   const distanceKm = deliveryLocation?.distance ?? 0;
   const baseDeliveryCharge = calculateDeliveryCharge(distanceKm);
 
-  // Free delivery logic
-  const now = new Date();
-  const isBeforeTwo = now.getHours() < 14;
-  const activeCoupons = settings.coupons || [];
+  // Free delivery logic (same rules as api/_pricing.js)
+  const activeCoupons = (settings.coupons || []) as CouponRule[];
   const appliedCouponDetails = appliedCoupon ? activeCoupons.find(c => c.code.toUpperCase() === appliedCoupon) : null;
-
-  const isTillJuly1st = new Date() < new Date('2026-07-02T00:00:00');
-  const isFreeDelivery = (appliedCouponDetails?.type === 'free_delivery') || isBeforeTwo || isTillJuly1st;
-  const freeDeliveryReason = appliedCouponDetails?.type === 'free_delivery' 
-    ? `${appliedCouponDetails.code} Promo` 
-    : isTillJuly1st 
-    ? 'Free Delivery till July 1st 🎉' 
-    : isBeforeTwo 
-    ? 'Free Before 2 PM 🎉' 
+  const isBeforeTwo = istHour() < 14;
+  const freeByCoupon = couponGivesFreeDelivery(appliedCouponDetails, subtotal);
+  const isFreeDelivery = freeByCoupon || isBeforeTwo;
+  const freeDeliveryReason = freeByCoupon
+    ? `${appliedCouponDetails!.code} Promo`
+    : isBeforeTwo
+    ? 'Free Before 2 PM 🎉'
     : '';
   const deliveryCharge = isFreeDelivery ? 0 : baseDeliveryCharge;
 
-  let couponDiscount = 0;
-  if (appliedCouponDetails) {
-    if (appliedCouponDetails.type === 'fixed_discount') {
-      couponDiscount = appliedCouponDetails.value;
-    } else if (appliedCouponDetails.type === 'percent_discount') {
-      couponDiscount = (subtotal * appliedCouponDetails.value) / 100;
-    }
-  }
+  // Re-checked on every render: dropping below the minimum or the admin
+  // switching the coupon off removes the discount instead of leaving a ₹0 order.
+  const couponDiscount = couponDiscountFor(appliedCouponDetails, subtotal);
+  const couponShortfall =
+    appliedCouponDetails && appliedCouponDetails.isActive && subtotal < appliedCouponDetails.minOrderValue
+      ? appliedCouponDetails.minOrderValue - subtotal
+      : 0;
 
   // Packaging fee rule: Only Hotel Mumtaz has ₹10 packaging fee, all other hotels/orders have ₹0
   const hasMumtaz = !isBulkOrder && cartItems.some(
@@ -154,6 +166,40 @@ export default function Checkout() {
 
   React.useEffect(() => { window.scrollTo(0, 0); }, []);
 
+  // If Android killed the app while the customer was paying in their UPI app,
+  // the payment may have gone through (the Razorpay webhook marks it paid)
+  // while the cart here is still full. Check before letting them pay again.
+  React.useEffect(() => {
+    let pending: { orderId: string; at: number } | null = null;
+    try { pending = JSON.parse(localStorage.getItem(PENDING_PAYMENT_KEY) || 'null'); } catch { /* ignore */ }
+    if (!pending?.orderId || Date.now() - pending.at > 2 * 60 * 60 * 1000) {
+      localStorage.removeItem(PENDING_PAYMENT_KEY);
+      return;
+    }
+    fetch(`/api/track?id=${encodeURIComponent(pending.orderId)}`, { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((body) => {
+        if (body?.order?.paymentStatus !== 'completed') return;
+        localStorage.removeItem(PENDING_PAYMENT_KEY);
+        clearCart();
+        toast.success('Your payment went through. Here is your order.');
+        navigate(`/track/${pending!.orderId}`, { replace: true });
+      })
+      .catch(() => {});
+  }, []);
+
+  // Clear the old party flag left on devices by previous versions.
+  React.useEffect(() => {
+    if (!isBulkOrder) localStorage.removeItem('moms_magic_order_type');
+  }, [isBulkOrder]);
+
+  React.useEffect(() => {
+    if (paymentMethod === 'online') {
+      preconnectRazorpay();
+      loadRazorpay();
+    }
+  }, [paymentMethod]);
+
   // Check store open & restore saved user info
   React.useEffect(() => {
     // Time lock / closure restrictions removed - always open
@@ -170,15 +216,11 @@ export default function Checkout() {
 
   // Payment Method Rule:
   // Default is COD. If distance > 5km, lock COD and select Online.
+  // Only forces a change when COD becomes impossible; picking another address
+  // must not silently switch a customer's "Pay Online" back to COD.
   React.useEffect(() => {
-    const dist = deliveryLocation?.distance ?? 0;
-    if (dist > 5) {
-      setPaymentMethod('online');
-    } else {
-      // Keep COD as default
-      setPaymentMethod('cod');
-    }
-  }, [deliveryLocation]);
+    if ((deliveryLocation?.distance ?? 0) > 5) setPaymentMethod('online');
+  }, [deliveryLocation?.distance]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -192,8 +234,9 @@ export default function Checkout() {
       toast.error('Please enter your name');
       return;
     }
-    if (!formData.phone.trim() || formData.phone.length < 10) {
-      toast.error('Please enter a valid 10-digit phone number');
+    const phone = normaliseIndianMobile(formData.phone);
+    if (!phone) {
+      toast.error('Please enter a valid 10-digit mobile number');
       return;
     }
     if (!deliveryLocation) {
@@ -210,13 +253,27 @@ export default function Checkout() {
       return;
     }
 
-    localStorage.setItem('moms_magic_user_name',  formData.name.trim());
-    localStorage.setItem('moms_magic_user_phone', formData.phone.trim());
+    const customerName = formData.name.trim();
+    localStorage.setItem('moms_magic_user_name', customerName);
+    localStorage.setItem('moms_magic_user_phone', phone);
 
     const mapsViewLink = `https://maps.google.com/?q=${deliveryLocation.lat},${deliveryLocation.lng}`;
     const mapsNavLink  = `https://maps.google.com/maps?daddr=${deliveryLocation.lat},${deliveryLocation.lng}`;
 
-    const buildWaMessage = (paymentId?: string) => {
+    // The id is the only thing guarding /track/<id>, which shows the delivery
+    // address, so a bare timestamp (guessable to the millisecond) is not enough.
+    // The timestamp prefix keeps ids sortable; the random tail makes them
+    // unguessable.
+    const orderId = `${Date.now()}${randomIdSuffix(10)}`;
+    const trackUrl = `https://momsmagic.shop/track/${orderId}`;
+    const pushToken = getOrderPushToken();
+    if (!pushToken) askForOrderUpdates();
+    const wantsOnline = payableAmount > 0 && paymentMethod === 'online';
+
+    type Totals = { subtotal: number; packagingFee: number; deliveryCharge: number; couponDiscount: number; payable: number };
+    const clientTotals: Totals = { subtotal, packagingFee, deliveryCharge, couponDiscount, payable: payableAmount };
+
+    const buildWaMessage = (totals: Totals, paymentId?: string) => {
       // activeItems so a party order that also has hotel dishes still names the hotel.
       const hotelName = getOrderHotelName(activeItems);
 
@@ -250,33 +307,34 @@ export default function Checkout() {
       }
 
       return [
-        isBulkOrder 
-          ? `🎉 *NEW EVENT ORDER!* 🎉` 
-          : hotelName 
-          ? `🏨 *NEW ORDER - ${hotelName.toUpperCase()}!* 🏨` 
+        isBulkOrder
+          ? `🎉 *NEW EVENT ORDER!* 🎉`
+          : hotelName
+          ? `🏨 *NEW ORDER - ${hotelName.toUpperCase()}!* 🏨`
           : `📦 *NEW ORDER - MOM'S MAGIC!* 📦`,
+        `🆔 *Order:* ${orderId}`,
         GAP,
         hotelName ? `🏨 *Hotel:* ${hotelName}` : '',
-        `👤 *Name:* ${formData.name.trim()}`,
-        `📞 *Phone:* ${formData.phone.trim()}`,
+        `👤 *Name:* ${customerName}`,
+        `📞 *Phone:* ${phone}`,
         `📍 *City:* ${selectedCity?.name || 'Yellapur'}`,
         `🏠 *Address:* ${deliveryLocation.address}`,
         `📏 *Distance:* ${distanceKm} km`,
         GAP,
         orderDetails,
         GAP,
-        `💰 *Cart Total:* ₹${subtotal.toFixed(2)}`,
-        packagingFee > 0 ? `📦 *Packaging Fee (Hotel Mumtaz):* ₹${packagingFee.toFixed(2)}` : '',
-        `🚚 *Delivery Fee:* ${isFreeDelivery ? `FREE (${freeDeliveryReason})` : `₹${deliveryCharge.toFixed(2)}`}`,
-        couponDiscount > 0 ? `🎟️ *Coupon Discount:* -₹${couponDiscount.toFixed(2)}` : '',
-        walletDeduction > 0 ? `🎁 *Wallet Used:* -₹${walletDeduction.toFixed(2)}` : '',
-        `💵 *TOTAL PAYABLE:* ₹${payableAmount.toFixed(2)}`,
+        `💰 *Cart Total:* ₹${totals.subtotal.toFixed(2)}`,
+        totals.packagingFee > 0 ? `📦 *Packaging Fee (Hotel Mumtaz):* ₹${totals.packagingFee.toFixed(2)}` : '',
+        `🚚 *Delivery Fee:* ${totals.deliveryCharge === 0 ? `FREE${freeDeliveryReason ? ` (${freeDeliveryReason})` : ''}` : `₹${totals.deliveryCharge.toFixed(2)}`}`,
+        totals.couponDiscount > 0 ? `🎟️ *Coupon Discount:* -₹${totals.couponDiscount.toFixed(2)}` : '',
+        `💵 *TOTAL PAYABLE:* ₹${totals.payable.toFixed(2)}`,
         paymentId ? `✅ *PAYMENT:* Paid Online (${paymentId})` : `💵 *PAYMENT:* Cash on Delivery (COD)`,
         needCutlery ? `🍴 *Cutlery:* Requested` : `🌱 *Cutlery:* Not needed`,
         formData.additionalMessage.trim() ? `📝 *Cooking / Delivery Note:* ${formData.additionalMessage.trim()}` : '',
         GAP,
         `🗺️ *View Map:* ${mapsViewLink}`,
         `🚗 *Navigate:* ${mapsNavLink}`,
+        `📍 *Track:* ${trackUrl}`,
         GAP,
         `━━━━━━━━━━━━━━━━`,
         hotelName ? `🏨 *${hotelName} Order via Mom's Magic*` : `🍽️ *Mom's Magic - All Orders*`,
@@ -285,35 +343,20 @@ export default function Checkout() {
       ].filter((l) => l !== '').map((l) => (l === GAP ? '' : l)).join('\n');
     };
 
+    // Only used when /api/place-order is unavailable; the server builds its own.
     const buildTgMessage = (paymentId?: string) => {
-      // activeItems so a party order that also has hotel dishes still names the hotel.
       const hotelName = getOrderHotelName(activeItems);
-
-      let tgDetails = '';
-      if (isBulkOrder) {
-        // activeItems, not bulkItems: a party order can also carry normal cart items,
-        // and listing only bulkItems dropped those item names from the message.
-        tgDetails = activeItems.map((i: any) => {
-          const qty = i.finalQuantity ?? i.quantity ?? 1;
-          const unit = i.finalQuantity != null ? ' units' : '';
-          return `• ${escHtml(i.name)}${escHtml(getItemHotelTag(i))} (${qty}${unit})`;
-        }).join('\n');
-      } else {
-        tgDetails = cartItems.map((item) => {
-          return `• ${item.quantity}x ${escHtml(item.name)}${escHtml(getItemHotelTag(item))} (₹${item.price * item.quantity})`;
-        }).join('\n');
-      }
+      const tgDetails = activeItems.map((item: any) => {
+        const qty = item.finalQuantity ?? item.quantity ?? 1;
+        return `• ${qty}x ${escHtml(item.name)}${escHtml(getItemHotelTag(item))} (₹${item.price * qty})`;
+      }).join('\n');
 
       return [
-        isBulkOrder 
-          ? `🎉 <b>NEW EVENT ORDER!</b>` 
-          : hotelName 
-          ? `🏨 <b>NEW ORDER - ${hotelName.toUpperCase()}!</b> 🏨` 
-          : `📦 <b>NEW FOOD ORDER!</b>`,
+        hotelName ? `🏨 <b>NEW ORDER - ${escHtml(hotelName.toUpperCase())}!</b> 🏨` : `📦 <b>NEW FOOD ORDER!</b>`,
+        `🆔 <code>${orderId}</code>`,
         GAP,
-        hotelName ? `🏨 <b>Hotel:</b> ${hotelName}` : '',
-        `👤 <b>Name:</b> ${escHtml(formData.name.trim())}`,
-        `📞 <b>Phone:</b> ${escHtml(formData.phone.trim())}`,
+        `👤 <b>Name:</b> ${escHtml(customerName)}`,
+        `📞 <b>Phone:</b> ${escHtml(phone)}`,
         `🏠 <b>Address:</b> ${escHtml(deliveryLocation.address)}`,
         `📏 <b>Distance:</b> ${distanceKm} km`,
         GAP,
@@ -323,194 +366,246 @@ export default function Checkout() {
         packagingFee > 0 ? `📦 <b>Packaging Fee (Hotel Mumtaz):</b> ₹${packagingFee.toFixed(2)}` : '',
         `🚚 <b>Delivery Fee:</b> ${isFreeDelivery ? `₹0 (${freeDeliveryReason})` : `₹${deliveryCharge.toFixed(2)}`}`,
         couponDiscount > 0 ? `🎟️ <b>Coupon:</b> -₹${couponDiscount.toFixed(2)}` : '',
-        walletDeduction > 0 ? `🎁 <b>Wallet:</b> -₹${walletDeduction.toFixed(2)}` : '',
         `💵 <b>TOTAL PAYABLE:</b> ₹${payableAmount.toFixed(2)}`,
-        paymentId ? `✅ <b>Payment:</b> Online (${escHtml(paymentId)})` : `💵 <b>Payment:</b> Cash on Delivery (COD)`,
+        paymentId
+          ? `⚠️ <b>Payment:</b> Online, NOT VERIFIED by the server. Confirm ${escHtml(paymentId)} in the Razorpay dashboard before cooking`
+          : `💵 <b>Payment:</b> Cash on Delivery (COD)`,
         formData.additionalMessage.trim() ? `📝 <b>Note:</b> ${escHtml(formData.additionalMessage.trim())}` : '',
         GAP,
         `🗺️ <a href="${mapsViewLink}">View Customer Location on Map</a>`,
         `🚗 <a href="${mapsNavLink}">Start Navigation</a>`,
+        `📍 <a href="${trackUrl}">Tracking page</a>`,
       ].filter((l) => l !== '').map((l) => (l === GAP ? '' : l)).join('\n');
     };
 
-    const completeOrder = async (paymentId?: string) => {
-      // The id is the only thing guarding /track/<id>, which shows the delivery
-      // address, so a bare timestamp (guessable to the millisecond) is not enough.
-      // The timestamp prefix keeps ids sortable; the random tail makes them
-      // unguessable.
-      const orderId = `${Date.now()}${randomIdSuffix(10)}`;
-      const pushToken = getOrderPushToken();
-      if (!pushToken) askForOrderUpdates();
-      
-      if (user && walletDeduction > 0) {
-        await deductWalletBalance(walletDeduction, orderId);
-      }
-
-      // Bulk orders can also contain hotel items, so look at everything being ordered.
-      const hotelName = getOrderHotelName(activeItems);
-      const orderHotelId = getOrderHotelId(activeItems);
-
-      const waMsg    = buildWaMessage(paymentId);
-      const tgMsg    = buildTgMessage(paymentId);
-      const waNumber = WHATSAPP_ORDER_NUMBER;
-      const waUrl    = `https://wa.me/${waNumber}?text=${encodeURIComponent(waMsg)}`;
-
+    /** Hand-off once an order exists: save a copy, empty the cart, open tracking and WhatsApp. */
+    const finish = (orders: any[], totals: Totals, paymentId?: string) => {
       try {
-        // One order per kitchen. A cart that mixes hotels becomes several
-        // orders sharing an orderGroupId, so each kitchen is only ever sent
-        // the food it is actually cooking. Cart-wide amounts (delivery,
-        // discount, wallet) are carried by the first order alone, so the
-        // orders still sum to exactly what the customer paid.
-        const groups = groupItemsByHotel(activeItems);
-        const nowIso = new Date().toISOString();
-
-        const orders = groups.map((group, index) => {
-          const isPrimary = index === 0;
-          // Packaging is Hotel Mumtaz's own charge, so it rides with Mumtaz.
-          const groupPackagingFee =
-            group.hotelId === 'mumtaz' ? packagingFee : 0;
-          const groupDelivery = isPrimary ? deliveryCharge : 0;
-          const groupDiscount = isPrimary ? couponDiscount : 0;
-          const groupWallet = isPrimary ? walletDeduction : 0;
-
-          const groupGrandTotal = Math.max(
-            0,
-            group.subtotal + groupDelivery + groupPackagingFee - groupDiscount
-          );
-          const groupPayable = Math.max(0, groupGrandTotal - groupWallet);
-
-          return {
-            id: isPrimary ? orderId : `${orderId}-${group.hotelId}`,
-            orderGroupId: orderId,
-            userId: user?.uid || null,
-            userName: formData.name.trim(),
-            userPhone: formData.phone.trim(),
-            orderType: isBulkOrder ? 'bulk' : 'regular',
-
-            hotelId: group.hotelId,
-            hotelName: group.hotelName,
-            restaurantId: group.hotelId,
-
-            items: group.items.map((item: any) => {
-              const itemHotel = getItemHotel(item);
-              return {
-                ...item,
-                name: item.name || 'Unnamed item',
-                hotelId: itemHotel?.id ?? group.hotelId,
-                hotelName: itemHotel?.name ?? group.hotelName,
-              };
-            }),
-
-            subtotal: group.subtotal,
-            deliveryCharge: groupDelivery,
-            packagingFee: groupPackagingFee,
-            couponDiscount: groupDiscount,
-            walletAmountUsed: groupWallet,
-            grandTotal: groupGrandTotal,
-            totalAmount: groupPayable,
-            payableAmount: groupPayable,
-
-            paymentMethod: payableAmount === 0 ? 'wallet' : paymentMethod,
-            paymentId: paymentId || null,
-            paymentStatus: paymentId ? 'completed' : 'pending',
-
-            // Every order is born at JIS Kitchen: never dispatched, always NEW.
-            // The hotel cannot see it until an operator presses SEND.
-            orderStatus: 'NEW',
-            dispatchStatus: 'PENDING_DISPATCH',
-            sentAt: null,
-            sentBy: null,
-            // Legacy lowercase mirror, still read by the tracking screen.
-            status: 'pending',
-
-            deliveryLocation,
-            // Lets /api/notify-order push status updates to this device.
-            customerPushToken: pushToken,
-            needCutlery,
-            instructions: formData.additionalMessage.trim(),
-            createdAt: nowIso,
-          };
-        });
-
-        await Promise.race([
-          Promise.all(orders.map((o) => setDoc(doc(db, 'orders', o.id), o))),
-          new Promise(resolve => setTimeout(resolve, 2500))
-        ]);
-
         const existing = JSON.parse(localStorage.getItem('moms_magic_orders') || '[]');
         orders.forEach((o) => existing.unshift(o));
-        localStorage.setItem('moms_magic_orders', JSON.stringify(existing));
-      } catch (err) {
-        console.error('Failed to store order:', err);
+        localStorage.setItem('moms_magic_orders', JSON.stringify(existing.slice(0, 50)));
+      } catch {
+        /* storage full: tracking still works from the server */
       }
 
-      sendTelegramMessage(tgMsg).catch(console.error);
-
-      if (isBulkOrder) {
-        resetBulkOrder();
-        localStorage.removeItem('moms_magic_order_type');
-      } else {
-        clearCart();
-      }
+      if (isBulkOrder) resetBulkOrder();
+      clearCart();
+      localStorage.removeItem(PENDING_PAYMENT_KEY);
+      setIsSubmitting(false);
 
       playSound(SOUNDS.ORDER_SUCCESS);
-      toast.success('🎉 Order confirmed! Opening WhatsApp to send order...');
+      toast.success('🎉 Order placed! Opening WhatsApp to send it to the kitchen...');
 
-      // One hand-off. The old code clicked an anchor and then navigated the page
-      // to the same URL 500ms later, which inside an Android WebView loaded
-      // WhatsApp's web page over the app instead of opening WhatsApp.
-      openExternal(waUrl);
+      // Tracking is what the customer sees when they come back from WhatsApp.
+      navigate(`/track/${orderId}`, { replace: true });
+      // One hand-off. Clicking an anchor and then also navigating loaded
+      // WhatsApp's web page over the app inside the Android WebView.
+      openExternal(`https://wa.me/${WHATSAPP_ORDER_NUMBER}?text=${encodeURIComponent(buildWaMessage(totals, paymentId))}`);
     };
 
-    if (payableAmount > 0 && paymentMethod === 'online') {
-      const loadRazorpay = () =>
-        new Promise<boolean>((resolve) => {
-          const script  = document.createElement('script');
-          script.src    = 'https://checkout.razorpay.com/v1/checkout.js';
-          script.onload = () => resolve(true);
-          script.onerror = () => resolve(false);
-          document.body.appendChild(script);
-        });
+    /**
+     * Fallback when /api/place-order is not reachable or not configured yet:
+     * write the order from the browser, as before. Such orders are never
+     * marked paid; an online payment is recorded as "unverified" for the team
+     * to check in the Razorpay dashboard.
+     */
+    const writeOrderFromBrowser = async (clientPaymentId?: string) => {
+      const groups = groupItemsByHotel(activeItems);
+      const nowIso = new Date().toISOString();
+      let discountLeft = couponDiscount;
 
-      setIsSubmitting(true);
+      const orders = groups.map((group, index) => {
+        const isPrimary = index === 0;
+        const isLast = index === groups.length - 1;
+        // Packaging is Hotel Mumtaz's own charge, so it rides with Mumtaz.
+        const groupPackagingFee = group.hotelId === 'mumtaz' ? packagingFee : 0;
+        const groupDelivery = isPrimary ? deliveryCharge : 0;
+        // The discount is spread by subtotal so the orders always add up to
+        // exactly what the customer pays (the last one takes the rounding).
+        const share = isLast ? discountLeft : Math.round((couponDiscount * group.subtotal) / (subtotal || 1));
+        const groupDiscount = Math.min(share, discountLeft);
+        discountLeft -= groupDiscount;
+        const groupTotal = group.subtotal + groupDelivery + groupPackagingFee - groupDiscount;
+
+        return {
+          id: isPrimary ? orderId : `${orderId}-${group.hotelId}`,
+          orderGroupId: orderId,
+          userId: user?.uid || null,
+          userName: customerName,
+          userPhone: phone,
+          orderType: isBulkOrder ? 'bulk' : 'regular',
+          hotelId: group.hotelId,
+          hotelName: group.hotelName,
+          restaurantId: group.hotelId,
+          items: group.items.map((item: any) => {
+            const itemHotel = getItemHotel(item);
+            return {
+              ...item,
+              name: item.name || 'Unnamed item',
+              hotelId: itemHotel?.id ?? group.hotelId,
+              hotelName: itemHotel?.name ?? group.hotelName,
+            };
+          }),
+          subtotal: group.subtotal,
+          deliveryCharge: groupDelivery,
+          packagingFee: groupPackagingFee,
+          couponCode: couponDiscount > 0 || freeByCoupon ? appliedCoupon : null,
+          couponDiscount: groupDiscount,
+          walletAmountUsed: 0,
+          grandTotal: groupTotal,
+          totalAmount: groupTotal,
+          payableAmount: groupTotal,
+          groupPayable: payableAmount,
+          paymentMethod,
+          paymentId: null,
+          clientPaymentId: clientPaymentId || null,
+          paymentStatus: clientPaymentId ? 'unverified' : 'pending',
+          // Every order is born at JIS Kitchen: never dispatched, always NEW.
+          orderStatus: 'NEW',
+          dispatchStatus: 'PENDING_DISPATCH',
+          sentAt: null,
+          sentBy: null,
+          // Legacy lowercase mirror, still read by the tracking screen.
+          status: 'pending',
+          deliveryLocation,
+          // Lets /api/notify-order push status updates to this device.
+          customerPushToken: pushToken,
+          needCutlery,
+          instructions: formData.additionalMessage.trim(),
+          createdAt: nowIso,
+        };
+      });
+
+      // Wait for Firestore to acknowledge. The old 2.5 s race reported
+      // "confirmed" for orders that were never saved.
+      const saved = await Promise.race([
+        Promise.all(orders.map((o) => setDoc(doc(db, 'orders', o.id), o))).then(
+          () => true,
+          (err) => {
+            console.error('Failed to store order:', err);
+            return false;
+          }
+        ),
+        new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 15000)),
+      ]);
+      return { orders, saved };
+    };
+
+    const openRazorpay = async (opts: { amount: number; orderId?: string; key?: string }, onPaid: (r: any) => void) => {
       const loaded = await loadRazorpay();
       if (!loaded) {
-        toast.error('Failed to load online payment gateway. Please check connection.');
+        toast.error('Could not load online payment. Check your connection, or choose Cash on Delivery.');
         setIsSubmitting(false);
         return;
       }
-
-      const options = {
-        key: 'rzp_live_T1Y1yu09Jbjo6b',
-        amount: Math.round(payableAmount * 100),
+      const rzp = new (window as any).Razorpay({
+        key: opts.key || RAZORPAY_KEY_ID,
+        amount: opts.amount,
         currency: 'INR',
+        ...(opts.orderId ? { order_id: opts.orderId } : {}),
         name: "Mom's Magic",
-        description: 'Delicious Homestyle Food Order',
-        handler: async (response: any) => {
-          await completeOrder(response.razorpay_payment_id);
-          setIsSubmitting(false);
-        },
-        prefill: { name: formData.name, contact: formData.phone },
-        theme: { color: '#ff4d6d' },
+        description: `Order ${orderId}`,
+        handler: onPaid,
+        prefill: { name: customerName, contact: phone },
+        notes: { orderId },
+        theme: { color: '#e11d48' },
+        // Only a closed modal re-enables Confirm. After a failed attempt the
+        // modal stays open for a retry, and a second tap underneath it used to
+        // start a second payment.
         modal: { ondismiss: () => setIsSubmitting(false) },
-      };
-
-      const rzp = new (window as any).Razorpay(options);
-      rzp.on('payment.failed', (r: any) => {
-        toast.error('Payment Failed: ' + r.error.description);
-        setIsSubmitting(false);
       });
+      rzp.on('payment.failed', (r: any) => toast.error('Payment failed: ' + (r?.error?.description || 'please try again')));
       rzp.open();
-    } else {
-      setIsSubmitting(true);
-      try {
-        await completeOrder(undefined);
-      } catch (err) {
-        console.error(err);
-        toast.error('Failed to complete order. Please try again.');
-        setIsSubmitting(false);
-      }
+    };
+
+    setIsSubmitting(true);
+
+    let idToken: string | undefined;
+    try { idToken = await user?.getIdToken(); } catch { /* guest order */ }
+
+    const outcome = await placeOrderOnServer({
+      orderId,
+      customer: { name: customerName, phone },
+      location: { lat: deliveryLocation.lat, lng: deliveryLocation.lng, address: deliveryLocation.address },
+      items: activeItems.map((item: any) => ({
+        ...item,
+        quantity: item.finalQuantity ?? item.quantity ?? 1,
+        hotelId: getItemHotel(item)?.id ?? item.hotelId ?? null,
+      })),
+      couponCode: appliedCoupon || undefined,
+      paymentMethod: wantsOnline ? 'online' : 'cod',
+      needCutlery,
+      instructions: formData.additionalMessage.trim(),
+      pushToken: pushToken || undefined,
+      idToken,
+    });
+
+    if (outcome.kind === 'rejected') {
+      toast.error(orderErrorMessage(outcome.error));
+      setIsSubmitting(false);
+      return;
     }
+
+    if (outcome.kind === 'ok') {
+      const { data } = outcome;
+      const p = data.pricing;
+      const serverTotals: Totals = p
+        ? { subtotal: p.subtotal, packagingFee: p.packagingFee, deliveryCharge: p.deliveryCharge, couponDiscount: p.couponDiscount, payable: data.amount }
+        : clientTotals;
+      const orders = data.orders || [];
+
+      // The server prices from the live menu; if that differs from what this
+      // screen showed (a price changed while the cart sat for a while), say so
+      // before the customer pays or the rider collects cash.
+      if (Math.abs(data.amount - payableAmount) >= 1) {
+        toast(`Prices were updated: your total is now ₹${data.amount.toFixed(2)}`, { icon: 'ℹ️', duration: 6000 });
+      }
+
+      if (wantsOnline && data.razorpay) {
+        try {
+          localStorage.setItem(PENDING_PAYMENT_KEY, JSON.stringify({ orderId, at: Date.now() }));
+        } catch { /* storage full */ }
+        await openRazorpay({ amount: data.razorpay.amount, orderId: data.razorpay.orderId, key: data.razorpay.key }, async (r) => {
+          // The server marks the order paid only after checking Razorpay's
+          // signature. If this call is lost, the Razorpay webhook does it.
+          const verified = await verifyPaymentOnServer({
+            orderId,
+            razorpay_order_id: r.razorpay_order_id,
+            razorpay_payment_id: r.razorpay_payment_id,
+            razorpay_signature: r.razorpay_signature,
+          });
+          finish(
+            orders.map((o) => ({ ...o, paymentStatus: verified ? 'completed' : o.paymentStatus, paymentId: r.razorpay_payment_id })),
+            serverTotals,
+            r.razorpay_payment_id
+          );
+        });
+        return;
+      }
+      finish(orders, serverTotals);
+      return;
+    }
+
+    // ---- fallback: the order server is unavailable
+    if (wantsOnline) {
+      await openRazorpay({ amount: Math.round(payableAmount * 100) }, async (r) => {
+        const { orders, saved } = await writeOrderFromBrowser(r.razorpay_payment_id);
+        if (!saved) console.error('Paid order could not be saved; WhatsApp and Telegram carry it', orderId);
+        notifyTelegram(buildTgMessage(r.razorpay_payment_id), orderId).catch(console.error);
+        // Money has been taken, so always hand over, even if saving failed.
+        finish(orders, clientTotals, r.razorpay_payment_id);
+      });
+      return;
+    }
+
+    const { orders, saved } = await writeOrderFromBrowser();
+    if (!saved) {
+      toast.error("Couldn't save your order. Check your internet connection and tap Confirm again.");
+      setIsSubmitting(false);
+      return;
+    }
+    notifyTelegram(buildTgMessage(), orderId).catch(console.error);
+    finish(orders, clientTotals);
   };
 
   // Empty Cart State
@@ -565,7 +660,7 @@ export default function Checkout() {
                 <span className="text-[11px] font-bold text-gray-600">30-40 mins</span>
               </div>
               <p className="text-[11px] text-gray-500 font-medium truncate max-w-[210px] sm:max-w-xs mt-0.5 group-hover:text-rose-600 transition-colors">
-                {deliveryLocation?.address || '471, 10th Cross Road, Neeladri Nagar, Yellapur'}
+                {deliveryLocation?.address || 'Set delivery location'}
               </p>
             </div>
           </div>
@@ -609,7 +704,9 @@ export default function Checkout() {
           <div className="space-y-3.5 divide-y divide-gray-50">
             {activeItems.map((item) => {
               const qty = isBulkOrder ? (item as any).finalQuantity : (item as any).quantity;
-              const originalPrice = Math.round(item.price * 1.25);
+              // A struck-out price only when the dish really has one; the old
+              // made-up "price x 1.25" was a fake discount.
+              const originalPrice = Number((item as any).originalPrice) > item.price ? Number((item as any).originalPrice) : 0;
 
               return (
                 <div key={item.id} className="pt-3 first:pt-0 flex items-start justify-between gap-2.5">
@@ -634,19 +731,17 @@ export default function Checkout() {
                       <h4 className="text-xs sm:text-[13px] font-bold text-gray-900 leading-snug truncate">
                         {item.name}
                       </h4>
-                      <p className="text-[10px] text-gray-400 font-medium mt-0.5 flex items-center gap-1">
-                        Add customization <span className="text-[8px]">▼</span>
-                      </p>
+                      <p className="text-[10px] text-gray-500 font-medium mt-0.5">₹{item.price} each</p>
                     </div>
                   </div>
 
                   {/* Center: Stepper Pill */}
-                  <div className="flex items-center gap-2 px-2.5 py-0.5 bg-rose-50/60 border border-rose-150 rounded-full shadow-2xs shrink-0">
+                  <div className="flex items-center bg-rose-50/60 border border-rose-150 rounded-full shadow-2xs shrink-0">
                     <button
                       type="button"
                       onClick={() => updateQuantity(item.id, qty - 1)}
-                      className="text-[#e11d48] hover:text-rose-800 text-sm font-black active:scale-75 transition-transform cursor-pointer px-1"
-                      aria-label="Decrease"
+                      className="w-9 h-9 flex items-center justify-center text-[#e11d48] hover:text-rose-800 text-base font-black active:scale-75 transition-transform cursor-pointer"
+                      aria-label={`Decrease ${item.name}`}
                     >
                       -
                     </button>
@@ -656,8 +751,8 @@ export default function Checkout() {
                     <button
                       type="button"
                       onClick={() => updateQuantity(item.id, qty + 1)}
-                      className="text-[#e11d48] hover:text-rose-800 text-sm font-black active:scale-75 transition-transform cursor-pointer px-1"
-                      aria-label="Increase"
+                      className="w-9 h-9 flex items-center justify-center text-[#e11d48] hover:text-rose-800 text-base font-black active:scale-75 transition-transform cursor-pointer"
+                      aria-label={`Increase ${item.name}`}
                     >
                       +
                     </button>
@@ -665,9 +760,9 @@ export default function Checkout() {
 
                   {/* Right: Prices */}
                   <div className="text-right shrink-0 min-w-[55px]">
-                    <p className="text-[10px] text-gray-400 line-through">
-                      ₹{originalPrice * qty}
-                    </p>
+                    {originalPrice > 0 && (
+                      <p className="text-[10px] text-gray-400 line-through">₹{originalPrice * qty}</p>
+                    )}
                     <p className="text-xs sm:text-sm font-black text-gray-900">
                       ₹{item.price * qty}
                     </p>
@@ -700,19 +795,27 @@ export default function Checkout() {
           <div className="flex justify-between items-center text-xs sm:text-[13px] font-medium text-gray-700">
             <div className="flex items-center gap-1">
               <span>Delivery Fees</span>
-              <span 
-                className="text-[#ff2e74] text-[11px] font-bold cursor-pointer underline"
-                title={`Delivery charge calculated based on actual distance: ${distanceKm} km`}
+              <button
+                type="button"
+                onClick={() =>
+                  toast(
+                    isFreeDelivery
+                      ? `Delivery is free right now (${freeDeliveryReason.replace(' 🎉', '')}).`
+                      : `₹20 for the first 2 km, then ₹10 per km. Your address is ${distanceKm} km away.`,
+                    { id: 'why-delivery' }
+                  )
+                }
+                className="text-[#e11d48] text-[11px] font-bold underline py-1"
               >
                 (Why this?)
-              </span>
+              </button>
             </div>
             <div className="text-right">
               {isFreeDelivery ? (
                 <div className="flex items-center gap-1.5">
-                  <span className="line-through text-gray-400 text-[11px]">
-                    ₹{baseDeliveryCharge > 0 ? baseDeliveryCharge.toFixed(2) : '25.00'}
-                  </span>
+                  {baseDeliveryCharge > 0 && (
+                    <span className="line-through text-gray-400 text-[11px]">₹{baseDeliveryCharge.toFixed(2)}</span>
+                  )}
                   <span className="text-emerald-600 font-black text-xs uppercase">FREE</span>
                 </div>
               ) : (
@@ -854,9 +957,11 @@ export default function Checkout() {
                 type="tel"
                 required
                 inputMode="numeric"
+                autoComplete="tel"
+                maxLength={14}
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                placeholder="+91 XXXXXXXXXX"
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/[^\d+ ]/g, '') })}
+                placeholder="10-digit mobile number"
                 className="w-full p-3 rounded-xl border border-gray-200 text-xs font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-rose-400 bg-gray-50"
               />
             </div>
@@ -966,11 +1071,15 @@ export default function Checkout() {
               Apply
             </button>
           </div>
-          {appliedCoupon && (
-            <p className="text-xs font-bold text-emerald-600">
-              ✅ Promo {appliedCoupon} applied!
+          {appliedCoupon && couponShortfall > 0 ? (
+            <p className="text-xs font-bold text-amber-700">
+              Add ₹{couponShortfall} more to use {appliedCoupon}.
             </p>
-          )}
+          ) : appliedCoupon && appliedCouponDetails && !appliedCouponDetails.isActive ? (
+            <p className="text-xs font-bold text-gray-500">{appliedCoupon} has expired.</p>
+          ) : appliedCoupon ? (
+            <p className="text-xs font-bold text-emerald-600">✅ Promo {appliedCoupon} applied!</p>
+          ) : null}
         </div>
 
         {/* 9. SUBMIT / PLACE ORDER BUTTON */}
