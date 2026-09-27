@@ -77,14 +77,9 @@ export const useSystemStore = create<SystemState>((set, get) => ({
     const docRef = doc(db, 'system/settings');
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
-        const data = docSnap.data() as AdminSettings;
-        data.websiteStatus = 'ON';
-        data.emergencyStop = false;
-        data.deliveryPause = false;
-        if (!data.openTime || (data.openTime === '00:00' && data.closeTime === '23:59')) {
-          data.openTime = '12:30';
-          data.closeTime = '22:45';
-        }
+        // Use the stored values as they are -- Emergency Stop and the website
+        // toggle must stick. Defaults only fill fields the document lacks.
+        const data = { ...DEFAULT_SETTINGS, ...(docSnap.data() as Partial<AdminSettings>) };
         set({ settings: data });
         localStorage.setItem('moms_magic_admin_settings', JSON.stringify(data));
       }
@@ -101,7 +96,9 @@ export const useSystemStore = create<SystemState>((set, get) => ({
     set({ settings: updatedSettings });
 
     // Synchronize securely with backend
-    const success = await DbService.saveSettings(updatedSettings);
+    // Write only the keys being changed, so this save cannot overwrite a
+    // switch someone else flipped since this copy was loaded.
+    const success = await DbService.saveSettings(newSettings, updatedSettings);
     if (!success) {
       console.warn('System settings push failed (Likely missing Firestore rules). Falling back to Local Storage.');
       // Do NOT revert state. Allow local app testing to continue.

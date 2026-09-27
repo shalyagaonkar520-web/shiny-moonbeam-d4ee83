@@ -106,7 +106,7 @@ interface AuthStore {
 }
 
 export const useAuthStore = create<AuthStore>((set, get) => {
-  // Sync profile document with Firestore and credit ₹50 welcome bonus atomically
+  // Create the profile document on first sign-in, or load the existing one.
   const syncProfile = async (firebaseUser: User) => {
     const userDocRef = doc(db, 'users', firebaseUser.uid);
     
@@ -168,6 +168,13 @@ export const useAuthStore = create<AuthStore>((set, get) => {
   // Listen to Auth State
   onAuthStateChanged(auth, async (firebaseUser) => {
     set({ loading: true });
+    // The admin panel signs in with a custom token (uid 'jis-admin'). That is
+    // staff, not a customer: creating a "Guest User" profile for it put a fake
+    // customer in the admin's own customer list.
+    if (firebaseUser?.uid === 'jis-admin') {
+      set({ user: null, profile: null, loading: false, initialized: true });
+      return;
+    }
     if (firebaseUser) {
       if (firebaseUser.phoneNumber) {
         localStorage.setItem('moms_magic_user_phone', firebaseUser.phoneNumber);

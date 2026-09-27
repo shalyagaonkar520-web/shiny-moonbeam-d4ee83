@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { notifyOrderStatus } from '../lib/push';
+import { setOrderStage, type OrderStageAction } from '../lib/orderStatus';
+import { toStage, type Stage } from '../lib/orderStage';
 import { openExternal } from '../lib/openExternal';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -27,14 +28,48 @@ import {
   query,
   orderBy,
   where,
-  setDoc
+  setDoc,
+  limit,
+  getDocs,
+  getDoc,
+  startAfter,
+  increment,
+  type QueryDocumentSnapshot
 } from 'firebase/firestore';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithCustomToken, signOut } from 'firebase/auth';
 import AdminMenuManager from './AdminMenuManager';
 import AdminCouponManager from './AdminCouponManager';
 import { getItemHotel } from '../utils/orderHotels';
 
-// Real Orders fetched from localStorage
+// Live order window: everything from the last few days plus any order that is
+// still open, capped so a busy year cannot turn every admin open into tens of
+// thousands of reads. Older orders load on demand.
+const LIVE_ORDER_DAYS = 3;
+const LIVE_ORDER_LIMIT = 300;
+const OPEN_ORDER_LIMIT = 100;
+const HISTORY_PAGE_SIZE = 50;
+const USERS_LIMIT = 500;
+const WALLET_LOG_LIMIT = 300;
+const INSTALLS_LIMIT = 1000;
+const LUCKY_LIMIT = 100;
+// Legacy status strings of orders that are not finished yet.
+const OPEN_STATUSES = ['pending', 'Confirmed', 'Preparing', 'Out For Delivery'];
+
+// Rider data comes from the riders collection, which riders can write
+// themselves, so it is escaped before it goes into Leaflet's HTML popups.
+function escHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+const isFinalStage = (o: any) => {
+  const stage = toStage(o);
+  return stage === 'delivered' || stage === 'cancelled';
+};
 
 export default function AdminPage() {
   useSEO("Admin Panel", "Manage operations, menu availability, and systems for Moms Magic.");
@@ -52,6 +87,11 @@ export default function AdminPage() {
   
   // Real Orders State
   const [realOrders, setRealOrders] = useState<any[]>([]);
+  const [olderOrders, setOlderOrders] = useState<any[]>([]);
+  const [olderCursor, setOlderCursor] = useState<QueryDocumentSnapshot | null>(null);
+  const [hasMoreOlder, setHasMoreOlder] = useState(true);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const [ordersError, setOrdersError] = useState<string | null>(null);
   const [trackingModalOrder, setTrackingModalOrder] = useState<string | null>(null);
   const [trackingUrl, setTrackingUrl] = useState('');
 
@@ -160,19 +200,74 @@ export default function AdminPage() {
     setLocalSettings(settings);
   }, [settings]);
 
-  // ── Firestore real-time queries for Orders, Riders, Customers, and Wallet Logs ──
+  // Start of the live order window, fixed per session so the query stays stable.
+  const liveCutoff = useRef<string>('');
+  if (!liveCutoff.current) {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - LIVE_ORDER_DAYS);
+    liveCutoff.current = d.toISOString();
+  }
+  // Oldest createdAt held by the recent listener, and the upper bound the
+  // "Load older orders" pages were started from.
+  const oldestRecentCreated = useRef<string>('');
+  const olderBound = useRef<string>('');
+
+  // ── Firestore real-time queries for Orders and Riders (always on) ──
   useEffect(() => {
     if (!user) return;
 
-    // 1. Listen to all orders
-    const ordersQuery = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
-    const unsubscribeOrders = onSnapshot(ordersQuery, (snapshot) => {
-      const fetchedOrders: any[] = [];
+    // 1. Orders: recent ones plus anything still open, merged by id.
+    let recent: Record<string, any> = {};
+    let open: Record<string, any> = {};
+    const publish = () => {
+      const merged = { ...recent, ...open };
+      setRealOrders(
+        Object.values(merged).sort((a: any, b: any) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))
+      );
+    };
+    const onOrdersError = (err: any) => {
+      console.error("Error fetching orders:", err);
+      setOrdersError(err?.code === 'permission-denied'
+        ? 'Firestore denied access to orders. Log out and sign in again.'
+        : 'Could not load live orders. Check the connection.');
+    };
+
+    const recentQuery = query(
+      collection(db, 'orders'),
+      where('createdAt', '>=', liveCutoff.current),
+      orderBy('createdAt', 'desc'),
+      limit(LIVE_ORDER_LIMIT)
+    );
+    const unsubscribeRecent = onSnapshot(recentQuery, (snapshot) => {
+      const next: Record<string, any> = {};
       snapshot.forEach((docSnap) => {
-        fetchedOrders.push({ id: docSnap.id, ...docSnap.data() });
+        next[docSnap.id] = { id: docSnap.id, ...docSnap.data() };
       });
-      setRealOrders(fetchedOrders);
-    }, (err) => console.error("Error fetching orders:", err));
+      recent = next;
+      // Oldest createdAt the recent listener holds. When it hits its limit this
+      // is newer than the cutoff, and "Load older orders" must start here or the
+      // orders between it and the cutoff would never be shown.
+      const lastDoc = snapshot.docs[snapshot.docs.length - 1];
+      const lastCreated = lastDoc?.data().createdAt;
+      oldestRecentCreated.current = typeof lastCreated === 'string' && lastCreated ? lastCreated : liveCutoff.current;
+      setOrdersError(null);
+      publish();
+    }, onOrdersError);
+
+    const openQuery = query(
+      collection(db, 'orders'),
+      where('status', 'in', OPEN_STATUSES),
+      limit(OPEN_ORDER_LIMIT)
+    );
+    const unsubscribeOpen = onSnapshot(openQuery, (snapshot) => {
+      const next: Record<string, any> = {};
+      snapshot.forEach((docSnap) => {
+        next[docSnap.id] = { id: docSnap.id, ...docSnap.data() };
+      });
+      open = next;
+      publish();
+    }, onOrdersError);
 
     // 2. Listen to all riders
     const ridersQuery = collection(db, 'riders');
@@ -184,38 +279,98 @@ export default function AdminPage() {
       setRidersList(fetchedRiders);
     }, (err) => console.error("Error fetching riders:", err));
 
-    // 3. Listen to all users
-    const usersQuery = collection(db, 'users');
-    const unsubscribeUsers = onSnapshot(usersQuery, (snapshot) => {
+    return () => {
+      unsubscribeRecent();
+      unsubscribeOpen();
+      unsubscribeRiders();
+    };
+  }, [user]);
+
+  // Older orders, one page at a time, only when the admin asks for them.
+  const handleLoadOlderOrders = async () => {
+    if (loadingOlder) return;
+    setLoadingOlder(true);
+    try {
+      const ordersRef = collection(db, 'orders');
+      // Start below the oldest order the recent listener loaded (not the cutoff:
+      // that listener is capped, so it can stop short of it). Open orders are
+      // left out of this bound: a stuck old open order would skip everything
+      // between it and the recent window. Later pages continue from olderCursor.
+      // The bound is fixed at the first page so every page uses the same query.
+      if (!olderCursor) olderBound.current = oldestRecentCreated.current || liveCutoff.current;
+      const olderThan = where('createdAt', '<', olderBound.current);
+      const newestFirst = orderBy('createdAt', 'desc');
+      const q = olderCursor
+        ? query(ordersRef, olderThan, newestFirst, startAfter(olderCursor), limit(HISTORY_PAGE_SIZE))
+        : query(ordersRef, olderThan, newestFirst, limit(HISTORY_PAGE_SIZE));
+      const snap = await getDocs(q);
+      const page = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      setOlderOrders((prev) => [...prev, ...page]);
+      setOlderCursor(snap.docs[snap.docs.length - 1] || olderCursor);
+      setHasMoreOlder(snap.docs.length === HISTORY_PAGE_SIZE);
+    } catch (err) {
+      console.error("Error loading older orders:", err);
+      toast.error('Failed to load older orders');
+    } finally {
+      setLoadingOlder(false);
+    }
+  };
+
+  // Live orders first, then any older pages, without duplicates (an old order
+  // that is still open is already in the live list).
+  const liveIds = new Set(realOrders.map((o) => o.id));
+  // An online order whose payment never completed is not a real order yet
+  // (the customer closed Razorpay, or it is still in progress): keep it out of
+  // the list, the counts and revenue. It appears once /api/verify-payment or
+  // the Razorpay webhook marks it paid.
+  const allOrders = [...realOrders, ...olderOrders.filter((o) => !liveIds.has(o.id))]
+    .filter((o) => o.paymentStatus !== 'awaiting_payment');
+  // Order totals only cover what is loaded, so they carry the same scope label.
+  const loadedOrdersScope = `Last ${LIVE_ORDER_DAYS} days + open${olderOrders.length > 0 ? ' + older pages' : ''}`;
+
+  // Users feed the analytics, customers and wallet-log tabs.
+  const needsUsers = activeTab === 'analytics' || activeTab === 'customers' || activeTab === 'walletLogs';
+  useEffect(() => {
+    if (!user || !needsUsers) return;
+    const usersQuery = query(collection(db, 'users'), orderBy('createdAt', 'desc'), limit(USERS_LIMIT));
+    return onSnapshot(usersQuery, (snapshot) => {
       const fetchedUsers: any[] = [];
       snapshot.forEach((docSnap) => {
         fetchedUsers.push({ uid: docSnap.id, ...docSnap.data() });
       });
       setUsersList(fetchedUsers);
     }, (err) => console.error("Error fetching users:", err));
+  }, [user, needsUsers]);
 
-    // 4. Listen to all wallet transactions
-    const walletLogsQuery = query(collection(db, 'walletTransactions'), orderBy('createdAt', 'desc'));
-    const unsubscribeWalletLogs = onSnapshot(walletLogsQuery, (snapshot) => {
+  useEffect(() => {
+    if (!user || activeTab !== 'walletLogs') return;
+    const walletLogsQuery = query(collection(db, 'walletTransactions'), orderBy('createdAt', 'desc'), limit(WALLET_LOG_LIMIT));
+    return onSnapshot(walletLogsQuery, (snapshot) => {
       const fetchedLogs: any[] = [];
       snapshot.forEach((docSnap) => {
         fetchedLogs.push({ id: docSnap.id, ...docSnap.data() });
       });
       setWalletLogs(fetchedLogs);
     }, (err) => console.error("Error fetching wallet logs:", err));
+  }, [user, activeTab]);
 
-    // 5. Listen to all PWA installs
-    const installsQuery = collection(db, 'pwaInstalls');
-    const unsubscribeInstalls = onSnapshot(installsQuery, (snapshot) => {
+  useEffect(() => {
+    if (!user || activeTab !== 'analytics') return;
+    const installsQuery = query(collection(db, 'pwaInstalls'), orderBy('installedAt', 'desc'), limit(INSTALLS_LIMIT));
+    return onSnapshot(installsQuery, (snapshot) => {
       const fetchedInstalls: any[] = [];
       snapshot.forEach((docSnap) => {
         fetchedInstalls.push({ id: docSnap.id, ...docSnap.data() });
       });
       setPwaInstallsList(fetchedInstalls);
     }, (err) => console.error("Error fetching PWA installs:", err));
+  }, [user, activeTab]);
 
-    // 6. Listen to Lucky Wheel Coupons
-    const couponsQuery = query(collection(db, 'luckyWheelCoupons'), orderBy('createdAt', 'desc'));
+  // Lucky wheel coupons, spins and config, only while that tab is open.
+  useEffect(() => {
+    if (!user || activeTab !== 'luckyWheel') return;
+
+    const couponsQuery = query(collection(db, 'luckyWheelCoupons'), orderBy('createdAt', 'desc'), limit(LUCKY_LIMIT));
     const unsubscribeCoupons = onSnapshot(couponsQuery, (snapshot) => {
       const fetchedCoupons: any[] = [];
       snapshot.forEach((docSnap) => {
@@ -224,8 +379,7 @@ export default function AdminPage() {
       setLuckyCoupons(fetchedCoupons);
     }, (err) => console.error("Error fetching lucky coupons:", err));
 
-    // 7. Listen to Lucky Wheel Spins
-    const spinsQuery = query(collection(db, 'luckyWheelSpins'), orderBy('timestamp', 'desc'));
+    const spinsQuery = query(collection(db, 'luckyWheelSpins'), orderBy('timestamp', 'desc'), limit(LUCKY_LIMIT));
     const unsubscribeSpins = onSnapshot(spinsQuery, (snapshot) => {
       const fetchedSpins: any[] = [];
       snapshot.forEach((docSnap) => {
@@ -234,7 +388,6 @@ export default function AdminPage() {
       setLuckySpins(fetchedSpins);
     }, (err) => console.error("Error fetching lucky spins:", err));
 
-    // 8. Listen to Lucky Wheel Config
     const configDocRef = doc(db, 'system/luckyWheelConfig');
     const unsubscribeConfig = onSnapshot(configDocRef, (docSnap) => {
       if (docSnap.exists()) {
@@ -252,16 +405,11 @@ export default function AdminPage() {
     }, (err) => console.error("Error fetching lucky config:", err));
 
     return () => {
-      unsubscribeOrders();
-      unsubscribeRiders();
-      unsubscribeUsers();
-      unsubscribeWalletLogs();
-      unsubscribeInstalls();
       unsubscribeCoupons();
       unsubscribeSpins();
       unsubscribeConfig();
     };
-  }, [user]);
+  }, [user, activeTab]);
 
   // ── Leaflet Interactive Map for Rider Tracking ──
   useEffect(() => {
@@ -324,19 +472,18 @@ export default function AdminPage() {
     onlineWithCoords.forEach(rider => {
       const latlng: [number, number] = [rider.currentLocation.lat, rider.currentLocation.lng];
       
-      const activeOrdersCount = realOrders.filter(o => 
-        o.riderId === rider.uid && 
-        o.status !== 'delivered' && 
-        o.status !== 'completed' && 
-        o.status !== 'cancelled'
+      const activeOrdersCount = realOrders.filter(o =>
+        o.riderId === rider.uid && !isFinalStage(o)
       ).length;
 
+      // Every rider field is escaped: riders can edit their own profile.
+      const earnings = Number(rider.earnings) || 0;
       const popupContent = `
         <div class="text-xs text-left p-1 text-black">
-          <h4 class="font-bold uppercase tracking-tight text-sm">${rider.name}</h4>
-          <p class="mt-0.5"><b>Phone:</b> ${rider.phone}</p>
+          <h4 class="font-bold uppercase tracking-tight text-sm">${escHtml(rider.name)}</h4>
+          <p class="mt-0.5"><b>Phone:</b> ${escHtml(rider.phone)}</p>
           <p><b>Active orders:</b> ${activeOrdersCount}</p>
-          <p><b>Today's Earnings:</b> ₹${rider.earnings || 0}</p>
+          <p><b>Total Earnings:</b> ₹${escHtml(earnings)}</p>
         </div>
       `;
 
@@ -395,7 +542,7 @@ export default function AdminPage() {
 
       realOrders.forEach(o => {
         if (o.riderId && o.riderId in activeCounts) {
-          if (o.status !== 'delivered' && o.status !== 'completed' && o.status !== 'cancelled') {
+          if (!isFinalStage(o)) {
             activeCounts[o.riderId]++;
           }
         }
@@ -440,21 +587,28 @@ export default function AdminPage() {
     setAdjustingLoading(true);
     try {
       const userRef = doc(db, 'users', adjustingUser.uid);
-      const nextBalance = Math.max(0, (adjustingUser.walletBalance || 0) + amount);
 
-      await runTransaction(db, async (transaction) => {
+      // Read the balance inside the transaction (not the list's stale copy) so a
+      // concurrent spend or credit is not overwritten. A debit is clamped so the
+      // balance never goes below zero, and the ledger records what was applied.
+      const nextBalance = await runTransaction(db, async (transaction) => {
+        const userSnap = await transaction.get(userRef);
+        if (!userSnap.exists()) throw new Error('Customer not found');
+        const current = Number(userSnap.data().walletBalance) || 0;
+        const applied = Math.max(amount, -current);
         transaction.update(userRef, {
-          walletBalance: nextBalance
+          walletBalance: increment(applied)
         });
 
         const newTransRef = doc(collection(db, 'walletTransactions'));
         transaction.set(newTransRef, {
           userId: adjustingUser.uid,
-          amount: amount,
+          amount: applied,
           type: 'admin_adjustment',
           description: adjustReason.trim(),
           createdAt: new Date().toISOString()
         });
+        return current + applied;
       });
 
       toast.success(`Wallet balance updated to ₹${nextBalance}!`);
@@ -470,21 +624,29 @@ export default function AdminPage() {
   };
 
   // ── Handle Order Status Update (Firestore + WhatsApp) ──
-  const handleUpdateOrderStatus = async (orderId: string, newStatus: string, phone: string, trackingLink?: string) => {
+  const handleUpdateOrderStatus = async (orderId: string, stage: OrderStageAction, phone: string, trackingLink?: string) => {
+    const STAGE_WORD: Record<OrderStageAction, string> = {
+      placed: 'Pending', confirmed: 'Confirmed', preparing: 'Preparing',
+      out_for_delivery: 'Out For Delivery', delivered: 'Delivered', cancelled: 'Cancelled',
+    };
+    const newStatus = STAGE_WORD[stage];
     try {
-      const orderRef = doc(db, 'orders', orderId);
-      const updateData: any = { status: newStatus };
-      // Timestamps the customer's tracking screen uses for its arrival time.
-      if (newStatus === 'Out For Delivery') updateData.outForDeliveryAt = new Date().toISOString();
-      if (newStatus === 'delivered') updateData.deliveredAt = new Date().toISOString();
-      if (trackingLink !== undefined) {
-        updateData.trackingLink = trackingLink;
+      await setOrderStage(orderId, stage, trackingLink !== undefined ? { trackingLink } : {});
+
+      // Orders from "Load older orders" are a one-shot read with no listener,
+      // so re-read the changed order and patch it in place.
+      if (olderOrders.some((o) => o.id === orderId)) {
+        getDoc(doc(db, 'orders', orderId))
+          .then((snap) => {
+            if (!snap.exists()) return;
+            const fresh = { id: snap.id, ...snap.data() };
+            setOlderOrders((prev) => prev.map((o) => (o.id === orderId ? fresh : o)));
+          })
+          .catch((err) => console.error('Error refreshing older order:', err));
       }
-      await updateDoc(orderRef, updateData);
-      notifyOrderStatus(orderId);
-      
+
       let message = '';
-      if (newStatus === 'Out For Delivery') {
+      if (stage === 'out_for_delivery') {
         message = `🚚 Your Moms Magic order is on the way!\\n\\nTrack your order live:\\n${trackingLink || `https://momsmagic.shop/track/${orderId}`}\\n\\nThank you for ordering from Moms Magic ❤️`;
       } else {
         message = `*Moms Magic Update* 🍲\\n\\nYour order (ID: ${orderId.slice(0,8)}) is now *${newStatus.toUpperCase()}*.\\n\\nThank you for ordering from Moms Magic ❤️`;
@@ -509,6 +671,7 @@ export default function AdminPage() {
     if (!confirm('Are you sure you want to delete this order?')) return;
     try {
       await deleteDoc(doc(db, 'orders', orderId));
+      setOlderOrders((prev) => prev.filter((o) => o.id !== orderId));
       toast.success('Order deleted successfully');
     } catch (err) {
       toast.error('Failed to delete order');
@@ -521,9 +684,9 @@ export default function AdminPage() {
       toast.error('Please enter a valid link');
       return;
     }
-    const order = realOrders.find(o => o.id === trackingModalOrder);
+    const order = allOrders.find(o => o.id === trackingModalOrder);
     if (order) {
-      handleUpdateOrderStatus(order.id, 'Out For Delivery', order.userPhone, trackingUrl.trim());
+      handleUpdateOrderStatus(order.id, 'out_for_delivery', order.userPhone, trackingUrl.trim());
       setTrackingModalOrder(null);
       setTrackingUrl('');
     }
@@ -549,7 +712,7 @@ export default function AdminPage() {
 
   const handleMarkRedeemed = async (spinId: string) => {
     try {
-      await updateDoc(doc(db, 'luckyWheelSpins'), {
+      await updateDoc(doc(db, 'luckyWheelSpins', spinId), {
         status: 'redeemed'
       });
       toast.success('Marked as redeemed!');
@@ -593,6 +756,22 @@ export default function AdminPage() {
 
       if (response.ok) {
         const data = await response.json();
+        // With the Admin SDK configured the endpoint also returns a Firebase
+        // custom token carrying admin:true. Without a Firebase session every
+        // admin listener and write is denied by the rules, so stop here if the
+        // sign-in fails rather than showing an empty, silently broken panel.
+        if (data.firebaseToken) {
+          try {
+            await signInWithCustomToken(auth, data.firebaseToken);
+          } catch (err: any) {
+            console.error('Admin Firebase sign-in failed:', err);
+            toast.error('Signed in, but Firebase refused the admin session. Try again.');
+            setIsLoggingIn(false);
+            return;
+          }
+        } else {
+          console.warn('admin-login returned no Firebase token; Firestore will treat this session as anonymous.');
+        }
         setUser({
           id: 'env-admin',
           name: 'Admin',
@@ -609,6 +788,11 @@ export default function AdminPage() {
       // so there is no point asking Firebase the same question.
       if (response.status === 401) {
         toast.error('Invalid admin credentials');
+        setIsLoggingIn(false);
+        return;
+      }
+      if (response.status === 429) {
+        toast.error('Too many failed attempts. Wait a few minutes and try again.');
         setIsLoggingIn(false);
         return;
       }
@@ -643,9 +827,24 @@ export default function AdminPage() {
     setIsSaving(true);
     const token = localStorage.getItem('moms_magic_admin_token') || '';
     
-    // Combine edits
-    const activeUpdates = { ...localSettings, ...updates };
-    
+    // Send only the fields that differ from the stored settings, so saving the
+    // delivery fee cannot also rewrite websiteStatus or emergencyStop with a
+    // stale value from this form.
+    const edited = { ...localSettings, ...updates } as Record<string, unknown>;
+    const current = settings as unknown as Record<string, unknown>;
+    const activeUpdates: Partial<typeof settings> = {};
+    for (const key of Object.keys(edited)) {
+      if (key === 'lastUpdated') continue;
+      if (JSON.stringify(edited[key]) !== JSON.stringify(current[key])) {
+        (activeUpdates as Record<string, unknown>)[key] = edited[key];
+      }
+    }
+    if (Object.keys(activeUpdates).length === 0) {
+      setIsSaving(false);
+      toast.success('No changes to save.');
+      return;
+    }
+
     const success = await updateSettings(activeUpdates, token);
     setIsSaving(false);
     if (success) {
@@ -844,6 +1043,8 @@ export default function AdminPage() {
                 onClick={() => {
                   logout();
                   localStorage.removeItem('moms_magic_admin_token');
+                  // End the admin's Firebase session too (custom-token or email login).
+                  signOut(auth).catch(() => {});
                   toast.success('Logged out successfully');
                 }}
                 className="w-10 h-10 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center transition-all border border-red-500/15"
@@ -1002,18 +1203,25 @@ export default function AdminPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {realOrders.length === 0 ? (
+            {ordersError && (
+              <div className="col-span-full flex items-center gap-3 px-5 py-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-300 text-xs font-bold">
+                <AlertCircle className="w-4 h-4 shrink-0" /> {ordersError}
+              </div>
+            )}
+            {allOrders.length === 0 ? (
               <div className="col-span-full py-20 text-center bg-white/5 border border-white/10 rounded-3xl">
                 <PackageSearch className="w-16 h-16 text-white/20 mx-auto mb-4" />
                 <p className="text-white/40 font-bold uppercase tracking-widest text-sm">No Orders Yet</p>
               </div>
             ) : (
-              realOrders.map((order) => {
-                const statusColor = 
+              allOrders.map((order) => {
+                const stage = toStage(order);
+                const statusColor =
                   order.status === 'Confirmed' ? 'text-blue-400 bg-blue-500/10 border-blue-500/20' :
-                  order.status === 'Preparing' ? 'text-orange-400 bg-orange-500/10 border-orange-500/20' :
-                  order.status === 'Out For Delivery' ? 'text-purple-400 bg-purple-500/10 border-purple-500/20' :
-                  order.status === 'Delivered' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' :
+                  stage === 'preparing' ? 'text-orange-400 bg-orange-500/10 border-orange-500/20' :
+                  stage === 'out_for_delivery' ? 'text-purple-400 bg-purple-500/10 border-purple-500/20' :
+                  stage === 'delivered' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' :
+                  stage === 'cancelled' ? 'text-red-400 bg-red-500/10 border-red-500/20' :
                   'text-gray-400 bg-gray-500/10 border-gray-500/20';
 
                 return (
@@ -1102,22 +1310,39 @@ export default function AdminPage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 pt-4 border-t border-white/5">
-                      <button onClick={() => handleUpdateOrderStatus(order.id, 'Confirmed', order.userPhone)} className="py-2.5 rounded-xl bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 text-[9px] font-black uppercase tracking-widest transition-colors">
+                      <button onClick={() => handleUpdateOrderStatus(order.id, 'confirmed', order.userPhone)} className="py-2.5 rounded-xl bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 text-[9px] font-black uppercase tracking-widest transition-colors">
                         ✅ Confirmed
                       </button>
-                      <button onClick={() => handleUpdateOrderStatus(order.id, 'Preparing', order.userPhone)} className="py-2.5 rounded-xl bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 border border-orange-500/20 text-[9px] font-black uppercase tracking-widest transition-colors">
+                      <button onClick={() => handleUpdateOrderStatus(order.id, 'preparing', order.userPhone)} className="py-2.5 rounded-xl bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 border border-orange-500/20 text-[9px] font-black uppercase tracking-widest transition-colors">
                         👨‍🍳 Preparing
                       </button>
                       <button onClick={() => setTrackingModalOrder(order.id)} className="py-2.5 rounded-xl bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-1">
                         📍 Live Track Link
                       </button>
-                      <button onClick={() => handleUpdateOrderStatus(order.id, 'Delivered', order.userPhone)} className="py-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 text-[9px] font-black uppercase tracking-widest transition-colors">
+                      <button onClick={() => handleUpdateOrderStatus(order.id, 'delivered', order.userPhone)} className="py-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 text-[9px] font-black uppercase tracking-widest transition-colors">
                         🎉 Delivered
                       </button>
                     </div>
                   </div>
                 );
               })
+            )}
+          </div>
+
+          {/* Only recent and open orders are live; older history loads on demand. */}
+          <div className="mt-8 flex flex-col items-center gap-2">
+            <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest text-center">
+              Live: last {LIVE_ORDER_DAYS} days (up to {LIVE_ORDER_LIMIT}) + open orders
+              {olderOrders.length > 0 && ` · ${olderOrders.length} older loaded`}
+            </p>
+            {hasMoreOlder && (
+              <button
+                onClick={handleLoadOlderOrders}
+                disabled={loadingOlder}
+                className="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 text-[10px] font-black uppercase tracking-widest transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {loadingOlder && <Loader2 className="w-3.5 h-3.5 animate-spin" />} Load older orders
+              </button>
             )}
           </div>
 
@@ -1179,11 +1404,11 @@ export default function AdminPage() {
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-6">
                 <div>
-                  <p className="text-white/45 text-[9px] font-black uppercase tracking-widest leading-none">Total PWA Installs</p>
+                  <p className="text-white/45 text-[9px] font-black uppercase tracking-widest leading-none">PWA Installs (last {INSTALLS_LIMIT})</p>
                   <h3 className="text-3xl font-black italic text-white mt-3">{pwaInstallsList.length}</h3>
                 </div>
                 <div>
-                  <p className="text-white/45 text-[9px] font-black uppercase tracking-widest leading-none">Registered Users</p>
+                  <p className="text-white/45 text-[9px] font-black uppercase tracking-widest leading-none">Newest Users (last {USERS_LIMIT})</p>
                   <h3 className="text-3xl font-black italic text-[#4CD964] mt-3">{usersList.length}</h3>
                 </div>
                 <div>
@@ -1209,9 +1434,10 @@ export default function AdminPage() {
             <div className="bg-[#121620]/60 border border-white/5 p-6 rounded-[25px]">
               <div className="flex items-center gap-3">
                 <span className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl">📦</span>
-                <p className="text-white/40 text-[9px] font-black uppercase tracking-widest leading-none">Total Orders</p>
+                <p className="text-white/40 text-[9px] font-black uppercase tracking-widest leading-none">Orders Loaded</p>
               </div>
-              <h3 className="text-3xl font-black italic text-white mt-4">{realOrders.length}</h3>
+              <h3 className="text-3xl font-black italic text-white mt-4">{allOrders.length}</h3>
+              <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest mt-2">{loadedOrdersScope}</p>
             </div>
 
             <div className="bg-[#121620]/60 border border-white/5 p-6 rounded-[25px]">
@@ -1220,8 +1446,9 @@ export default function AdminPage() {
                 <p className="text-white/40 text-[9px] font-black uppercase tracking-widest leading-none">Delivered Revenue</p>
               </div>
               <h3 className="text-3xl font-black italic text-emerald-400 mt-4">
-                ₹{realOrders.filter(o => o.status === 'delivered' || o.status === 'completed').reduce((sum, o) => sum + (o.grandTotal || 0), 0)}
+                ₹{allOrders.filter(o => toStage(o) === 'delivered').reduce((sum, o) => sum + (o.grandTotal || 0), 0)}
               </h3>
+              <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest mt-2">{loadedOrdersScope}</p>
             </div>
 
             <div className="bg-[#121620]/60 border border-white/5 p-6 rounded-[25px]">
@@ -1235,7 +1462,7 @@ export default function AdminPage() {
             <div className="bg-[#121620]/60 border border-white/5 p-6 rounded-[25px]">
               <div className="flex items-center gap-3">
                 <span className="p-3 bg-pink-500/10 text-pink-400 rounded-xl">👥</span>
-                <p className="text-white/40 text-[9px] font-black uppercase tracking-widest leading-none">Registered Users</p>
+                <p className="text-white/40 text-[9px] font-black uppercase tracking-widest leading-none">Newest Users (last {USERS_LIMIT})</p>
               </div>
               <h3 className="text-3xl font-black italic text-white mt-4">{usersList.length}</h3>
             </div>
@@ -1244,24 +1471,27 @@ export default function AdminPage() {
           {/* Revenue and Orders Analytics Breakdown */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="bg-[#121620]/50 border border-white/5 p-8 rounded-[35px] space-y-6">
-              <h3 className="text-lg font-black italic uppercase tracking-tight border-b border-white/5 pb-4">Revenue Breakdown</h3>
+              <div className="border-b border-white/5 pb-4">
+                <h3 className="text-lg font-black italic uppercase tracking-tight">Revenue Breakdown</h3>
+                <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest mt-1">Loaded orders only: {loadedOrdersScope}</p>
+              </div>
               <div className="space-y-4">
                 <div className="flex justify-between items-center text-sm font-semibold">
                   <span className="text-white/60">Delivered Orders Revenue:</span>
-                  <span className="text-emerald-400 font-extrabold">₹{realOrders.filter(o => o.status === 'delivered' || o.status === 'completed').reduce((sum, o) => sum + (o.grandTotal || 0), 0)}</span>
+                  <span className="text-emerald-400 font-extrabold">₹{allOrders.filter(o => toStage(o) === 'delivered').reduce((sum, o) => sum + (o.grandTotal || 0), 0)}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm font-semibold">
                   <span className="text-white/60">In-progress Orders Value:</span>
-                  <span className="text-blue-400 font-extrabold">₹{realOrders.filter(o => o.status === 'pending' || o.status === 'Preparing' || o.status === 'Out For Delivery').reduce((sum, o) => sum + (o.grandTotal || 0), 0)}</span>
+                  <span className="text-blue-400 font-extrabold">₹{allOrders.filter(o => !isFinalStage(o)).reduce((sum, o) => sum + (o.grandTotal || 0), 0)}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm font-semibold">
                   <span className="text-white/60">Cancelled Orders Value:</span>
-                  <span className="text-red-400 font-extrabold">₹{realOrders.filter(o => o.status === 'cancelled').reduce((sum, o) => sum + (o.grandTotal || 0), 0)}</span>
+                  <span className="text-red-400 font-extrabold">₹{allOrders.filter(o => toStage(o) === 'cancelled').reduce((sum, o) => sum + (o.grandTotal || 0), 0)}</span>
                 </div>
                 <div className="h-px bg-white/5 my-2" />
                 <div className="flex justify-between items-center text-base font-black uppercase">
                   <span>Gross Sales Total:</span>
-                  <span className="text-white">₹{realOrders.filter(o => o.status !== 'cancelled').reduce((sum, o) => sum + (o.grandTotal || 0), 0)}</span>
+                  <span className="text-white">₹{allOrders.filter(o => toStage(o) !== 'cancelled').reduce((sum, o) => sum + (o.grandTotal || 0), 0)}</span>
                 </div>
               </div>
             </div>
@@ -1269,21 +1499,25 @@ export default function AdminPage() {
             <div className="bg-[#121620]/50 border border-white/5 p-8 rounded-[35px] space-y-6">
               <h3 className="text-lg font-black italic uppercase tracking-tight border-b border-white/5 pb-4">Order Pipeline Volume</h3>
               <div className="space-y-4">
-                {['pending', 'Preparing', 'Out For Delivery', 'delivered', 'cancelled'].map(status => {
-                  const count = realOrders.filter(o => o.status === status).length;
-                  const percentage = realOrders.length ? Math.round((count / realOrders.length) * 100) : 0;
+                {(['placed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'] as Stage[]).map(status => {
+                  const count = allOrders.filter(o => toStage(o) === status).length;
+                  const percentage = allOrders.length ? Math.round((count / allOrders.length) * 100) : 0;
+                  const label: Record<Stage, string> = {
+                    placed: 'Pending Confirmation', preparing: 'Preparing', out_for_delivery: 'Out For Delivery',
+                    delivered: 'Delivered', cancelled: 'Cancelled',
+                  };
                   return (
                     <div key={status} className="space-y-1.5">
                       <div className="flex justify-between text-xs font-bold uppercase tracking-wider text-white/70">
-                        <span>{status === 'pending' ? 'Pending Confirmation' : status}</span>
+                        <span>{label[status]}</span>
                         <span>{count} ({percentage}%)</span>
                       </div>
                       <div className="h-2 bg-white/5 rounded-full overflow-hidden">
                         <div 
                           className={`h-full rounded-full ${
-                            status === 'pending' ? 'bg-blue-500' :
-                            status === 'Preparing' ? 'bg-orange-500' :
-                            status === 'Out For Delivery' ? 'bg-purple-500' :
+                            status === 'placed' ? 'bg-blue-500' :
+                            status === 'preparing' ? 'bg-orange-500' :
+                            status === 'out_for_delivery' ? 'bg-purple-500' :
                             status === 'delivered' ? 'bg-emerald-500' : 'bg-red-500'
                           }`}
                           style={{ width: `${percentage}%` }}
@@ -1354,7 +1588,7 @@ export default function AdminPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-2xl font-black italic uppercase tracking-tighter text-white">Customer Database</h2>
-              <p className="text-white/40 text-xs mt-1 font-semibold">View user profiles, reward points, and manage wallet credits.</p>
+              <p className="text-white/40 text-xs mt-1 font-semibold">View user profiles, reward points, and manage wallet credits. Showing the newest {USERS_LIMIT} customers.</p>
             </div>
             
             {/* Search Input */}
@@ -1512,7 +1746,7 @@ export default function AdminPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-2xl font-black italic uppercase tracking-tighter text-white">Wallet Transaction Logs</h2>
-              <p className="text-white/40 text-xs mt-1 font-semibold">Audit trail database of all platform credits and debits.</p>
+              <p className="text-white/40 text-xs mt-1 font-semibold">Audit trail of platform credits and debits. Showing the latest {WALLET_LOG_LIMIT} entries.</p>
             </div>
 
             <div className="flex items-center gap-4 flex-wrap">

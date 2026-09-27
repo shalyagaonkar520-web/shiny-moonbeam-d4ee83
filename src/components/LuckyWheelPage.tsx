@@ -82,8 +82,11 @@ export default function LuckyWheelPage() {
       
       setCouponId(validCouponId);
       toast.success('Code Verified! You may spin the wheel.');
-    } catch (err) {
-      toast.error('Verification failed');
+    } catch (err: any) {
+      console.error('Lucky wheel code check failed', err);
+      toast.error(err?.code === 'permission-denied'
+        ? 'The Lucky Wheel is not available right now.'
+        : 'Could not check the code. Check your connection and try again.');
     } finally {
       setIsVerifying(false);
     }
@@ -143,8 +146,15 @@ export default function LuckyWheelPage() {
         } else {
           toast.success(`You won: ${selectedPrize}! 🎉`, { duration: 5000 });
         }
-      } catch (err) {
+      } catch (err: any) {
+        // Tell the customer instead of letting them believe the win was saved.
         console.error('Failed to save spin results', err);
+        toast.error(
+          err?.code === 'permission-denied'
+            ? "Your spin could not be recorded. Please contact Mom's Magic with your code before claiming."
+            : "Your spin could not be saved (network problem). Please contact Mom's Magic with your code.",
+          { duration: 8000 }
+        );
       }
     }, 5000); // 5 seconds spin animation
   };

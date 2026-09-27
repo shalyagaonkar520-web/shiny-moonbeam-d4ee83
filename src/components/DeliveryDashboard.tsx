@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { notifyOrderStatus } from '../lib/push';
+import React, { useState, useEffect, useRef } from 'react';
+import { setOrderStage, RIDER_COMMISSION } from '../lib/orderStatus';
+import { toStage } from '../lib/orderStage';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -27,11 +28,24 @@ import {
   where, 
   onSnapshot, 
   setDoc,
+  limit,
   serverTimestamp 
 } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import toast from 'react-hot-toast';
 import { useSEO } from '../utils/seo';
+
+const GPS_MIN_INTERVAL_MS = 15000;
+const GPS_MIN_DISTANCE_M = 50;
+
+/** Straight-line distance between two fixes, in metres (haversine). */
+function distanceMeters(lat1: number, lng1: number, lat2: number, lng2: number) {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 6371000 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
 export default function DeliveryDashboard() {
   useSEO("Rider Portal", "Delivery Partner dashboard for live tracking, routing, and earnings updates.");
@@ -79,6 +93,10 @@ export default function DeliveryDashboard() {
     return () => unsubscribe();
   }, []);
 
+  // Only a rider carrying food needs precise, frequent fixes.
+  const hasOutForDelivery = assignedOrders.some(o => toStage(o) === 'out_for_delivery');
+  const lastGpsWrite = useRef<{ at: number; lat: number; lng: number } | null>(null);
+
   // 1. Live Geolocation GPS Tracking while Online
   useEffect(() => {
     if (!isOnline || !riderId) return;
@@ -89,17 +107,33 @@ export default function DeliveryDashboard() {
       watchId = navigator.geolocation.watchPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
+          // Fixes arrive about once a second while moving. Write at most every
+          // 15s unless the rider has moved 50m, to spare the battery, the data
+          // plan and the Firestore write quota.
+          const last = lastGpsWrite.current;
+          const now = Date.now();
+          if (last && now - last.at < GPS_MIN_INTERVAL_MS &&
+              distanceMeters(last.lat, last.lng, latitude, longitude) < GPS_MIN_DISTANCE_M) {
+            return;
+          }
+          lastGpsWrite.current = { at: now, lat: latitude, lng: longitude };
           const riderRef = doc(db, 'riders', riderId);
-          await updateDoc(riderRef, {
-            'currentLocation.lat': latitude,
-            'currentLocation.lng': longitude,
-            'currentLocation.lastUpdated': new Date().toISOString()
-          });
+          try {
+            await updateDoc(riderRef, {
+              'currentLocation.lat': latitude,
+              'currentLocation.lng': longitude,
+              'currentLocation.lastUpdated': new Date().toISOString()
+            });
+          } catch (err) {
+            console.error("GPS location write failed:", err);
+          }
         },
         (error) => {
           console.error("GPS position watch error:", error);
         },
-        { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 }
+        hasOutForDelivery
+          ? { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
+          : { enableHighAccuracy: false, maximumAge: 60000, timeout: 30000 }
       );
     } else {
       toast.error("GPS location not supported on this browser.");
@@ -110,7 +144,7 @@ export default function DeliveryDashboard() {
         navigator.geolocation.clearWatch(watchId);
       }
     };
-  }, [isOnline, riderId]);
+  }, [isOnline, riderId, hasOutForDelivery]);
 
   // 2. Real-Time Listeners for Assigned Orders (Pending/Preparing/Delivering)
   useEffect(() => {
@@ -118,7 +152,10 @@ export default function DeliveryDashboard() {
 
     const ordersQuery = query(
       collection(db, 'orders'),
-      where('riderId', '==', riderId)
+      where('riderId', '==', riderId),
+      // Capped so a long-serving rider does not read every past order on open.
+      // No orderBy: that would need a composite index.
+      limit(200)
     );
 
     const unsubscribe = onSnapshot(ordersQuery, (snapshot) => {
@@ -128,7 +165,8 @@ export default function DeliveryDashboard() {
       snapshot.forEach((docSnap) => {
         // Firestore returns DocumentData, so annotate to keep the status reads typed.
         const o: any = { id: docSnap.id, ...docSnap.data() };
-        if (o.status === 'delivered' || o.status === 'completed' || o.status === 'cancelled') {
+        const stage = toStage(o);
+        if (stage === 'delivered' || stage === 'cancelled') {
           past.push(o);
         } else {
           active.push(o);
@@ -193,12 +231,7 @@ export default function DeliveryDashboard() {
   // Accept Order
   const handleAcceptOrder = async (orderId: string) => {
     try {
-      const orderRef = doc(db, 'orders', orderId);
-      await updateDoc(orderRef, {
-        status: 'Preparing', // Move to preparing/accepted state
-        riderStatus: 'accepted'
-      });
-      notifyOrderStatus(orderId);
+      await setOrderStage(orderId, 'preparing', { riderStatus: 'accepted' });
       toast.success("Order accepted! 📦");
     } catch (err) {
       toast.error("Failed to accept order.");
@@ -222,42 +255,25 @@ export default function DeliveryDashboard() {
   // Start Delivery
   const handleStartDelivery = async (orderId: string) => {
     try {
-      const orderRef = doc(db, 'orders', orderId);
-      await updateDoc(orderRef, {
-        status: 'Out For Delivery',
-        riderStatus: 'delivering',
-        // The customer's tracking screen counts the arrival time from here.
-        outForDeliveryAt: new Date().toISOString()
-      });
-      notifyOrderStatus(orderId);
+      await setOrderStage(orderId, 'out_for_delivery', { riderStatus: 'delivering' });
       toast.success("Delivery run started! Drive safe. 🛵");
     } catch (err) {
       toast.error("Failed to update order.");
     }
   };
 
-  // Complete Delivery (Crediting ₹40 commission automatically)
+  // Complete Delivery. The commission is credited inside setOrderStage's
+  // transaction, once per order, with an increment rather than a stale total.
   const handleCompleteDelivery = async (orderId: string) => {
     if (!riderId) return;
     try {
-      const orderRef = doc(db, 'orders', orderId);
-      const riderRef = doc(db, 'riders', riderId);
-
-      await updateDoc(orderRef, {
-        status: 'delivered',
-        riderStatus: 'delivered',
-        deliveredAt: new Date().toISOString()
-      });
-      notifyOrderStatus(orderId);
-
-      // Update rider earnings (+₹40 per delivery commission)
-      const newEarnings = (riderProfile?.earnings || 0) + 40;
-      await updateDoc(riderRef, {
-        earnings: newEarnings
-      });
-
-      setRiderProfile((prev: any) => ({ ...prev, earnings: newEarnings }));
-      toast.success("Order Delivered successfully! +₹40 earned. 💵");
+      const credited = await setOrderStage(orderId, 'delivered', { riderStatus: 'delivered' });
+      if (credited) {
+        setRiderProfile((prev: any) => ({ ...prev, earnings: (prev?.earnings || 0) + RIDER_COMMISSION }));
+        toast.success(`Order Delivered successfully! +₹${RIDER_COMMISSION} earned. 💵`);
+      } else {
+        toast.success("Order marked delivered.");
+      }
     } catch (err) {
       toast.error("Failed to complete delivery.");
     }
@@ -316,7 +332,7 @@ export default function DeliveryDashboard() {
   }
 
   // Calculate earnings
-  const completedCount = pastDeliveries.filter(o => o.status === 'delivered').length;
+  const completedCount = pastDeliveries.filter(o => toStage(o) === 'delivered').length;
 
   return (
     <div className="min-h-screen bg-[#050505] text-white pt-24 pb-48 px-4 md:px-6">

@@ -1,4 +1,7 @@
 import crypto from 'crypto';
+import { getApps } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
+import { adminDb } from './_firebaseAdmin.js';
 
 // Admin login, checked on the server.
 //
@@ -11,15 +14,59 @@ import crypto from 'crypto';
 // variables. If they are not set this endpoint reports that it is unconfigured
 // and the app falls back to Firebase Auth, so there is always a way in.
 //
-// Note what this does and does not buy you. The token returned here only
-// unlocks the admin UI in the browser; it is not checked by Firestore. Admin
-// changes are written to Firestore directly from the client, so the real access
-// control is the Firestore security rules (see firestore.rules), which key off
-// Firebase Auth. Treat this endpoint as a lock on the door of the room, not on
-// the safe.
+// Admin changes are written to Firestore directly from the client, so the real
+// access control is the Firestore security rules, which key off Firebase Auth.
+// When the Firebase Admin SDK is configured (see _firebaseAdmin.js) a correct
+// password also gets a Firebase custom token for ADMIN_UID with the claim
+// admin:true; the client signs in with it so the rules can see an admin. The
+// separate ADMIN_API_TOKEN is still returned for send-push.
+//
+// Failed attempts are slowed down (a fixed delay) and counted per IP. The
+// counter lives in this instance's memory, so on serverless it is best effort:
+// a cold start or another instance starts from zero.
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+const ADMIN_UID = 'jis-admin';
+const FAILURE_DELAY_MS = 600;
+const MAX_FAILURES = 5;
+const FAILURE_WINDOW_MS = 15 * 60 * 1000;
+/** ip -> { count, first } for recent failed logins in this instance. */
+const failures = new Map();
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function clientIp(req) {
+  const fwd = String(req.headers?.['x-forwarded-for'] || '').split(',')[0].trim();
+  return fwd || String(req.headers?.['x-real-ip'] || '') || req.socket?.remoteAddress || 'unknown';
+}
+
+function isLockedOut(ip) {
+  const entry = failures.get(ip);
+  if (!entry) return false;
+  if (Date.now() - entry.first > FAILURE_WINDOW_MS) {
+    failures.delete(ip);
+    return false;
+  }
+  return entry.count >= MAX_FAILURES;
+}
+
+function recordFailure(ip) {
+  const now = Date.now();
+  const entry = failures.get(ip);
+  if (!entry || now - entry.first > FAILURE_WINDOW_MS) failures.set(ip, { count: 1, first: now });
+  else entry.count += 1;
+  // Keep the map from growing without bound on a long-lived instance.
+  if (failures.size > 5000) failures.clear();
+}
+
+/** Firebase Auth with admin rights, or null when the Admin SDK is not configured. */
+function adminAuth() {
+  if (!adminDb) return null;
+  const apps = getApps();
+  return apps.length ? getAuth(apps[0]) : null;
+}
 
 /** Constant-time compare, so a wrong password cannot be found byte by byte. */
 function safeEqual(a, b) {
@@ -50,6 +97,12 @@ export default async function handler(req, res) {
     return res.status(501).json({ ok: false, unconfigured: true });
   }
 
+  const ip = clientIp(req);
+  if (isLockedOut(ip)) {
+    await sleep(FAILURE_DELAY_MS);
+    return res.status(429).json({ ok: false, error: 'Too many failed attempts. Try again later.' });
+  }
+
   let email = '';
   let password = '';
   try {
@@ -64,17 +117,33 @@ export default async function handler(req, res) {
   const passwordOk = safeEqual(password, ADMIN_PASSWORD);
 
   if (!emailOk || !passwordOk) {
+    recordFailure(ip);
+    await sleep(FAILURE_DELAY_MS);
     return res.status(401).json({ ok: false, error: 'Invalid admin credentials' });
   }
+  failures.delete(ip);
 
-  // Hand back ADMIN_API_TOKEN, which the protected endpoints (send-push,
-  // settings, drinks) compare against. Only someone who passed the password
+  // A Firebase session for the admin, so Firestore rules can tell it apart
+  // from a customer. Null (and the admin UI warns) when the SDK is missing.
+  let firebaseToken = null;
+  const auth = adminAuth();
+  if (auth) {
+    try {
+      firebaseToken = await auth.createCustomToken(ADMIN_UID, { admin: true });
+    } catch (error) {
+      console.error('admin-login: could not create a Firebase custom token:', error);
+    }
+  }
+
+  // Hand back ADMIN_API_TOKEN, which the protected endpoint (send-push)
+  // compares against. Only someone who passed the password
   // check above ever receives it, and it is never written in the repo or the
   // client bundle. Without it configured, fall back to a random value that
-  // still unlocks the admin UI but opens no endpoint -- those fail closed.
+  // still unlocks the admin UI but opens no endpoint -- send-push fails closed.
   return res.status(200).json({
     ok: true,
     token: process.env.ADMIN_API_TOKEN || crypto.randomBytes(32).toString('hex'),
     email: ADMIN_EMAIL,
+    firebaseToken,
   });
 }

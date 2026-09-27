@@ -77,14 +77,8 @@ export class DbService {
       const docRef = doc(db, this.SETTINGS_DOC_REF);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        const data = docSnap.data() as AdminSettings;
-        data.websiteStatus = 'ON';
-        data.emergencyStop = false;
-        data.deliveryPause = false;
-        if (!data.openTime || (data.openTime === '00:00' && data.closeTime === '23:59')) {
-          data.openTime = '12:30';
-          data.closeTime = '22:45';
-        }
+        // Stored values win; defaults only fill fields the document lacks.
+        const data: AdminSettings = { ...DEFAULT_SETTINGS, ...(docSnap.data() as Partial<AdminSettings>) };
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
         return data;
       }
@@ -97,14 +91,7 @@ export class DbService {
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
-        parsed.websiteStatus = 'ON';
-        parsed.emergencyStop = false;
-        parsed.deliveryPause = false;
-        if (!parsed.openTime || (parsed.openTime === '00:00' && parsed.closeTime === '23:59')) {
-          parsed.openTime = '12:30';
-          parsed.closeTime = '22:45';
-        }
-        return parsed;
+        return { ...DEFAULT_SETTINGS, ...parsed };
       } catch (e) {
         // Corrupted cache
       }
@@ -115,17 +102,29 @@ export class DbService {
   }
 
   /**
-   * Save settings securely via Firestore, fallback to local cache.
+   * Save settings via Firestore, fallback to local cache.
+   *
+   * `changes` holds only the keys being edited and is all that is written, so
+   * a save of one field cannot put back stale values of the others (such as
+   * reopening the shop after an Emergency Stop). `fullSettings`, when given,
+   * refreshes the offline cache.
    */
-  static async saveSettings(settings: AdminSettings): Promise<boolean> {
-    // 1. Update offline cache immediately
-    settings.lastUpdated = new Date().toISOString();
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(settings));
+  static async saveSettings(changes: Partial<AdminSettings>, fullSettings?: AdminSettings): Promise<boolean> {
+    const lastUpdated = new Date().toISOString();
 
-    // 2. Perform backend secure push to Firestore
+    // 1. Update offline cache immediately
+    if (fullSettings) {
+      try {
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify({ ...fullSettings, lastUpdated }));
+      } catch {
+        /* storage unavailable */
+      }
+    }
+
+    // 2. Push just the changed keys to Firestore
     try {
       const docRef = doc(db, this.SETTINGS_DOC_REF);
-      await setDoc(docRef, settings, { merge: true });
+      await setDoc(docRef, { ...changes, lastUpdated }, { merge: true });
       return true;
     } catch (error) {
       console.error('Error communicating settings update to backend:', error);
