@@ -20,10 +20,13 @@ export function haversineDistance(lat1: number, lon1: number, lat2: number, lon2
 // ═══════════════════════════════════════════════════════════════
 export async function reverseGeocode(lat: number, lng: number): Promise<string> {
   try {
+    // Capped at 5 s: on a poor connection Nominatim can hang for a minute.
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timer = setTimeout(() => controller?.abort(), 5000);
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
-      { headers: { 'Accept-Language': 'en' } }
-    );
+      { headers: { 'Accept-Language': 'en' }, signal: controller?.signal }
+    ).finally(() => clearTimeout(timer));
     const data = await res.json();
     if (data && data.address) {
       const addr = data.address;

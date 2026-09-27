@@ -23,7 +23,7 @@ export default defineConfig(({mode}) => {
         // test passes and `.register()` then throws. index.html registers the
         // worker itself, checking the value.
         injectRegister: false,
-        includeAssets: ['favicon.ico', 'robots.txt', 'logo.png', 'pwa-icon-192.png', 'pwa-icon-512.png'],
+        includeAssets: ['favicon.ico', 'robots.txt', 'pwa-icon-192.png', 'pwa-icon-512.png'],
         manifest: {
           name: "Mom's Magic",
           short_name: "Mom's Magic",
@@ -58,6 +58,9 @@ export default defineConfig(({mode}) => {
           // build, so a first visit downloaded ~52 MB of food photos before the app was
           // usable. Photos are now fetched on demand and cached as they are seen.
           globPatterns: ['**/*.{js,css,html,svg,ico,webmanifest}'],
+          // Staff screens and the map are never needed offline by customers;
+          // keeping them out saves every phone ~300 KB on first install.
+          globIgnores: ['**/AdminPage-*.js', '**/AdminMenuManager-*.js', '**/AdminCouponManager-*.js', '**/DeliveryDashboard-*.js', '**/leaflet-*.js', '**/leaflet-*.css'],
           navigateFallbackDenylist: [/^\/api/],
           runtimeCaching: [
             {
@@ -236,11 +239,16 @@ export default defineConfig(({mode}) => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: {
-            'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-            'vendor-motion': ['framer-motion'],
-            'vendor-lucide': ['lucide-react'],
-            'vendor-firebase': ['firebase/app', 'firebase/firestore', 'firebase/auth']
+          // A function rather than a list: main.tsx imports 'react-dom/client',
+          // which the list form did not match, so react-dom (~180 KB) sat in the
+          // app chunk and was re-downloaded after every deploy.
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return undefined;
+            if (/[\/]node_modules[\/](react|react-dom|scheduler|react-router|react-router-dom)[\/]/.test(id)) return 'vendor-react';
+            if (/[\/]node_modules[\/](framer-motion|motion-dom|motion-utils)[\/]/.test(id)) return 'vendor-motion';
+            if (id.includes('lucide-react')) return 'vendor-lucide';
+            if (/[\/]node_modules[\/]@?firebase[\/]/.test(id) && !id.includes('messaging')) return 'vendor-firebase';
+            return undefined;
           }
         }
       }

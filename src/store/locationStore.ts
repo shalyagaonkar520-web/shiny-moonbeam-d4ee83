@@ -46,7 +46,7 @@ export const SERVICE_AREA_NAME = 'Yellapur';
 
 export const useLocationStore = create<LocationStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       deliveryLocation: null,
       nearbyRestaurants: [],
       isLocationPickerOpen: false,
@@ -64,42 +64,50 @@ export const useLocationStore = create<LocationStore>()(
         }
 
         set({ isLoading: true });
-        
-        return new Promise((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(
-            async (pos) => {
-              try {
-                const { latitude, longitude } = pos.coords;
-                const address = await reverseGeocode(latitude, longitude);
-                const distance = haversineDistance(
-                  RESTAURANT_LOCATION.lat, 
-                  RESTAURANT_LOCATION.lng, 
-                  latitude, 
-                  longitude
-                );
 
-                set({
-                  deliveryLocation: {
-                    lat: latitude,
-                    lng: longitude,
-                    address,
-                    distance: parseFloat(distance.toFixed(2)),
-                    isDeliverable: distance <= MAX_DELIVERY_RANGE
-                  },
-                  isLoading: false
-                });
-                resolve();
-              } catch (err) {
-                set({ isLoading: false });
-                reject(err);
-              }
-            },
-            (err) => {
-              set({ isLoading: false });
-              reject(err);
-            },
-            { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+        const getPosition = (options: PositionOptions) =>
+          new Promise<GeolocationPosition>((resolve, reject) =>
+            navigator.geolocation.getCurrentPosition(resolve, reject, options)
           );
+
+        let pos: GeolocationPosition;
+        try {
+          // A fix up to a minute old is fine, and a cold GPS start gets 10 s
+          // before falling back to network location; this used to wait up to
+          // 20 s for a brand-new high-accuracy fix every time.
+          pos = await getPosition({ enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
+        } catch (err) {
+          const code = (err as GeolocationPositionError)?.code;
+          if (code === 1) {
+            set({ isLoading: false });
+            throw err; // permission denied: nothing else to try
+          }
+          try {
+            pos = await getPosition({ enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
+          } catch (err2) {
+            set({ isLoading: false });
+            throw err2;
+          }
+        }
+
+        const { latitude, longitude } = pos.coords;
+        const distance = haversineDistance(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, latitude, longitude);
+        const location = {
+          lat: latitude,
+          lng: longitude,
+          address: 'Current location',
+          distance: parseFloat(distance.toFixed(2)),
+          isDeliverable: distance <= MAX_DELIVERY_RANGE,
+        };
+        // The service-area check needs only the coordinates, so the customer is
+        // let in now and the street address fills in when the lookup returns.
+        set({ deliveryLocation: location, isLoading: false });
+
+        reverseGeocode(latitude, longitude).then((address) => {
+          const current = get().deliveryLocation;
+          if (current && current.lat === latitude && current.lng === longitude && address && address !== 'Unable to fetch address') {
+            set({ deliveryLocation: { ...current, address } });
+          }
         });
       }
     }),

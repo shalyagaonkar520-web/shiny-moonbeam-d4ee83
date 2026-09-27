@@ -16,7 +16,10 @@
     <link rel="apple-touch-icon" href="/pwa-icon-192.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;600;800&display=swap" />
+    <!-- Non-blocking: text renders at once in the fallback font and swaps when
+         the web font arrives, instead of a blank screen on slow mobile data. -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Poppins:wght@400;600;800&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Poppins:wght@400;600;800&display=swap" /></noscript>
 
     
     <!-- SEO Meta Tags -->
@@ -178,6 +181,18 @@
         });
       })();
 
+      // After a deploy, a page opened earlier still asks for the previous
+      // build's lazy chunks, which no longer exist. Reload once to pick up the
+      // new build instead of showing the error screen.
+      window.addEventListener('vite:preloadError', function (event) {
+        try {
+          if (sessionStorage.getItem('mm_chunk_reload')) return;
+          sessionStorage.setItem('mm_chunk_reload', '1');
+        } catch (e) { return; }
+        event.preventDefault();
+        location.reload();
+      });
+
       // Self-heal watchdog.
       //
       // If the app has not mounted a few seconds after load, the page is stuck on
@@ -194,6 +209,10 @@
         setTimeout(function () {
           var root = document.getElementById('root');
           if (root && root.hasAttribute('data-app-ready')) return;
+          // Only a page served by a service worker can be stuck on a stale
+          // shell. On a slow first visit (no worker yet) the app is simply
+          // still downloading, and reloading would restart it from zero.
+          if (!navigator.serviceWorker || !navigator.serviceWorker.controller) return;
           try {
             if (sessionStorage.getItem(FLAG)) return;
             sessionStorage.setItem(FLAG, '1');

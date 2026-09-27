@@ -74,6 +74,13 @@ export default function LocationGate({ children }: { children: React.ReactNode }
 
   const inServiceArea = !!deliveryLocation && deliveryLocation.distance <= SERVICE_RADIUS_KM;
 
+  // Download the home page while the customer is still answering, so it is
+  // ready the moment they tap Continue (it used to start only after).
+  useEffect(() => {
+    const idle = (window as any).requestIdleCallback || ((cb: () => void) => window.setTimeout(cb, 300));
+    idle(() => { import('./LandingPage').catch(() => {}); });
+  }, []);
+
   if ((inServiceArea && confirmed) || isOpenPath(pathname)) {
     return <>{children}</>;
   }
