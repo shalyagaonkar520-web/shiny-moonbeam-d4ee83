@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import MenuFilterChips from './MenuFilterChips';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -12,7 +13,6 @@ import { useLiveHotelStore } from '../store/liveHotelStore';
 import { useSystemStore } from '../store/systemStore';
 import { useLocationStore } from '../store/locationStore';
 import { useAuthStore } from '../store/authStore';
-import { useInstallModalStore } from '../store/installModalStore';
 import AuthModal from './AuthModal';
 import toast from 'react-hot-toast';
 import { playSound, SOUNDS } from '../utils/audio';
@@ -160,11 +160,12 @@ export default function LandingPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchIndex, setSearchIndex] = useState(0);
   const [dietFilter, setDietFilter] = useState<'all' | 'veg' | 'nonveg'>('all');
+  const [priceSort, setPriceSort] = useState<'relevance' | 'low' | 'high'>('relevance');
+  const [priceCap, setPriceCap] = useState<number | null>(null);
   const [selectedMindCategory, setSelectedMindCategory] = useState<string | null>(null);
   const [selectedCategoryTab, setSelectedCategoryTab] = useState<string>('All');
   const [activeBannerIndex, setActiveBannerIndex] = useState(0);
   const [showHelpToOrder, setShowHelpToOrder] = useState(false);
-  const openInstallModal = useInstallModalStore(state => state.openModal);
   const bestsellersRef = useRef<HTMLDivElement>(null);
   // The home grid lists every hotel's menu (230+ dishes). Rendering them all at
   // once costs about 6,500 DOM nodes and made scrolling noticeably heavier on a
@@ -309,18 +310,23 @@ export default function LandingPage() {
     'Party Special'
   ];
 
-  const filteredProducts = allProducts.filter(item => {
+  const searchTerms = searchQuery.toLowerCase().split(/\s+/).filter((t) => t && t !== 'hotel');
+  const searchHaystack = (item: any) =>
+    `${item.name} ${item.category || ''} ${item.description || ''} ${item.hotelName || ''}`.toLowerCase();
+
+  const matchedProducts = allProducts.filter(item => {
     // Diet filter (Veg / Non-Veg / All)
     if (dietFilter === 'veg' && !item.isVeg) return false;
     if (dietFilter === 'nonveg' && item.isVeg) return false;
 
-    // Search query filter
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const matchName = item.name.toLowerCase().includes(q);
-      const matchCat = (item.category || '').toLowerCase().includes(q);
-      const matchDesc = (item.description || '').toLowerCase().includes(q);
-      if (!matchName && !matchCat && !matchDesc) return false;
+    if (priceCap !== null && item.price > priceCap) return false;
+
+    // Search query filter. Every word must appear somewhere in the dish name,
+    // category, description or restaurant name, so "mumtaz biryani" and
+    // "Hotel Sankalpa" (both suggested in the search box) find something.
+    if (searchTerms.length) {
+      const haystack = searchHaystack(item);
+      if (!searchTerms.every((t) => haystack.includes(t))) return false;
     }
 
     // What's on your mind filter
@@ -356,13 +362,26 @@ export default function LandingPage() {
     return true;
   });
 
+  // Search puts dishes whose name matches first; price sort overrides that.
+  const nameRank = (item: any) => {
+    if (!searchTerms.length) return 0;
+    const name = item.name.toLowerCase();
+    if (name.startsWith(searchTerms[0])) return 0;
+    return searchTerms.every((t) => name.includes(t)) ? 1 : 2;
+  };
+  const filteredProducts =
+    priceSort === 'low' ? [...matchedProducts].sort((a, b) => a.price - b.price)
+    : priceSort === 'high' ? [...matchedProducts].sort((a, b) => b.price - a.price)
+    : searchTerms.length ? [...matchedProducts].sort((a, b) => nameRank(a) - nameRank(b))
+    : matchedProducts;
+
   const visibleProducts = filteredProducts.slice(0, visibleCount);
   const hasMoreProducts = filteredProducts.length > visibleCount;
 
   // Any change of filter, tab or search starts the list again from the top.
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
-  }, [searchQuery, dietFilter, selectedMindCategory, selectedCategoryTab]);
+  }, [searchQuery, dietFilter, selectedMindCategory, selectedCategoryTab, priceSort, priceCap]);
 
   // Append the next page when the sentinel below the grid scrolls into view.
   useEffect(() => {
@@ -412,15 +431,6 @@ export default function LandingPage() {
 
             {/* Right: Install App + Help to Order Button + Sign In / Login */}
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={openInstallModal}
-                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white font-bold text-xs border border-white/30 active:scale-95 transition-all cursor-pointer shadow-xs"
-                title="Install Mom's Magic App"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Install</span>
-              </button>
 
               <button
                 type="button"
@@ -617,6 +627,15 @@ export default function LandingPage() {
                 Clear Search ✕
               </button>
             </div>
+
+            <MenuFilterChips
+              priceSort={priceSort}
+              onPriceSort={setPriceSort}
+              priceCap={priceCap}
+              onPriceCap={setPriceCap}
+              diet={dietFilter}
+              onDiet={setDietFilter}
+            />
 
             {filteredProducts.length === 0 ? (
               <div className="text-center py-12 bg-white rounded-3xl border border-rose-100 p-6 shadow-xs space-y-3">
@@ -1119,6 +1138,13 @@ export default function LandingPage() {
             })}
           </div>
 
+          <MenuFilterChips
+            priceSort={priceSort}
+            onPriceSort={setPriceSort}
+            priceCap={priceCap}
+            onPriceCap={setPriceCap}
+          />
+
           {/* Product Grid */}
           {filteredProducts.length === 0 ? (
             <div className="text-center py-14 bg-white rounded-3xl border border-gray-200 p-8 shadow-xs">
@@ -1130,6 +1156,8 @@ export default function LandingPage() {
                   setSelectedMindCategory(null);
                   setSearchQuery('');
                   setDietFilter('all');
+                  setPriceSort('relevance');
+                  setPriceCap(null);
                 }}
                 className="mt-3 text-xs font-bold text-[#1836c2] bg-blue-50 px-4 py-2 rounded-full"
               >

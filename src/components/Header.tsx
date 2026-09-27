@@ -6,7 +6,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useSystemStore } from '../store/systemStore';
 import { useAuthStore } from '../store/authStore';
 import AuthModal from './AuthModal';
-import { useInstallModalStore } from '../store/installModalStore';
 import toast from 'react-hot-toast';
 
 export default function Header() {
@@ -15,11 +14,7 @@ export default function Header() {
   const settings = useSystemStore(state => state.settings);
   const { user, profile } = useAuthStore();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const openInstallModal = useInstallModalStore(state => state.openModal);
 
-  const handleInstallClick = () => {
-    openInstallModal();
-  };
 
   const formatTime12h = (time24: string) => {
     try {
@@ -123,19 +118,6 @@ export default function Header() {
                   Sign In / Login
                 </motion.button>
               )}
-
-              {/* Install App Button to the Right of Login */}
-              <motion.button
-                whileHover={{ y: -2, scale: 1.03 }}
-                whileTap={{ y: -4, scale: 1.06 }}
-                transition={{ type: "spring", stiffness: 500, damping: 18 }}
-                onClick={handleInstallClick}
-                className="flex items-center gap-1 bg-[#4CD964]/10 hover:bg-[#4CD964]/20 border border-[#4CD964]/30 text-[#4CD964] hover:text-white px-2.5 sm:px-3 py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider cursor-pointer shadow-sm shrink-0"
-                title="Install Mom's Magic App"
-              >
-                <Download className="w-3.5 h-3.5 text-[#4CD964] animate-bounce" />
-                <span>Install</span>
-              </motion.button>
             </div>
           </div>
         </div>

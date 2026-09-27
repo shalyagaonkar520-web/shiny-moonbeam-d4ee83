@@ -17,7 +17,11 @@ import {
   LogIn,
   LogOut,
   Gift,
-  Sparkles
+  Sparkles,
+  PackageSearch,
+  ShieldCheck,
+  Home as HomeIcon,
+  Trash2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSEO } from '../utils/seo';
@@ -392,6 +396,50 @@ export default function ProfilePage() {
               ))}
             </div>
           )}
+        </div>
+
+        {/* 5. Tracking, privacy and account deletion */}
+        <div className="bg-white rounded-[26px] p-2.5 border border-rose-100/90 shadow-sm text-left">
+          <button
+            onClick={() => navigate('/addresses')}
+            className="w-full p-2.5 rounded-xl hover:bg-rose-50/50 flex items-center justify-between transition-colors cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <HomeIcon className="w-4 h-4 text-[#e11d48]" />
+              <span className="text-xs font-bold text-gray-800">Saved Addresses</span>
+            </div>
+            <span className="text-gray-400 text-xs">→</span>
+          </button>
+          <button
+            onClick={() => navigate('/track')}
+            className="w-full p-2.5 rounded-xl hover:bg-rose-50/50 flex items-center justify-between transition-colors cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <PackageSearch className="w-4 h-4 text-[#e11d48]" />
+              <span className="text-xs font-bold text-gray-800">Track an Order</span>
+            </div>
+            <span className="text-gray-400 text-xs">→</span>
+          </button>
+          <button
+            onClick={() => navigate('/privacy')}
+            className="w-full p-2.5 rounded-xl hover:bg-rose-50/50 flex items-center justify-between transition-colors cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <ShieldCheck className="w-4 h-4 text-[#e11d48]" />
+              <span className="text-xs font-bold text-gray-800">Privacy Policy</span>
+            </div>
+            <span className="text-gray-400 text-xs">→</span>
+          </button>
+          <button
+            onClick={() => navigate('/delete-account')}
+            className="w-full p-2.5 rounded-xl hover:bg-red-50/60 flex items-center justify-between transition-colors cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <Trash2 className="w-4 h-4 text-red-500" />
+              <span className="text-xs font-bold text-red-600">Delete Account</span>
+            </div>
+            <span className="text-gray-400 text-xs">→</span>
+          </button>
         </div>
 
       </div>

@@ -2,13 +2,18 @@ import { create } from 'zustand';
 import { 
   User, 
   signInWithPopup, 
+  signInWithCredential,
   GoogleAuthProvider, 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut, 
   onAuthStateChanged,
   sendPasswordResetEmail,
-  updateProfile
+  updateProfile,
+  reauthenticateWithCredential,
+  reauthenticateWithPopup,
+  EmailAuthProvider,
+  deleteUser
 } from 'firebase/auth';
 import { 
   doc, 
@@ -24,6 +29,43 @@ import {
   arrayRemove 
 } from 'firebase/firestore';
 import { auth, db } from '../firebase';
+
+// Google refuses OAuth inside an Android WebView (403 disallowed_useragent), so
+// signInWithPopup can never succeed in the Play Store app. The app's native
+// shell exposes AndroidBridge.signInWithGoogle(), which runs Google sign-in
+// through Android Credential Manager and answers with a
+// 'native-google-signin' window event carrying the ID token.
+type NativeBridge = { signInWithGoogle?: () => void };
+
+function getNativeBridge(): NativeBridge | undefined {
+  return (window as unknown as { AndroidBridge?: NativeBridge }).AndroidBridge;
+}
+
+function isAndroidWebView(): boolean {
+  return /MomsMagicApp|; wv\)/.test(navigator.userAgent);
+}
+
+function authError(code: string, message: string): Error {
+  return Object.assign(new Error(message), { code });
+}
+
+function getNativeGoogleIdToken(bridge: NativeBridge): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const onResult = (event: Event) => {
+      window.removeEventListener('native-google-signin', onResult);
+      const { idToken, error } = (event as CustomEvent).detail || {};
+      if (idToken) {
+        resolve(idToken);
+      } else if (error === 'cancelled') {
+        reject(authError('auth/popup-closed-by-user', 'Google Sign-In was cancelled.'));
+      } else {
+        reject(authError('auth/native-google-failed', error || 'Google Sign-In failed. Please try again.'));
+      }
+    };
+    window.addEventListener('native-google-signin', onResult);
+    bridge.signInWithGoogle!();
+  });
+}
 
 export interface UserProfile {
   uid: string;
@@ -55,7 +97,8 @@ interface AuthStore {
   quickPhoneLogin: (name: string, phone: string) => void;
   resetPassword: (email: string) => Promise<void>;
   logout: () => Promise<void>;
-  deleteAccount: () => Promise<void>;
+  /** Permanently deletes the signed-in account. Password accounts must pass their password. */
+  deleteAccount: (password?: string) => Promise<void>;
   addAddress: (label: string, address: string, lat: number, lng: number) => Promise<void>;
   deleteAddress: (addressId: string) => Promise<void>;
   deductWalletBalance: (amount: number, orderId: string) => Promise<void>;
@@ -167,8 +210,17 @@ export const useAuthStore = create<AuthStore>((set, get) => {
     loginWithGoogle: async () => {
       set({ loading: true });
       try {
-        const provider = new GoogleAuthProvider();
-        const res = await signInWithPopup(auth, provider);
+        const bridge = getNativeBridge();
+        let res;
+        if (bridge?.signInWithGoogle) {
+          const idToken = await getNativeGoogleIdToken(bridge);
+          res = await signInWithCredential(auth, GoogleAuthProvider.credential(idToken));
+        } else if (isAndroidWebView()) {
+          // Older app build without the native bridge: the popup would hang forever.
+          throw authError('auth/unsupported-webview', 'Google Sign-In needs the latest app update. Please update from the Play Store, or use Email or Quick Phone Login below.');
+        } else {
+          res = await signInWithPopup(auth, new GoogleAuthProvider());
+        }
         if (res.user.displayName) {
           localStorage.setItem('moms_magic_user_name', res.user.displayName);
         }
@@ -254,24 +306,52 @@ export const useAuthStore = create<AuthStore>((set, get) => {
       }
     },
 
-    deleteAccount: async () => {
-      const { user } = get();
+    deleteAccount: async (password) => {
       set({ loading: true });
       try {
-        if (user) {
-          const userDocRef = doc(db, 'users', user.uid);
-          await deleteDoc(userDocRef).catch(() => {});
-          await user.delete().catch(() => {});
+        const current = auth?.currentUser;
+        if (current) {
+          // Firebase only deletes an account whose owner signed in recently, and
+          // the old version swallowed that error: the profile document went but
+          // the login survived, so the customer thought they were deleted when
+          // they were not. Confirm identity first, then delete the profile, then
+          // the login, and let any failure reach the caller.
+          const providers = current.providerData.map((p) => p.providerId);
+          if (providers.includes('password')) {
+            if (!password) {
+              throw authError('auth/missing-password', 'Enter your password to confirm deletion.');
+            }
+            await reauthenticateWithCredential(current, EmailAuthProvider.credential(current.email || '', password));
+          } else if (providers.includes('google.com')) {
+            const bridge = getNativeBridge();
+            if (bridge?.signInWithGoogle) {
+              const idToken = await getNativeGoogleIdToken(bridge);
+              await reauthenticateWithCredential(current, GoogleAuthProvider.credential(idToken));
+            } else if (isAndroidWebView()) {
+              throw authError('auth/unsupported-webview', 'Please update the app from the Play Store to delete your account, or delete it from momsmagic.shop/delete-account.');
+            } else {
+              await reauthenticateWithPopup(current, new GoogleAuthProvider());
+            }
+          }
+
+          await deleteDoc(doc(db, 'users', current.uid));
+          await deleteUser(current);
         }
-      } catch (err) {
-        console.warn('Error deleting user from Firebase Auth:', err);
-      } finally {
-        localStorage.removeItem('moms_magic_user_phone');
-        localStorage.removeItem('moms_magic_orders');
-        localStorage.removeItem('moms_magic_admin_token');
-        localStorage.removeItem('moms_magic_pwa_installed_logged');
+
+        // Personal data this device holds: name, phone, email, address, order
+        // copies, saved delivery location. Quick-phone-login customers have no
+        // cloud account, so for them this is the whole deletion.
+        try {
+          Object.keys(localStorage)
+            .filter((k) => k.startsWith('moms_magic_') || k === 'delivery-location-storage')
+            .forEach((k) => localStorage.removeItem(k));
+        } catch {
+          /* storage unavailable */
+        }
         await signOut(auth).catch(() => {});
-        set({ user: null, profile: null, loading: false });
+        set({ user: null, profile: null });
+      } finally {
+        set({ loading: false });
       }
     },
 

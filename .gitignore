@@ -10,3 +10,18 @@ coverage/
 .vercel
 .env*.local
 dev-dist/
+
+# Android signing material and machine-local build files. The upload key and
+# its passwords must never reach the public repo.
+*.jks
+*.keystore
+*.pem
+android-webview/keystore.properties
+android-webview/local.properties
+android-webview/.gradle/
+android-webview/app/build/
+android-webview/build/
+
+# IDE files
+.idea/
+*.iml

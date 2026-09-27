@@ -15,7 +15,7 @@ function getFriendlyErrorMessage(err: any): string {
   const msg = err?.message || '';
 
   if (code.includes('invalid-credential') || code.includes('wrong-password') || code.includes('user-not-found')) {
-    return 'Incorrect email or password. Please try again or use Quick Phone Login.';
+    return 'Incorrect email or password. Please try again or sign in with Google.';
   }
   if (code.includes('email-already-in-use')) {
     return 'An account already exists with this email. Please switch to Sign In above!';
@@ -30,7 +30,7 @@ function getFriendlyErrorMessage(err: any): string {
     return 'Google Sign-In was cancelled.';
   }
   if (code.includes('unauthorized-domain')) {
-    return 'Google Sign-In is unavailable on this domain. Please use Email or Quick Phone Login below!';
+    return 'Google Sign-In is unavailable on this domain. Please sign in with your email below.';
   }
   if (code.includes('network-request-failed')) {
     return 'Network connection issue. Please check your internet connection.';
@@ -48,7 +48,7 @@ export default function AuthPage() {
 
   // Determine initial mode based on route
   const isSignupPath = location.pathname.includes('signup');
-  const [mode, setMode] = useState<'signin' | 'signup' | 'phone'>(isSignupPath ? 'signup' : 'signin');
+  const [mode, setMode] = useState<'signin' | 'signup'>(isSignupPath ? 'signup' : 'signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -57,7 +57,7 @@ export default function AuthPage() {
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
 
-  const { user, profile, loginWithGoogle, loginWithEmail, signUpWithEmail, quickPhoneLogin, resetPassword, logout } = useAuthStore();
+  const { user, profile, loginWithGoogle, loginWithEmail, signUpWithEmail, resetPassword, logout } = useAuthStore();
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,22 +123,6 @@ export default function AuthPage() {
     }
   };
 
-  const handleQuickPhoneAuth = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) {
-      toast.error('Please enter your name.');
-      return;
-    }
-    const cleanedPhone = phone.trim().replace(/\D/g, '');
-    if (cleanedPhone.length < 10) {
-      toast.error('Please enter a valid 10-digit mobile number.');
-      return;
-    }
-
-    quickPhoneLogin(name.trim(), `+91 ${cleanedPhone.slice(-10)}`);
-    toast.success(`Welcome, ${name.trim()}! Logged in successfully! 🍲`);
-    navigate('/profile');
-  };
 
   const handleGoogleAuth = async () => {
     setSubmitLoading(true);
@@ -260,8 +244,6 @@ export default function AuthPage() {
                   ? 'Reset Password'
                   : mode === 'signup'
                   ? 'Create Your Account'
-                  : mode === 'phone'
-                  ? 'Quick Phone Login'
                   : 'Welcome Back!'}
               </h1>
               <p className="text-xs text-gray-500 mt-0.5">
@@ -269,15 +251,13 @@ export default function AuthPage() {
                   ? 'Enter your registered email to receive a password reset link'
                   : mode === 'signup'
                   ? 'Sign up to track your orders & save delivery addresses'
-                  : mode === 'phone'
-                  ? 'Instant access for quick orders without a password'
                   : 'Sign in to access your orders & saved delivery addresses'}
               </p>
             </div>
 
             {/* Tabs */}
             {!isForgotPassword && (
-              <div className="grid grid-cols-3 gap-1 bg-gray-100/80 p-1 rounded-2xl">
+              <div className="grid grid-cols-2 gap-1 bg-gray-100/80 p-1 rounded-2xl">
                 <button
                   type="button"
                   onClick={() => setMode('signin')}
@@ -300,70 +280,11 @@ export default function AuthPage() {
                 >
                   Sign Up
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setMode('phone')}
-                  className={`py-2 text-center text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer ${
-                    mode === 'phone'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-500 hover:text-gray-900'
-                  }`}
-                >
-                  Quick Phone
-                </button>
               </div>
             )}
 
-            {/* Mode: Quick Phone */}
-            {mode === 'phone' && !isForgotPassword && (
-              <form onSubmit={handleQuickPhoneAuth} className="space-y-3 pt-1">
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
-                    Your Full Name
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="e.g. Ramesh Hegde"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl py-2.5 sm:py-3 pl-10 pr-3.5 text-xs font-bold text-gray-900 placeholder:text-gray-400 outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
-                    WhatsApp / Mobile Number
-                  </label>
-                  <div className="relative">
-                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      type="tel"
-                      inputMode="numeric"
-                      placeholder="10-digit phone number"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      required
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl py-2.5 sm:py-3 pl-10 pr-3.5 text-xs font-bold text-gray-900 placeholder:text-gray-400 outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-[#ff4d6d] to-[#e11d48] hover:brightness-105 active:scale-98 text-white font-black text-xs uppercase tracking-wider py-3.5 rounded-xl transition-all shadow-md shadow-rose-500/25 flex items-center justify-center gap-2 cursor-pointer mt-2"
-                >
-                  <LogIn className="w-4 h-4" />
-                  <span>Login Instantly with Phone</span>
-                </button>
-              </form>
-            )}
-
             {/* Mode: Email Sign In / Sign Up / Forgot Password */}
-            {(mode !== 'phone' || isForgotPassword) && (
+            {(
               <form onSubmit={handleEmailAuth} className="space-y-3 pt-1">
                 {mode === 'signup' && !isForgotPassword && (
                   <div>

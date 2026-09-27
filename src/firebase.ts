@@ -3,6 +3,7 @@ import { getFirestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 import { firebaseConfig } from './firebaseConfig';
+import { rememberWebPushToken } from './lib/push';
 
 // Initialising Firebase must never be able to take the app down.
 //
@@ -93,6 +94,9 @@ export const requestForToken = async (): Promise<string | null> => {
       console.warn('No registration token available.');
       return null;
     }
+
+    // Order-status notifications are sent to the token stored on each order.
+    rememberWebPushToken(currentToken);
 
     // Save token to Firestore deviceTokens collection.
     // Using the token as the document ID prevents duplicate entries.

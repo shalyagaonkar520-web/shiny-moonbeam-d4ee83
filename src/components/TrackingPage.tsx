@@ -1,404 +1,613 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ChevronLeft, MapPin, Phone, Truck, Clock, Store, Navigation, ShieldCheck } from 'lucide-react';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebase';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import toast from 'react-hot-toast';
+import { ChevronLeft, Phone, MapPin, ReceiptText, MessageCircle, RotateCcw, XCircle, Bike, CookingPot, CheckCircle2, Radio } from 'lucide-react';
+import { db } from '../firebase';
 import { useSEO } from '../utils/seo';
 import FoodLoader from './FoodLoader';
+import RateOrderCard from './RateOrderCard';
+import { reorderAndGo, localOrder } from '../lib/reorder';
+import { haversineDistance } from '../lib/location';
+import { toStage, Stage, STAGE_STEPS, STAGE_TITLE } from '../lib/orderStage';
+import { useSystemStore } from '../store/systemStore';
+import { openExternal } from '../lib/openExternal';
 
-// Helper to calculate distance in km via Haversine
-const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-  const R = 6371; // Radius of the earth in km
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c; // Distance in km
-};
+// Mom's Magic kitchen, where every delivery starts.
+const KITCHEN = { lat: 14.9643, lng: 74.7121 };
+// Typical time from order to food leaving the kitchen, and town riding speed.
+const PREP_MINUTES = 20;
+const AVG_KMH = 22;
+const POLL_MS = 10000;
+
+type LatLng = { lat: number; lng: number };
+
+interface TrackView {
+  stage: Stage;
+  items: Array<{ name: string; qty: number; price?: number }>;
+  amount: number;
+  paymentMethod: string | null;
+  address: string;
+  dest: LatLng | null;
+  riderId: string | null;
+  rider: { name: string; phone: string; location: LatLng | null } | null;
+  createdAt: string | null;
+  outForDeliveryAt: string | null;
+  deliveredAt: string | null;
+  rated: boolean;
+}
+
+interface Route {
+  coords: Array<[number, number]>;
+  durationMin: number;
+}
+
+const isLatLng = (v: any): v is LatLng => v && typeof v.lat === 'number' && typeof v.lng === 'number';
+
+/** A Firestore order document, or the copy saved on this phone at checkout. */
+function fromRaw(o: any): TrackView {
+  return {
+    stage: toStage(o),
+    items: (o.items || []).map((i: any) => ({
+      name: i?.name || 'Item',
+      qty: Number(i?.finalQuantity ?? i?.quantity ?? 1),
+      price: typeof i?.price === 'number' ? i.price : undefined,
+    })),
+    amount: Number(o.payableAmount ?? o.grandTotal ?? 0),
+    paymentMethod: o.paymentMethod || null,
+    address: o.deliveryLocation?.address || '',
+    dest: isLatLng(o.deliveryLocation) ? { lat: o.deliveryLocation.lat, lng: o.deliveryLocation.lng } : null,
+    riderId: o.riderId || null,
+    rider: null,
+    createdAt: o.createdAt || null,
+    outForDeliveryAt: o.outForDeliveryAt || null,
+    deliveredAt: o.deliveredAt || null,
+    rated: !!o.customerRating,
+  };
+}
+
+/** The trimmed /api/track response. */
+function fromApi(o: any, prev: TrackView | null): TrackView {
+  return {
+    stage: o.stage,
+    items: o.items?.length
+      ? o.items.map((i: any) => ({ name: i.name, qty: i.quantity, price: prev?.items.find((p) => p.name === i.name)?.price }))
+      : prev?.items || [],
+    amount: o.amount ?? prev?.amount ?? 0,
+    paymentMethod: o.paymentMethod ?? prev?.paymentMethod ?? null,
+    address: o.delivery?.address || prev?.address || '',
+    dest: isLatLng(o.delivery) ? { lat: o.delivery.lat, lng: o.delivery.lng } : prev?.dest || null,
+    riderId: prev?.riderId || null,
+    rider: o.rider
+      ? { name: o.rider.name || 'Delivery partner', phone: o.rider.phone || '', location: isLatLng(o.rider.location) ? o.rider.location : null }
+      : null,
+    createdAt: o.createdAt ?? prev?.createdAt ?? null,
+    outForDeliveryAt: o.outForDeliveryAt ?? prev?.outForDeliveryAt ?? null,
+    deliveredAt: o.deliveredAt ?? prev?.deliveredAt ?? null,
+    rated: !!o.rated || !!prev?.rated,
+  };
+}
+
+/** Road route from the kitchen to the customer (OSRM on OpenStreetMap), straight line if unavailable. */
+async function fetchRoute(dest: LatLng, cacheKey: string): Promise<Route> {
+  try {
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) return JSON.parse(cached);
+  } catch { /* ignore */ }
+  const straight = (): Route => {
+    const km = haversineDistance(KITCHEN.lat, KITCHEN.lng, dest.lat, dest.lng) * 1.3;
+    return { coords: [[KITCHEN.lat, KITCHEN.lng], [dest.lat, dest.lng]], durationMin: Math.max(3, (km / AVG_KMH) * 60) };
+  };
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${KITCHEN.lng},${KITCHEN.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson`;
+    const res = await fetch(url);
+    const body = await res.json();
+    const r = body?.routes?.[0];
+    if (!r) return straight();
+    const route: Route = {
+      coords: r.geometry.coordinates.map(([lng, lat]: [number, number]) => [lat, lng]),
+      // OSRM assumes car speeds; town scooter riding with stops is slower.
+      durationMin: Math.max(3, (r.distance / 1000 / AVG_KMH) * 60),
+    };
+    try { sessionStorage.setItem(cacheKey, JSON.stringify(route)); } catch { /* ignore */ }
+    return route;
+  } catch {
+    return straight();
+  }
+}
+
+/** The point a fraction (0..1) of the way along a polyline. */
+function pointAlong(coords: Array<[number, number]>, fraction: number): LatLng {
+  if (coords.length === 1) return { lat: coords[0][0], lng: coords[0][1] };
+  const seg: number[] = [];
+  let total = 0;
+  for (let i = 1; i < coords.length; i++) {
+    const d = haversineDistance(coords[i - 1][0], coords[i - 1][1], coords[i][0], coords[i][1]);
+    seg.push(d);
+    total += d;
+  }
+  let target = total * Math.min(Math.max(fraction, 0), 1);
+  for (let i = 0; i < seg.length; i++) {
+    if (target <= seg[i] || i === seg.length - 1) {
+      const t = seg[i] ? target / seg[i] : 0;
+      const [a, b] = [coords[i], coords[i + 1]];
+      return { lat: a[0] + (b[0] - a[0]) * t, lng: a[1] + (b[1] - a[1]) * t };
+    }
+    target -= seg[i];
+  }
+  const last = coords[coords.length - 1];
+  return { lat: last[0], lng: last[1] };
+}
+
+const fmtTime = (d: Date) => d.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' });
+
+// Map markers are inline SVG (lucide shapes), not emoji: emoji fonts differ by
+// phone and some render the kitchen and bike unrecognisably.
+const svg = (paths: string, color: string, size = 18) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+const UTENSILS = '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>';
+const HOUSE = '<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>';
+const BIKE = '<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>';
+
+const pinIcon = (paths: string, bg: string, fg: string) =>
+  L.divIcon({
+    html: `<div style="width:38px;height:38px;border-radius:9999px;background:${bg};border:3px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(17,24,39,.25)">${svg(paths, fg)}</div>`,
+    className: '',
+    iconSize: [38, 38],
+    iconAnchor: [19, 19],
+  });
+
+const kitchenIcon = pinIcon(UTENSILS, '#e11d48', '#ffffff');
+const homeIcon = pinIcon(HOUSE, '#111827', '#ffffff');
+
+const bikeIcon = L.divIcon({
+  html: `<div style="position:relative;width:48px;height:48px"><span style="position:absolute;inset:0;border-radius:9999px;background:rgba(225,29,72,.28);animation:mm-ping 1.6s ease-out infinite"></span><div style="position:absolute;inset:5px;border-radius:9999px;background:#ffffff;border:3px solid #e11d48;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(225,29,72,.45)">${svg(BIKE, '#e11d48', 20)}</div></div>`,
+  className: '',
+  iconSize: [48, 48],
+  iconAnchor: [24, 24],
+});
 
 export default function TrackingPage() {
-  const { orderId } = useParams<{ orderId: string }>();
+  const { orderId = '' } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
-  useSEO("Live Tracking", "Track your live delivery from Mom's Magic on our interactive map.");
+  useSEO('Live Tracking', "Track your Mom's Magic order live.");
+  const supportNumber = useSystemStore((s) => s.settings?.whatsappNumber) || '+919606001790';
 
-  const [order, setOrder] = useState<any>(null);
-  const [rider, setRider] = useState<any>(null);
+  const [view, setView] = useState<TrackView | null>(null);
   const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  const [route, setRoute] = useState<Route | null>(null);
+  const [now, setNow] = useState(Date.now());
 
-  // Leaflet references
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<L.Map | null>(null);
-  const markersRef = useRef<{ [key: string]: L.Marker }>({});
-  const polylineRef = useRef<L.Polyline | null>(null);
-
-  // 1. Real-time Listener for the Order document
+  // ---- data: Firestore live, then the /api/track backend, then this phone's copy
   useEffect(() => {
     if (!orderId) return;
-
-    const orderDocRef = doc(db, 'orders', orderId);
-    const unsubscribeOrder = onSnapshot(orderDocRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const orderData = docSnap.data();
-        setOrder(orderData);
-        setLoading(false);
-      } else {
-        // Fallback: check if we have it in localStorage
-        try {
-          const stored = JSON.parse(localStorage.getItem('moms_magic_orders') || '[]');
-          const localOrder = stored.find((o: any) => o.id === orderId);
-          if (localOrder) {
-            setOrder(localOrder);
-            setLoading(false);
-          } else {
-            toast.error('Order not found.');
-            navigate('/profile');
-          }
-        } catch (e) {
-          setLoading(false);
-        }
-      }
-    }, (error) => {
-      // This fires when Firestore is unreachable or the read is denied by
-      // security rules. It used to only log, leaving `loading` true, so the
-      // tracking link a customer gets after ordering sat on the loading
-      // animation for ever. Fall back to the copy saved at checkout, and
-      // whatever happens, stop loading so the page can render something.
-      console.error('Firestore order subscription error:', error);
-      try {
-        const stored = JSON.parse(localStorage.getItem('moms_magic_orders') || '[]');
-        const localOrder = stored.find((o: any) => o.id === orderId);
-        if (localOrder) setOrder(localOrder);
-      } catch {
-        /* storage unavailable; fall through to the not-found screen */
-      }
+    const saved = localOrder(orderId);
+    if (saved) {
+      setView(fromRaw(saved));
       setLoading(false);
-    });
-
-    return () => unsubscribeOrder();
-  }, [orderId, navigate]);
-
-  // 2. Real-time Listener for the Rider document
-  useEffect(() => {
-    if (!order || !order.riderId || order.riderId === '') {
-      setRider(null);
-      return;
     }
 
-    const riderDocRef = doc(db, 'riders', order.riderId);
-    const unsubscribeRider = onSnapshot(riderDocRef, (docSnap) => {
-      if (docSnap.exists()) {
-        setRider(docSnap.data());
-      }
-    });
+    let pollTimer: number | undefined;
+    let stopped = false;
+    const poll = async () => {
+      try {
+        const res = await fetch(`/api/track?id=${encodeURIComponent(orderId)}`, { cache: 'no-store' });
+        if (res.status === 404 && !saved) setNotFound(true);
+        if (res.ok && (res.headers.get('content-type') || '').includes('json')) {
+          const body = await res.json();
+          if (body?.ok && !stopped) setView((prev) => fromApi(body.order, prev));
+        }
+      } catch { /* offline or backend not configured: keep what we have */ }
+      if (!stopped) setLoading(false);
+    };
 
-    return () => unsubscribeRider();
-  }, [order]);
+    let unsubOrder = () => {};
+    try {
+      unsubOrder = onSnapshot(
+        doc(db, 'orders', orderId),
+        (snap) => {
+          if (snap.exists()) {
+            const raw = snap.data();
+            setView((prev) => ({ ...fromRaw(raw), rider: prev?.rider || null }));
+            setLoading(false);
+          }
+        },
+        // Signed-out customers cannot read orders under the live rules; the
+        // backend poll below reads with server credentials instead.
+        () => {}
+      );
+    } catch { /* Firebase unavailable: the poll covers it */ }
 
-  // 3. Initialize Leaflet Map
-  useEffect(() => {
-    if (mapRef.current && !mapInstance.current) {
-      // Start centered on Yellapur
-      mapInstance.current = L.map(mapRef.current, {
-        zoomControl: false,
-        attributionControl: false
-      }).setView([14.9643, 74.7121], 15);
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19
-      }).addTo(mapInstance.current);
-
-      L.control.zoom({ position: 'bottomright' }).addTo(mapInstance.current);
-    }
+    // The backend also supplies the rider's position, so poll the whole time.
+    poll();
+    pollTimer = window.setInterval(poll, POLL_MS);
 
     return () => {
-      if (mapInstance.current) {
-        mapInstance.current.remove();
-        mapInstance.current = null;
-      }
+      stopped = true;
+      unsubOrder();
+      if (pollTimer) window.clearInterval(pollTimer);
     };
+  }, [orderId]);
+
+  // Rider document, when this browser is allowed to read it directly.
+  useEffect(() => {
+    if (!view?.riderId) return;
+    try {
+      return onSnapshot(
+        doc(db, 'riders', view.riderId),
+        (snap) => {
+          const r: any = snap.data();
+          if (!r) return;
+          setView((prev) =>
+            prev && {
+              ...prev,
+              rider: { name: r.name || 'Delivery partner', phone: r.phone || '', location: isLatLng(r.currentLocation) ? r.currentLocation : null },
+            }
+          );
+        },
+        () => { /* not readable: the backend poll supplies the rider */ }
+      );
+    } catch {
+      return undefined;
+    }
+  }, [view?.riderId]);
+
+  // Route once we know where the customer is.
+  const destKey = view?.dest ? `${view.dest.lat.toFixed(5)},${view.dest.lng.toFixed(5)}` : '';
+  useEffect(() => {
+    if (!view?.dest) return;
+    let cancelled = false;
+    fetchRoute(view.dest, `moms_magic_route_${destKey}`).then((r) => !cancelled && setRoute(r));
+    return () => { cancelled = true; };
+  }, [destKey]);
+
+  // Clock for the arrival time and the estimated bike position.
+  useEffect(() => {
+    const t = window.setInterval(() => setNow(Date.now()), 5000);
+    return () => window.clearInterval(t);
   }, []);
 
-  // 4. Update Map Markers and Bounds dynamically when coordinates change
-  useEffect(() => {
-    const map = mapInstance.current;
-    if (!map || !order) return;
+  // ---- where the bike is, and when the food arrives
+  const stage = view?.stage || 'placed';
+  const liveRider = stage === 'out_for_delivery' && view?.rider?.location ? view.rider.location : null;
+  const dispatchedAt = view?.outForDeliveryAt ? new Date(view.outForDeliveryAt).getTime() : null;
+  const driveMin = route?.durationMin ?? null;
 
-    const restCoords: [number, number] = [14.9643, 74.7121]; // Mom's Magic Kitchen coordinates
-    const custCoords: [number, number] = [
-      order.deliveryLocation?.lat || 14.9667,
-      order.deliveryLocation?.lng || 74.7167
-    ];
-    const riderCoords: [number, number] | null = rider?.currentLocation?.lat && rider?.currentLocation?.lng
-      ? [rider.currentLocation.lat, rider.currentLocation.lng]
-      : null;
-
-    // Custom UI icons matching Swish styles
-    const restaurantIcon = L.divIcon({
-      html: '<div class="w-8 h-8 rounded-full bg-orange-600 border-2 border-white flex items-center justify-center shadow-lg font-bold text-sm">🍳</div>',
-      className: 'custom-div-icon',
-      iconSize: [32, 32],
-      iconAnchor: [16, 16]
-    });
-
-    const customerIcon = L.divIcon({
-      html: '<div class="w-8 h-8 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center shadow-lg font-bold text-sm">🏠</div>',
-      className: 'custom-div-icon',
-      iconSize: [32, 32],
-      iconAnchor: [16, 16]
-    });
-
-    const riderIcon = L.divIcon({
-      html: '<div class="w-9 h-9 rounded-full bg-[#4CD964] border-2 border-white flex items-center justify-center shadow-2xl font-bold text-sm animate-bounce shadow-[#4CD964]/50">🛵</div>',
-      className: 'custom-div-icon',
-      iconSize: [36, 36],
-      iconAnchor: [18, 18]
-    });
-
-    // Handle Restaurant Marker
-    if (!markersRef.current['restaurant']) {
-      markersRef.current['restaurant'] = L.marker(restCoords, { icon: restaurantIcon }).addTo(map)
-        .bindPopup('<b>Mom\'s Magic Kitchen</b>');
-    } else {
-      markersRef.current['restaurant'].setLatLng(restCoords);
-    }
-
-    // Handle Customer Marker
-    if (!markersRef.current['customer']) {
-      markersRef.current['customer'] = L.marker(custCoords, { icon: customerIcon }).addTo(map)
-        .bindPopup(`<b>Your Location</b><br/>${order.deliveryLocation?.address || ''}`);
-    } else {
-      markersRef.current['customer'].setLatLng(custCoords);
-    }
-
-    // Handle Rider Marker
-    if (riderCoords) {
-      if (!markersRef.current['rider']) {
-        markersRef.current['rider'] = L.marker(riderCoords, { icon: riderIcon }).addTo(map)
-          .bindPopup(`<b>Delivery Partner: ${rider.name}</b>`);
-      } else {
-        markersRef.current['rider'].setLatLng(riderCoords);
-      }
-    } else if (markersRef.current['rider']) {
-      markersRef.current['rider'].remove();
-      delete markersRef.current['rider'];
-    }
-
-    // Draw route polyline linking points
-    const routePoints: Array<[number, number]> = [];
-    routePoints.push(restCoords);
-    if (riderCoords) {
-      routePoints.push(riderCoords);
-    }
-    routePoints.push(custCoords);
-
-    if (polylineRef.current) {
-      polylineRef.current.setLatLngs(routePoints);
-    } else {
-      polylineRef.current = L.polyline(routePoints, {
-        color: '#4CD964',
-        weight: 4,
-        opacity: 0.8,
-        dashArray: '8, 8'
-      }).addTo(map);
-    }
-
-    // Fit map view to wrap all active markers nicely
-    const bounds = L.latLngBounds(routePoints);
-    map.fitBounds(bounds, { padding: [50, 50] });
-
-  }, [order, rider]);
-
-  // Calculations for remaining distance and ETA
-  const getTrackingMetrics = () => {
-    if (!order) return { distance: 0, eta: 0 };
-    
-    // Coordinates
-    const lat1 = rider?.currentLocation?.lat || 14.9643; // Rider or Restaurant
-    const lon1 = rider?.currentLocation?.lng || 74.7121;
-    const lat2 = order.deliveryLocation?.lat || 14.9667;
-    const lon2 = order.deliveryLocation?.lng || 74.7167;
-
-    const distance = calculateDistance(lat1, lon1, lat2, lon2);
-    
-    // Average rider speed is 22 km/h inside town routes
-    const speedKmh = 22;
-    // Calculate minutes and add 3 mins packaging/traffic buffer
-    const eta = Math.ceil((distance / speedKmh) * 60) + 3;
-
-    return {
-      distance: parseFloat(distance.toFixed(1)),
-      eta: order.status === 'delivered' ? 0 : eta
-    };
-  };
-
-  const metrics = getTrackingMetrics();
-
-  if (loading) {
-    return <FoodLoader />;
+  let bike: LatLng | null = null;
+  let bikeMode: 'live' | 'estimated' | null = null;
+  if (liveRider) {
+    bike = liveRider;
+    bikeMode = 'live';
+  } else if (stage === 'out_for_delivery' && route) {
+    const frac = dispatchedAt && driveMin ? Math.min(0.97, (now - dispatchedAt) / (driveMin * 60000)) : 0.05;
+    bike = pointAlong(route.coords, frac);
+    bikeMode = 'estimated';
   }
 
-  // Reached when the order is not in Firestore and not in this device's saved
-  // orders -- an old link, a different phone, or a read the rules refused.
-  if (!order) {
+  let etaMin: number | null = null;
+  if (view && driveMin && stage !== 'delivered' && stage !== 'cancelled') {
+    if (stage === 'out_for_delivery') {
+      if (liveRider && view.dest) {
+        const km = haversineDistance(liveRider.lat, liveRider.lng, view.dest.lat, view.dest.lng) * 1.3;
+        etaMin = (km / AVG_KMH) * 60 + 1;
+      } else {
+        etaMin = dispatchedAt ? driveMin - (now - dispatchedAt) / 60000 : driveMin;
+      }
+    } else {
+      const created = view.createdAt ? new Date(view.createdAt).getTime() : now;
+      const readyIn = Math.max(stage === 'preparing' ? 5 : 8, (created + PREP_MINUTES * 60000 - now) / 60000);
+      etaMin = readyIn + driveMin;
+    }
+    etaMin = Math.max(1, Math.round(etaMin));
+  }
+
+  // ---- map
+  const mapEl = useRef<HTMLDivElement>(null);
+  const map = useRef<L.Map | null>(null);
+  const layers = useRef<{ home?: L.Marker; bike?: L.Marker; route?: L.Polyline; casing?: L.Polyline; lastLeg?: L.Polyline }>({});
+  const fitted = useRef('');
+  const tripBounds = useRef<L.LatLngBounds | null>(null);
+  // Room at the top for the badge and at the bottom for the arrival pill.
+  // No animation: leaving the page mid-zoom made Leaflet throw.
+  const frameTrip = (m: L.Map) => {
+    if (tripBounds.current) {
+      m.fitBounds(tripBounds.current, { paddingTopLeft: [40, 80], paddingBottomRight: [40, 130], maxZoom: 16, animate: false });
+    }
+  };
+  const anim = useRef<number>(0);
+  const hasView = !!view;
+
+  useEffect(() => {
+    if (!mapEl.current || map.current) return;
+    const m = L.map(mapEl.current, { zoomControl: false, attributionControl: false }).setView([KITCHEN.lat, KITCHEN.lng], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(m);
+    L.marker([KITCHEN.lat, KITCHEN.lng], { icon: kitchenIcon }).addTo(m).bindPopup("Mom's Magic kitchen");
+    map.current = m;
+    // The page fades in, so the container gets its final size after Leaflet first measures it.
+    // Re-frame too: a fit done before the final size lands off-centre.
+    const settle = () => { m.invalidateSize(); frameTrip(m); };
+    const t1 = window.setTimeout(settle, 250);
+    const t2 = window.setTimeout(settle, 800);
+    const onResize = () => m.invalidateSize();
+    window.addEventListener('resize', onResize);
+    return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      window.removeEventListener('resize', onResize);
+      cancelAnimationFrame(anim.current);
+      m.remove();
+      map.current = null;
+      layers.current = {};
+      fitted.current = '';
+      tripBounds.current = null;
+    };
+  }, [hasView]);
+
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !view?.dest) return;
+    const home: [number, number] = [view.dest.lat, view.dest.lng];
+    if (!layers.current.home) layers.current.home = L.marker(home, { icon: homeIcon }).addTo(m).bindPopup('Your location');
+    else layers.current.home.setLatLng(home);
+
+    const coords = route?.coords || [[KITCHEN.lat, KITCHEN.lng], home];
+    if (!layers.current.route) {
+      layers.current.casing = L.polyline(coords, { color: '#ffffff', weight: 9, opacity: 0.9 }).addTo(m);
+      layers.current.route = L.polyline(coords, { color: '#e11d48', weight: 5, opacity: 0.9 }).addTo(m);
+    } else {
+      layers.current.casing!.setLatLngs(coords);
+      layers.current.route.setLatLngs(coords);
+    }
+
+    // The road route stops at the nearest road; a dashed line covers the last
+    // stretch to the door (a lane, a farm track).
+    const roadEnd = coords[coords.length - 1];
+    const leg: Array<[number, number]> = [roadEnd as [number, number], home];
+    if (!layers.current.lastLeg) {
+      layers.current.lastLeg = L.polyline(leg, { color: '#e11d48', weight: 3, opacity: 0.8, dashArray: '4 8' }).addTo(m);
+    } else {
+      layers.current.lastLeg.setLatLngs(leg);
+    }
+
+    // Frame the whole trip once per route, not on every update.
+    const key = `${destKey}|${route ? 'road' : 'line'}`;
+    if (fitted.current !== key) {
+      fitted.current = key;
+      // Room at the top for the badge and at the bottom for the arrival pill.
+      // No animation: leaving the page mid-zoom made Leaflet throw.
+      tripBounds.current = L.latLngBounds([...coords, home, [KITCHEN.lat, KITCHEN.lng]] as L.LatLngExpression[]);
+      frameTrip(m);
+    }
+  }, [view?.dest, route, destKey, hasView]);
+
+  // Glide the bike to each new position instead of jumping.
+  useEffect(() => {
+    const m = map.current;
+    if (!m) return;
+    if (!bike) {
+      layers.current.bike?.remove();
+      layers.current.bike = undefined;
+      return;
+    }
+    if (!layers.current.bike) {
+      layers.current.bike = L.marker([bike.lat, bike.lng], { icon: bikeIcon, zIndexOffset: 1000 }).addTo(m);
+      return;
+    }
+    const marker = layers.current.bike;
+    const from = marker.getLatLng();
+    const to = bike;
+    const start = performance.now();
+    cancelAnimationFrame(anim.current);
+    const step = (t: number) => {
+      const k = Math.min(1, (t - start) / 1800);
+      const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      marker.setLatLng([from.lat + (to.lat - from.lat) * e, from.lng + (to.lng - from.lng) * e]);
+      if (k < 1) anim.current = requestAnimationFrame(step);
+    };
+    anim.current = requestAnimationFrame(step);
+  }, [bike?.lat, bike?.lng, hasView]);
+
+  // ---- render
+  if (loading && !view) return <FoodLoader />;
+
+  if (!view) {
     return (
-      <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-8 text-center gap-4">
-        <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-3xl">
-          🔍
-        </div>
-        <h1 className="text-lg font-black">Order not found</h1>
-        <p className="text-sm text-white/60 max-w-xs">
-          We couldn't load this order. It may have been placed on another device,
-          or the link may be out of date.
+      <div className="min-h-screen bg-gradient-to-b from-[#fff1f4] via-[#fff8fa] to-white text-gray-900 flex flex-col items-center justify-center p-8 text-center gap-3">
+        <div className="w-16 h-16 rounded-full bg-white border border-rose-100 shadow-sm flex items-center justify-center text-3xl">🔍</div>
+        <h1 className="text-lg font-black">{notFound ? 'Order not found' : "Couldn't load this order"}</h1>
+        <p className="text-sm text-gray-500 max-w-xs">
+          It may have been placed on another phone, or the link may be out of date.
         </p>
-        <button
-          onClick={() => navigate('/orders')}
-          className="mt-2 px-6 py-3 rounded-full bg-[#4CD964] text-black font-black text-sm active:scale-95 transition-transform"
-        >
+        <button onClick={() => navigate('/track')} className="mt-2 px-6 py-3 rounded-2xl bg-[#e11d48] text-white font-black text-sm">
           See my orders
-        </button>
-        <button
-          onClick={() => navigate('/')}
-          className="text-xs font-bold text-white/50 underline"
-        >
-          Back to home
         </button>
       </div>
     );
   }
 
+  const cancelled = stage === 'cancelled';
+  const currentStep = STAGE_STEPS.findIndex((s) => s.key === stage);
+  const StageIcon = stage === 'out_for_delivery' ? Bike : stage === 'delivered' ? CheckCircle2 : stage === 'cancelled' ? XCircle : CookingPot;
+  const itemsTotal = view.items.reduce((sum, i) => sum + (i.price ?? 0) * i.qty, 0);
+
   return (
-    <div className="min-h-screen bg-[#050505] flex flex-col relative pb-32">
-      {/* 1. Leaflet Interactive Map View */}
-      <div className="flex-1 w-full relative z-10 min-h-[50vh] md:min-h-[60vh] bg-neutral-900">
-        <div ref={mapRef} className="w-full h-full absolute inset-0" />
-        
-        {/* Floating Back Action */}
-        <button 
-          onClick={() => navigate('/profile')}
-          className="absolute top-6 left-6 z-20 w-10 h-10 rounded-full bg-matte-black/80 border border-white/10 flex items-center justify-center text-white backdrop-blur-md cursor-pointer hover:border-[#4CD964] transition-all active:scale-95 shadow-lg"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-[#fff1f4] via-[#fff8fa] to-white text-gray-900 pb-28">
+      <style>{`@keyframes mm-ping{0%{transform:scale(.8);opacity:.9}100%{transform:scale(1.8);opacity:0}}`}</style>
+      <div className="max-w-md mx-auto">
+        {/* Map */}
+        <div className="relative h-[46vh] min-h-[300px] max-h-[460px] bg-rose-50 overflow-hidden">
+          <div ref={mapEl} className="absolute inset-0 z-0" />
 
-      {/* 2. Order Tracking Status Drawer Sheet */}
-      <div className="relative z-20 bg-matte-black/95 border-t border-[#4CD964]/20 rounded-t-[35px] p-6 space-y-6 -mt-6 backdrop-blur-lg shadow-[0_-10px_35px_rgba(76,217,100,0.1)]">
-        
-        {/* ETA & Distance Card */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex items-center gap-4 text-left">
-            <div className="bg-[#4CD964]/10 p-3 rounded-xl border border-[#4CD964]/20">
-              <Clock className="w-6 h-6 text-[#4CD964]" />
-            </div>
-            <div>
-              <p className="text-[8px] font-black text-white/30 uppercase tracking-widest">Estimated Arrival</p>
-              <h3 className="text-2xl font-black italic text-white mt-1">
-                {order.status === 'delivered' ? 'Arrived' : `${metrics.eta} Mins`}
-              </h3>
-            </div>
-          </div>
+          <button
+            onClick={() => navigate('/track')}
+            aria-label="Back"
+            className="absolute top-4 left-4 z-[500] w-10 h-10 rounded-full bg-white shadow-md border border-rose-100 flex items-center justify-center text-gray-800"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
 
-          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex items-center gap-4 text-left">
-            <div className="bg-blue-500/10 p-3 rounded-xl border border-blue-500/20">
-              <Navigation className="w-6 h-6 text-blue-400" />
+          {bikeMode && (
+            <span className="absolute top-4 right-4 z-[500] flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white shadow-md border border-rose-100 text-[10px] font-black uppercase tracking-wider text-gray-700">
+              {bikeMode === 'live' ? (
+                <><Radio className="w-3 h-3 text-emerald-600" /> Live GPS</>
+              ) : (
+                <><span className="w-2 h-2 rounded-full bg-amber-400" /> Estimated position</>
+              )}
+            </span>
+          )}
+
+          {/* Arrival time, Zomato style */}
+          {!cancelled && (
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[500] px-5 py-2.5 rounded-2xl bg-[#e11d48] text-white shadow-xl shadow-rose-500/30 text-center min-w-[190px]">
+              {stage === 'delivered' ? (
+                <p className="text-sm font-black">
+                  Delivered{view.deliveredAt ? ` at ${fmtTime(new Date(view.deliveredAt))}` : ''} 🎉
+                </p>
+              ) : etaMin !== null ? (
+                <>
+                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">Arriving in</p>
+                  <p className="text-2xl font-black leading-tight">{etaMin} min{etaMin === 1 ? '' : 's'}</p>
+                  <p className="text-[10px] font-semibold opacity-80">by {fmtTime(new Date(now + etaMin * 60000))}</p>
+                </>
+              ) : (
+                <p className="text-sm font-black">Calculating arrival time…</p>
+              )}
             </div>
-            <div>
-              <p className="text-[8px] font-black text-white/30 uppercase tracking-widest">Remaining Distance</p>
-              <h3 className="text-2xl font-black italic text-white mt-1">
-                {order.status === 'delivered' ? '0.0 km' : `${metrics.distance} km`}
-              </h3>
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* Step Indicator Panel */}
-        <div className="space-y-4 pt-2">
-          <div className="flex items-center gap-3 text-left">
-            <div className={`p-2.5 rounded-full shrink-0 ${
-              order.status === 'delivered' ? 'bg-emerald-500 text-black' : 'bg-[#4CD964]/20 text-[#4CD964] animate-pulse'
-            }`}>
-              <Truck className="w-5 h-5" />
+        {/* Sheet */}
+        <div className="relative z-10 -mt-5 px-4 space-y-3.5">
+          <div className="bg-white rounded-[26px] p-4 border border-rose-100/90 shadow-sm space-y-4">
+            <div className="flex items-center gap-3">
+              <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${cancelled ? 'bg-gray-100 text-gray-500' : 'bg-rose-50 text-[#e11d48]'}`}>
+                <StageIcon className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-base font-black text-gray-900">{STAGE_TITLE[stage]}</h1>
+                <p className="text-[11px] font-semibold text-gray-500">
+                  Order #{orderId.slice(0, 13)}
+                  {view.createdAt && ` · ${new Date(view.createdAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}`}
+                </p>
+              </div>
             </div>
-            <div>
-              <h4 className="text-sm font-black uppercase text-white tracking-wide">
-                {order.status === 'pending' ? 'Waiting for Confirmation' :
-                 order.status === 'Preparing' ? 'Kitchen is Cooking Your Feast' :
-                 order.status === 'Out For Delivery' ? 'Rider is Out For Delivery' :
-                 order.status === 'delivered' ? 'Order Delivered!' : 'Processing Order'}
-              </h4>
-              <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider mt-0.5">
-                Status: {order.status}
+
+            {cancelled ? (
+              <p className="text-xs font-semibold text-gray-600 bg-gray-50 border border-gray-200 rounded-xl p-3">
+                This order was cancelled. If you were charged, message us on WhatsApp and we'll sort it out.
               </p>
-            </div>
+            ) : (
+              <ol className="grid grid-cols-4 gap-1.5" aria-label="Order progress">
+                {STAGE_STEPS.map((s, i) => (
+                  <li key={s.key} className="space-y-1.5" aria-current={i === currentStep ? 'step' : undefined}>
+                    <div className={`h-1.5 rounded-full ${i <= currentStep ? 'bg-[#e11d48]' : 'bg-gray-200'} ${i === currentStep && stage !== 'delivered' ? 'animate-pulse' : ''}`} />
+                    <p className={`text-[10px] font-bold text-center ${i <= currentStep ? 'text-gray-900' : 'text-gray-400'}`}>{s.label}</p>
+                  </li>
+                ))}
+              </ol>
+            )}
           </div>
 
-          {/* Simple progress bar */}
-          <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-            <div 
-              className={`h-full rounded-full transition-all duration-500 ${
-                order.status === 'delivered' ? 'bg-emerald-500' : 'bg-[#4CD964]'
-              }`}
-              style={{
-                width: 
-                  order.status === 'pending' ? '15%' :
-                  order.status === 'Preparing' ? '50%' :
-                  order.status === 'Out For Delivery' ? '85%' :
-                  order.status === 'delivered' ? '100%' : '10%'
-              }}
-            />
-          </div>
-        </div>
-
-        <div className="h-px bg-white/5" />
-
-        {/* Rider & Address Info */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-          {rider ? (
-            <div className="flex items-center gap-4 text-left">
-              <div className="w-12 h-12 rounded-full bg-[#4CD964]/10 border border-[#4CD964]/20 flex items-center justify-center text-xl text-[#4CD964] font-black uppercase">
-                {rider.name.charAt(0)}
-              </div>
-              <div>
-                <p className="text-[9px] font-black text-white/30 uppercase tracking-widest">Assigned Rider</p>
-                <h4 className="text-base font-extrabold text-white mt-0.5">{rider.name}</h4>
-                <p className="text-[10px] text-[#4CD964] font-bold">{rider.phone}</p>
-              </div>
-              <a
-                href={`tel:${rider.phone}`}
-                className="ml-4 w-10 h-10 rounded-full bg-white/5 border border-white/10 hover:border-[#4CD964] flex items-center justify-center text-[#4CD964] transition-colors"
-              >
-                <Phone className="w-4 h-4 fill-current text-[#4CD964]" />
-              </a>
-            </div>
-          ) : (
-            <div className="text-left py-2">
-              <p className="text-[9px] font-black text-white/30 uppercase tracking-widest">Delivery Partner</p>
-              <h4 className="text-sm font-bold text-white mt-1">Rider assignment in progress... 🛵</h4>
-              <p className="text-[10px] text-white/40 leading-relaxed mt-0.5">
-                Our kitchen is preparing your box. Once a delivery partner accepts, you will see their details here.
-              </p>
+          {/* Delivery partner */}
+          {!cancelled && stage !== 'delivered' && (
+            <div className="bg-white rounded-[26px] p-4 border border-rose-100/90 shadow-sm">
+              {view.rider ? (
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-full bg-[#e11d48] text-white flex items-center justify-center text-lg font-black shrink-0">
+                    {view.rider.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-black text-gray-900 truncate">{view.rider.name}</p>
+                    <p className="text-[11px] font-semibold text-gray-500">Your delivery partner 🛵</p>
+                  </div>
+                  {view.rider.phone && (
+                    <a
+                      href={`tel:${view.rider.phone}`}
+                      aria-label={`Call ${view.rider.name}`}
+                      className="w-11 h-11 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/30"
+                    >
+                      <Phone className="w-4.5 h-4.5" />
+                    </a>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-full bg-rose-50 flex items-center justify-center text-xl shrink-0">🛵</div>
+                  <div>
+                    <p className="text-sm font-black text-gray-900">Assigning a delivery partner</p>
+                    <p className="text-[11px] font-semibold text-gray-500">You'll see their name and live location here.</p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          <div className="text-left sm:text-right space-y-1">
-            <p className="text-[9px] font-black text-white/30 uppercase tracking-widest">Delivery Destination</p>
-            <h4 className="text-xs font-bold text-white truncate max-w-xs">{order.deliveryLocation?.address}</h4>
-            <p className="text-[9px] text-[#4CD964] font-black uppercase tracking-widest mt-1">₹{order.grandTotal} • {order.paymentMethod}</p>
+          {/* After delivery */}
+          {stage === 'delivered' && (
+            <div className="space-y-3">
+              <RateOrderCard orderId={orderId} alreadyRated={view.rated} />
+              <button
+                onClick={() => reorderAndGo(localOrder(orderId) || { items: view.items.map((i) => ({ name: i.name, quantity: i.qty })) }, navigate, toast)}
+                className="w-full py-3.5 rounded-2xl bg-white border border-rose-200 text-[#e11d48] font-black text-sm flex items-center justify-center gap-2"
+              >
+                <RotateCcw className="w-4 h-4" /> Order again
+              </button>
+            </div>
+          )}
+
+          {/* Order details */}
+          <div className="bg-white rounded-[26px] p-4 border border-rose-100/90 shadow-sm space-y-3">
+            <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+              <ReceiptText className="w-3.5 h-3.5 text-[#e11d48]" /> Order details
+            </h2>
+            <ul className="space-y-2">
+              {view.items.map((i, idx) => (
+                <li key={idx} className="flex items-start justify-between gap-3 text-sm">
+                  <span className="font-semibold text-gray-800">
+                    <span className="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1 mr-2 rounded-md bg-rose-50 text-[#e11d48] text-[11px] font-black">
+                      {i.qty}×
+                    </span>
+                    {i.name}
+                  </span>
+                  {i.price !== undefined && <span className="font-bold text-gray-900 shrink-0">₹{i.price * i.qty}</span>}
+                </li>
+              ))}
+            </ul>
+            <div className="pt-3 border-t border-dashed border-gray-200 flex items-center justify-between">
+              <span className="text-xs font-bold text-gray-500">
+                {view.paymentMethod === 'cod' ? 'Cash on delivery' : view.paymentMethod === 'online' ? 'Paid online' : view.paymentMethod === 'wallet' ? 'Paid from wallet' : 'Total'}
+                {itemsTotal > 0 && view.amount > itemsTotal ? ' · incl. delivery' : ''}
+              </span>
+              <span className="text-base font-black text-gray-900">₹{view.amount}</span>
+            </div>
           </div>
-        </div>
 
-        {/* Footer badges */}
-        <div className="flex items-center justify-center gap-2 mt-2 text-white/20 font-black uppercase tracking-[3px] text-[8px]">
-          <ShieldCheck className="w-3.5 h-3.5 text-[#4CD964]" /> Live GPS Satellite Encrypted
-        </div>
+          {/* Address */}
+          {view.address && (
+            <div className="bg-white rounded-[26px] p-4 border border-rose-100/90 shadow-sm flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-rose-50 flex items-center justify-center shrink-0">
+                <MapPin className="w-4 h-4 text-[#e11d48]" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Delivering to</p>
+                <p className="text-sm font-bold text-gray-900">{view.address}</p>
+              </div>
+            </div>
+          )}
 
+          <button
+            onClick={() => {
+              const text = `Hi Mom's Magic, I need help with my order #${orderId}`;
+              openExternal(`https://wa.me/${supportNumber.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`);
+            }}
+            className="w-full py-3.5 rounded-2xl bg-white border border-rose-100 shadow-sm text-gray-900 font-black text-sm flex items-center justify-center gap-2"
+          >
+            <MessageCircle className="w-4 h-4 text-emerald-600" /> Need help with this order?
+          </button>
+        </div>
       </div>
     </div>
   );

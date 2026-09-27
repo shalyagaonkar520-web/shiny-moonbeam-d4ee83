@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { notifyOrderStatus } from '../lib/push';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -197,6 +198,7 @@ export default function DeliveryDashboard() {
         status: 'Preparing', // Move to preparing/accepted state
         riderStatus: 'accepted'
       });
+      notifyOrderStatus(orderId);
       toast.success("Order accepted! 📦");
     } catch (err) {
       toast.error("Failed to accept order.");
@@ -223,8 +225,11 @@ export default function DeliveryDashboard() {
       const orderRef = doc(db, 'orders', orderId);
       await updateDoc(orderRef, {
         status: 'Out For Delivery',
-        riderStatus: 'delivering'
+        riderStatus: 'delivering',
+        // The customer's tracking screen counts the arrival time from here.
+        outForDeliveryAt: new Date().toISOString()
       });
+      notifyOrderStatus(orderId);
       toast.success("Delivery run started! Drive safe. 🛵");
     } catch (err) {
       toast.error("Failed to update order.");
@@ -243,6 +248,7 @@ export default function DeliveryDashboard() {
         riderStatus: 'delivered',
         deliveredAt: new Date().toISOString()
       });
+      notifyOrderStatus(orderId);
 
       // Update rider earnings (+₹40 per delivery commission)
       const newEarnings = (riderProfile?.earnings || 0) + 40;

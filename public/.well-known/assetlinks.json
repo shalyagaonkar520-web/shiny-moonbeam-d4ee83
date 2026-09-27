@@ -3,9 +3,9 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.momsmagic.app",
+      "package_name": "com.minto.food",
       "sha256_cert_fingerprints": [
-        "REPLACE_WITH_YOUR_SHA256_FINGERPRINT"
+        "4A:D6:8D:5D:5D:CF:06:C0:3E:53:C6:D5:41:17:2D:80:A9:BD:A2:1A:FC:4A:FF:52:EC:74:F0:F6:DE:A5:43:E1"
       ]
     }
   }

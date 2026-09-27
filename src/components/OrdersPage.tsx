@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { useSEO } from '../utils/seo';
 import FoodLoader from './FoodLoader';
 import { getItemHotel } from '../utils/orderHotels';
+import toast from 'react-hot-toast';
+import { reorderAndGo } from '../lib/reorder';
 
 interface OrderItem {
   id?: string;
@@ -149,6 +151,21 @@ export default function OrdersPage() {
                   {order.items.length > 3 && (
                     <p className="text-[#4CD964]/70 text-[10px] font-bold italic mt-2">+ {order.items.length - 3} more items</p>
                   )}
+                </div>
+
+                <div className="mt-5 grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => reorderAndGo(order, navigate, toast)}
+                    className="py-2.5 rounded-xl bg-[#4CD964] text-black text-[10px] font-black uppercase tracking-widest"
+                  >
+                    Order Again
+                  </button>
+                  <button
+                    onClick={() => navigate(`/track/${encodeURIComponent(order.id)}`)}
+                    className="py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest"
+                  >
+                    Track / Rate
+                  </button>
                 </div>
 
                 {order.trackingLink && (

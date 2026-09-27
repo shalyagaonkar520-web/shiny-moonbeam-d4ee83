@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
@@ -31,7 +32,7 @@ function isAuthorisedAdmin(authHeader) {
   const a = Buffer.from(supplied);
   const b = Buffer.from(expected);
   if (a.length !== b.length) return false;
-  return require('crypto').timingSafeEqual(a, b);
+  return timingSafeEqual(a, b);
 }
 
 export default function handler(req, res) {

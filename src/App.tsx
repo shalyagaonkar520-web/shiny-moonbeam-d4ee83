@@ -24,6 +24,7 @@ const HotelSankalpaMenuPage = lazy(() => import('./components/HotelSankalpaMenuP
 import BottomNav from './components/BottomNav';
 import BottomCartBar from './components/BottomCartBar';
 import CityGateway from './components/CityGateway';
+import LocationGate from './components/LocationGate';
 // Both render null until opened, so they are kept out of the app-shell chunk.
 const LocationPicker = lazy(() => import('./components/LocationPicker'));
 const InstallAppModal = lazy(() => import('./components/InstallAppModal'));
@@ -38,6 +39,10 @@ const AdminPage = lazy(() => import('./components/AdminPage'));
 const OrdersPage = lazy(() => import('./components/OrdersPage'));
 const LuckyWheelPage = lazy(() => import('./components/LuckyWheelPage'));
 const AuthPage = lazy(() => import('./components/AuthPage'));
+const TrackOrderPage = lazy(() => import('./components/TrackOrderPage'));
+const PrivacyPage = lazy(() => import('./components/PrivacyPage'));
+const DeleteAccountPage = lazy(() => import('./components/DeleteAccountPage'));
+const AddressesPage = lazy(() => import('./components/AddressesPage'));
 
 // Store
 import { useSystemStore } from './store/systemStore';
@@ -190,6 +195,8 @@ export default function App() {
           <InstallAppModal />
         </Suspense>
         
+        {/* No menu until we know the customer is inside the delivery area. */}
+        <LocationGate>
         <div className="min-h-screen bg-gradient-to-b from-[#fff5f7] via-[#fff9fb] to-[#ffffff] text-gray-900 font-sans relative flex flex-col selection:bg-rose-500/20">
 
           <main className="flex-1 relative z-10">
@@ -202,7 +209,11 @@ export default function App() {
                   <Route path="/cart" element={<Navigate to="/checkout" replace />} />
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/track" element={<TrackOrderPage />} />
                   <Route path="/track/:orderId" element={<TrackingPage />} />
+                  <Route path="/privacy" element={<PrivacyPage />} />
+                  <Route path="/delete-account" element={<DeleteAccountPage />} />
+                  <Route path="/addresses" element={<AddressesPage />} />
                   <Route path="/delivery" element={<DeliveryDashboard />} />
                   <Route path="/bulk" element={<BulkOrderPage />} />
                   <Route path="/hotel-mumtaz" element={<HotelMumtazMenuPage />} />
@@ -231,6 +242,7 @@ export default function App() {
           <BottomCartBar />
           <BottomNav />
         </div>
+        </LocationGate>
       </OperatingHoursGate>
       </SiteClosedGate>
     </Router>

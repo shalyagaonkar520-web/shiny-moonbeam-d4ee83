@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { UtensilsCrossed, Cake, ShoppingBag, User } from 'lucide-react';
+import { UtensilsCrossed, Cake, ShoppingBag, User, PackageSearch } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 
 export default function BottomNav() {
@@ -59,7 +59,20 @@ export default function BottomNav() {
           </span>
         </Link>
 
-        {/* 4. Account (Profile) */}
+        {/* 4. Track orders */}
+        <Link 
+          to="/track" 
+          className={`flex flex-col items-center gap-0.5 py-1 px-3 transition-colors ${
+            location.pathname.startsWith('/track') ? 'text-[#e11d48]' : 'text-gray-400 hover:text-gray-700'
+          }`}
+        >
+          <PackageSearch className={`w-5 h-5 ${location.pathname.startsWith('/track') ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} />
+          <span className={`text-[10px] ${location.pathname.startsWith('/track') ? 'font-black text-[#e11d48]' : 'font-semibold'}`}>
+            Track
+          </span>
+        </Link>
+
+        {/* 5. Account (Profile) */}
         <Link 
           to="/profile" 
           className={`flex flex-col items-center gap-0.5 py-1 px-3 transition-colors ${

@@ -37,6 +37,13 @@ interface LocationStore {
 const RESTAURANT_LOCATION = { lat: 14.9643, lng: 74.7121 };
 const MAX_DELIVERY_RANGE = 5; // km
 
+// The outer edge of the area we serve: Yellapur town and the villages around it.
+// Checkout refuses anything further, and the location gate uses the same number
+// so a customer is never shown a menu they cannot order from. (MAX_DELIVERY_RANGE
+// above is the tighter Cash-on-Delivery radius, not the service area.)
+export const SERVICE_RADIUS_KM = 12;
+export const SERVICE_AREA_NAME = 'Yellapur';
+
 export const useLocationStore = create<LocationStore>()(
   persist(
     (set) => ({

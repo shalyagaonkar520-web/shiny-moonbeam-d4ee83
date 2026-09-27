@@ -62,15 +62,24 @@ service cloud.firestore {
     }
 
     // ---- orders -------------------------------------------------------------
-    // Customers order without signing in, so anyone may create an order. Reads
-    // are allowed because the tracking link (/track/<orderId>) has to work for
-    // a customer who is not signed in; the document id is a long random string,
-    // so it is unguessable in practice. Only an admin may change or delete an
-    // order, so a customer cannot mark their own order paid or delivered.
+    // Customers order without signing in, so anyone may create an order.
+    //
+    // Opening ONE order by its id (`get`) is public, because the tracking link
+    // /track/<orderId> has to work for a customer who is not signed in. Order
+    // ids end in 10 random characters (see Checkout.tsx), so they cannot be
+    // guessed. LISTING orders is not public: an open `list` would let anyone
+    // download every customer's name, phone and address in one query. Only an
+    // admin may list everything; a rider may list the orders assigned to them
+    // (DeliveryDashboard queries where riderId == their uid).
+    //
+    // Only an admin may change or delete an order, so a customer cannot mark
+    // their own order paid or delivered.
 
     match /orders/{orderId} {
       allow create: if true;
-      allow read: if true;
+      allow get: if true;
+      allow list: if isAdmin()
+                  || (request.auth != null && resource.data.riderId == request.auth.uid);
       allow update, delete: if isAdmin();
     }
 
@@ -78,8 +87,11 @@ service cloud.firestore {
     // The tracking map reads a rider's position. A rider updates their own
     // document; everything else is admin-only.
 
+    // One rider (the one on your order) is public so the tracking map can show
+    // them; the full list of riders' phones and positions is admin-only.
     match /riders/{riderId} {
-      allow read: if true;
+      allow get: if true;
+      allow list: if isAdmin();
       allow update: if isAdmin() || (request.auth != null && request.auth.uid == riderId);
       allow create, delete: if isAdmin();
     }

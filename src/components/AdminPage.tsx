@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { notifyOrderStatus } from '../lib/push';
 import { openExternal } from '../lib/openExternal';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -473,10 +474,14 @@ export default function AdminPage() {
     try {
       const orderRef = doc(db, 'orders', orderId);
       const updateData: any = { status: newStatus };
+      // Timestamps the customer's tracking screen uses for its arrival time.
+      if (newStatus === 'Out For Delivery') updateData.outForDeliveryAt = new Date().toISOString();
+      if (newStatus === 'delivered') updateData.deliveredAt = new Date().toISOString();
       if (trackingLink !== undefined) {
         updateData.trackingLink = trackingLink;
       }
       await updateDoc(orderRef, updateData);
+      notifyOrderStatus(orderId);
       
       let message = '';
       if (newStatus === 'Out For Delivery') {

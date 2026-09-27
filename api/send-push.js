@@ -1,41 +1,11 @@
-import admin from 'firebase-admin';
+import { timingSafeEqual } from 'crypto';
+import { adminDb, adminMessaging } from './_firebaseAdmin.js';
 
-// Initialize Firebase Admin SDK
-let initialized = false;
-let db = null;
-let messaging = null;
-
-try {
-  const projectId = process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID || 'momsmagic-d131a';
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY;
-
-  if (!admin.apps.length) {
-    if (clientEmail && privateKey) {
-      admin.initializeApp({
-        credential: admin.credential.cert({
-          projectId,
-          clientEmail,
-          privateKey: privateKey.replace(/\\n/g, '\n'),
-        })
-      });
-      initialized = true;
-    } else {
-      // Local dev mode fallback - try using application default credentials or mock
-      console.warn("FCM credentials missing. Running send-push API in simulated local dev mode.");
-    }
-  } else {
-    initialized = true;
-  }
-
-  if (admin.apps.length > 0) {
-    db = admin.firestore();
-    messaging = admin.messaging();
-    initialized = true;
-  }
-} catch (error) {
-  console.error("Firebase admin init error:", error);
-}
+// Initialised in _firebaseAdmin.js; both are null when the service-account
+// env vars are missing, which the handler reports below.
+const db = adminDb;
+const messaging = adminMessaging;
+const initialized = !!(db && messaging);
 
 // Shared admin check.
 //
@@ -52,7 +22,7 @@ function isAuthorisedAdmin(authHeader) {
   const a = Buffer.from(supplied);
   const b = Buffer.from(expected);
   if (a.length !== b.length) return false;
-  return require('crypto').timingSafeEqual(a, b);
+  return timingSafeEqual(a, b);
 }
 
 export default async function handler(req, res) {

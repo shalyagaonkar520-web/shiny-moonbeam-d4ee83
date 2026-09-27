@@ -8,7 +8,6 @@ import { PARTY_ITEMS, SNACKS, ICE_CAKES, NORMAL_CAKES } from '../data/partyItems
 import { Product } from '../types';
 import { useSEO } from '../utils/seo';
 
-import { useInstallModalStore } from '../store/installModalStore';
 import DishImage from './DishImage';
 
 // Category tabs for Party Specials
@@ -20,16 +19,12 @@ export default function BulkOrderPage() {
   const { addItem, items, updateQuantity } = useCartStore();
   const [activeCategory, setActiveCategory] = useState<Category>('Normal');
   const [showUpsell, setShowUpsell] = useState(false);
-  const openInstallModal = useInstallModalStore(state => state.openModal);
 
   useEffect(() => {
     localStorage.setItem('moms_magic_order_type', 'bulk');
     window.scrollTo(0, 0);
   }, []);
 
-  const handleInstallClick = () => {
-    openInstallModal();
-  };
 
   const categories: Category[] = ['Normal', 'Ice Cake', 'Party Items', 'Snacks'];
 
@@ -92,15 +87,6 @@ export default function BulkOrderPage() {
 
           {/* Right Section: INSTALL BUTTON UPSIDE + Cart */}
           <div className="flex items-center gap-2 shrink-0">
-            {/* INSTALL BUTTON UPSIDE */}
-            <button
-              onClick={handleInstallClick}
-              className="px-3 sm:px-4 py-2 rounded-2xl bg-gradient-to-r from-[#ff4d6d] via-[#f43f5e] to-[#e11d48] text-white font-black text-[11px] sm:text-xs uppercase tracking-wider shadow-md shadow-rose-500/25 flex items-center gap-1.5 active:scale-95 hover:opacity-95 transition-all cursor-pointer"
-              title="Install Mom's Magic App"
-            >
-              <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
-              <span>Install</span>
-            </button>
 
             {/* Cart Icon Button */}
             <Link

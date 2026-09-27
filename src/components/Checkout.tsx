@@ -3,7 +3,9 @@ import { openExternal } from '../lib/openExternal';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import { useBulkOrderStore } from '../store/bulkOrderStore';
-import { useLocationStore } from '../store/locationStore';
+import { useLocationStore, SERVICE_RADIUS_KM } from '../store/locationStore';
+import CheckoutSavedAddresses from './CheckoutSavedAddresses';
+import { getOrderPushToken, askForOrderUpdates } from '../lib/push';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, MapPin, Ticket, Calendar, ShieldCheck, ChevronLeft, Loader2, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -31,6 +33,14 @@ const escHtml = (s: string) =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 const sendTelegramMessage = (text: string) => notifyTelegram(text);
+
+const ID_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+function randomIdSuffix(length: number): string {
+  const bytes = new Uint8Array(length);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => ID_ALPHABET[b % ID_ALPHABET.length]).join('');
+}
 
 export default function Checkout() {
   useSEO('Cart & Checkout', 'Review your cart with zero hidden fees and finalize delivery at Mom\'s Magic.');
@@ -191,8 +201,8 @@ export default function Checkout() {
       openLocationPicker();
       return;
     }
-    if (deliveryLocation.distance > 12) {
-      toast.error('Sorry, we deliver up to 12 km from our kitchen.');
+    if (deliveryLocation.distance > SERVICE_RADIUS_KM) {
+      toast.error(`Sorry, we deliver up to ${SERVICE_RADIUS_KM} km from our kitchen.`);
       return;
     }
     if (distanceKm > 5 && paymentMethod === 'cod') {
@@ -324,7 +334,13 @@ export default function Checkout() {
     };
 
     const completeOrder = async (paymentId?: string) => {
-      const orderId = Date.now().toString();
+      // The id is the only thing guarding /track/<id>, which shows the delivery
+      // address, so a bare timestamp (guessable to the millisecond) is not enough.
+      // The timestamp prefix keeps ids sortable; the random tail makes them
+      // unguessable.
+      const orderId = `${Date.now()}${randomIdSuffix(10)}`;
+      const pushToken = getOrderPushToken();
+      if (!pushToken) askForOrderUpdates();
       
       if (user && walletDeduction > 0) {
         await deductWalletBalance(walletDeduction, orderId);
@@ -408,6 +424,8 @@ export default function Checkout() {
             status: 'pending',
 
             deliveryLocation,
+            // Lets /api/notify-order push status updates to this device.
+            customerPushToken: pushToken,
             needCutlery,
             instructions: formData.additionalMessage.trim(),
             createdAt: nowIso,
@@ -865,6 +883,7 @@ export default function Checkout() {
               Change
             </button>
           </div>
+          <CheckoutSavedAddresses />
         </div>
 
         {/* 7. PAYMENT METHOD: DEFAULT COD, LOCKED IF > 5KM */}
