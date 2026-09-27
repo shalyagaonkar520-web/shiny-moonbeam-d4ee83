@@ -274,3 +274,27 @@
     -webkit-overflow-scrolling: touch;
   }
 }
+
+/* LocationPicker map pins (Leaflet divIcons). Nothing styled these before, so
+   the white-stroke icons were invisible on the map tiles. */
+.custom-delivery-marker,
+.custom-restaurant-marker,
+.custom-nearby-marker {
+  background: transparent;
+  border: none;
+}
+
+.marker-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: calc(100% - 10px);
+  border-radius: 9999px;
+  border: 2px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.25);
+}
+
+.marker-pin.delivery { background: #e11d48; }
+.marker-pin.restaurant { background: #111827; }
+.marker-pin.nearby { background: #9ca3af; }

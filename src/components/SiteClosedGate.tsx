@@ -33,19 +33,19 @@ export default function SiteClosedGate({ children }: { children: React.ReactNode
   if (!closed) return <>{children}</>;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-5 text-center">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#fff1f4] via-[#fff8fa] to-white px-5 text-center">
       <div className="max-w-sm space-y-4">
         <div className="text-6xl">🍽️</div>
-        <h1 className="text-2xl font-black text-on-background">
+        <h1 className="text-2xl font-black text-gray-900">
           We're closed right now
         </h1>
-        <p className="text-on-surface-variant">
+        <p className="text-gray-600">
           Mom's Magic is not taking orders at the moment. Please check back a
           little later — we'll be right here.
         </p>
         <a
           href="tel:+919606001790"
-          className="inline-block px-6 py-3 rounded-2xl bg-primary text-white font-bold"
+          className="inline-flex items-center justify-center min-h-[44px] px-6 py-3 rounded-2xl bg-[#e11d48] text-white font-bold shadow-md shadow-rose-200 active:scale-95 transition-transform"
         >
           Call us
         </a>

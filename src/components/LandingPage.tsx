@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import MenuFilterChips from './MenuFilterChips';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Search, Star, Plus, Minus, ChevronDown, Clock, Zap, 
+  Search, Plus, Minus, ChevronDown, Clock,
   ArrowRight, X, Sparkles, User, ShoppingBag, Flame,
-  Store, Image as ImageIcon, Bell, Phone, HelpCircle, MessageCircle, Download, LogIn
+  Store, Image as ImageIcon, Phone, HelpCircle, MessageCircle, Download, LogIn
 } from 'lucide-react';
 import { useMenuStore } from '../store/menuStore';
 import { useCartStore } from '../store/cartStore';
@@ -19,16 +19,6 @@ import { playSound, SOUNDS } from '../utils/audio';
 import { useSEO } from '../utils/seo';
 import DishImage from './DishImage';
 import { PARTNER_HOTEL_PRODUCTS } from '../data/partnerHotelItems';
-
-const getStableRating = (id: string | number) => {
-  const str = String(id);
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const rating = 4.2 + (Math.abs(hash) % 8) * 0.1;
-  return rating.toFixed(1);
-};
 
 const ROTATING_SEARCH_PLACEHOLDERS = [
   'Search "Chicken Dum Biryani"',
@@ -48,7 +38,7 @@ const PARTNER_HOTELS = [
     tagline: "All Orders",
     isOpen: true,
     badge: "Open Now",
-    deliveryTime: "10-15 mins",
+    deliveryTime: "30-40 mins",
     image: "/logo-sm.webp",
     hasCustomPhoto: true
   },
@@ -58,7 +48,7 @@ const PARTNER_HOTELS = [
     tagline: "Multi-Cuisine & Biryani",
     isOpen: true,
     badge: "View Menu",
-    deliveryTime: "20-25 mins",
+    deliveryTime: "30-40 mins",
     image: "/hotel_mumtaz.webp",
     hasCustomPhoto: true
   },
@@ -68,7 +58,7 @@ const PARTNER_HOTELS = [
     tagline: "Coastal Fish & Multi-Cuisine",
     isOpen: true,
     badge: "View Menu",
-    deliveryTime: "20-25 mins",
+    deliveryTime: "30-40 mins",
     image: "/hotel_malabar.webp",
     hasCustomPhoto: true
   },
@@ -78,7 +68,7 @@ const PARTNER_HOTELS = [
     tagline: "Pure Veg Heritage Feasts",
     isOpen: true,
     badge: "View Menu",
-    deliveryTime: "20-25 mins",
+    deliveryTime: "30-40 mins",
     image: "/hotel_sankalpa.webp",
     hasCustomPhoto: true
   },
@@ -88,7 +78,7 @@ const PARTNER_HOTELS = [
     tagline: "Seafood & Tandoor Magic",
     isOpen: true,
     badge: "View Menu",
-    deliveryTime: "20-25 mins",
+    deliveryTime: "30-40 mins",
     image: "/hotel_coastal_crown_dining.webp",
     hasCustomPhoto: true
   },
@@ -98,7 +88,7 @@ const PARTNER_HOTELS = [
     tagline: "Kebabs, Rolls & Shawarma",
     isOpen: true,
     badge: "View Menu",
-    deliveryTime: "15-20 mins",
+    deliveryTime: "30-40 mins",
     image: "/hotel_al_amin.webp",
     hasCustomPhoto: true
   }
@@ -167,6 +157,7 @@ export default function LandingPage() {
   const [activeBannerIndex, setActiveBannerIndex] = useState(0);
   const [showHelpToOrder, setShowHelpToOrder] = useState(false);
   const bestsellersRef = useRef<HTMLDivElement>(null);
+  const hotelsRef = useRef<HTMLElement>(null);
   // The home grid lists every hotel's menu (230+ dishes). Rendering them all at
   // once costs about 6,500 DOM nodes and made scrolling noticeably heavier on a
   // phone, so cards are appended a page at a time as the user reaches the end.
@@ -272,7 +263,7 @@ export default function LandingPage() {
   // `menuItems` is Hotel Al Amin's menu, so it stays first and its cards carry
   // no hotel badge; PARTNER_HOTEL_PRODUCTS then adds Sankalpa followed by the
   // remaining hotels, each badged with the hotel that cooks it.
-  const allProducts = [...menuItems, ...PARTNER_HOTEL_PRODUCTS];
+  const allProducts = useMemo(() => [...menuItems, ...PARTNER_HOTEL_PRODUCTS], [menuItems]);
 
   /** Hotel name to print on a card, or null for Al Amin / Mom's Magic items. */
   const hotelBadgeOf = (product: any): string | null =>
@@ -292,11 +283,11 @@ export default function LandingPage() {
   };
 
   // Bestsellers under 149
-  const bestsellersUnder149 = allProducts.filter(item => {
+  const bestsellersUnder149 = useMemo(() => allProducts.filter(item => {
     const matchPrice = item.price <= 149;
     const matchDiet = dietFilter === 'veg' ? item.isVeg : dietFilter === 'nonveg' ? !item.isVeg : true;
     return matchPrice && matchDiet;
-  });
+  }), [allProducts, dietFilter]);
 
   const CATEGORY_TABS = [
     'All',
@@ -310,11 +301,14 @@ export default function LandingPage() {
     'Party Special'
   ];
 
-  const searchTerms = searchQuery.toLowerCase().split(/\s+/).filter((t) => t && t !== 'hotel');
+  const searchTerms = useMemo(
+    () => searchQuery.toLowerCase().split(/\s+/).filter((t) => t && t !== 'hotel'),
+    [searchQuery]
+  );
   const searchHaystack = (item: any) =>
     `${item.name} ${item.category || ''} ${item.description || ''} ${item.hotelName || ''}`.toLowerCase();
 
-  const matchedProducts = allProducts.filter(item => {
+  const matchedProducts = useMemo(() => allProducts.filter(item => {
     // Diet filter (Veg / Non-Veg / All)
     if (dietFilter === 'veg' && !item.isVeg) return false;
     if (dietFilter === 'nonveg' && item.isVeg) return false;
@@ -360,20 +354,21 @@ export default function LandingPage() {
     }
 
     return true;
-  });
+  }), [allProducts, dietFilter, priceCap, searchTerms, selectedMindCategory, selectedCategoryTab]);
 
   // Search puts dishes whose name matches first; price sort overrides that.
-  const nameRank = (item: any) => {
-    if (!searchTerms.length) return 0;
-    const name = item.name.toLowerCase();
-    if (name.startsWith(searchTerms[0])) return 0;
-    return searchTerms.every((t) => name.includes(t)) ? 1 : 2;
-  };
-  const filteredProducts =
-    priceSort === 'low' ? [...matchedProducts].sort((a, b) => a.price - b.price)
-    : priceSort === 'high' ? [...matchedProducts].sort((a, b) => b.price - a.price)
-    : searchTerms.length ? [...matchedProducts].sort((a, b) => nameRank(a) - nameRank(b))
-    : matchedProducts;
+  const filteredProducts = useMemo(() => {
+    const nameRank = (item: any) => {
+      if (!searchTerms.length) return 0;
+      const name = item.name.toLowerCase();
+      if (name.startsWith(searchTerms[0])) return 0;
+      return searchTerms.every((t) => name.includes(t)) ? 1 : 2;
+    };
+    return priceSort === 'low' ? [...matchedProducts].sort((a, b) => a.price - b.price)
+      : priceSort === 'high' ? [...matchedProducts].sort((a, b) => b.price - a.price)
+      : searchTerms.length ? [...matchedProducts].sort((a, b) => nameRank(a) - nameRank(b))
+      : matchedProducts;
+  }, [matchedProducts, priceSort, searchTerms]);
 
   const visibleProducts = filteredProducts.slice(0, visibleCount);
   const hasMoreProducts = filteredProducts.length > visibleCount;
@@ -425,7 +420,7 @@ export default function LandingPage() {
                 </span>
               </div>
               <p className="text-[10px] sm:text-[11px] text-white/85 font-medium truncate leading-tight mt-0.5">
-                {deliveryLocation ? deliveryLocation.address : '471, 10th Cross Road, Neeladri Nagar, Yellapur'}
+                {deliveryLocation ? deliveryLocation.address : 'Set delivery location'}
               </p>
             </div>
 
@@ -437,6 +432,7 @@ export default function LandingPage() {
                 onClick={() => setShowHelpToOrder(true)}
                 className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white font-bold text-xs border border-white/30 active:scale-95 transition-all cursor-pointer shadow-xs"
                 title="Need Help with Ordering?"
+                aria-label="Help to order"
               >
                 <span className="hidden sm:inline">Help?</span>
                 <span aria-hidden="true">❓</span>
@@ -486,7 +482,8 @@ export default function LandingPage() {
               {searchQuery && (
                 <button 
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3.5 text-gray-400 hover:text-gray-700 p-0.5 rounded-full"
+                  aria-label="Clear search"
+                  className="absolute right-1.5 w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-full"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -494,12 +491,12 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* THAT BANNER THING: MUMTAZ, MULBAR, SANKALPA, COASTAL CROWN, AL AMIN - COMING SOON BANNER */}
+          {/* Partner-hotels banner. All five are live, so no "coming soon" copy. */}
           <div className="mt-4 relative rounded-2xl overflow-hidden shadow-xl border border-white/20 bg-blue-950">
             <div className="relative h-44 sm:h-52 w-full overflow-hidden">
               <AnimatePresence mode="wait">
                 {activeBannerIndex === 0 ? (
-                  /* Slide 1: Hotels Coming Soon Banner */
+                  /* Slide 1: Partner hotels now delivering */
                   <motion.div
                     key="hotels-banner"
                     initial={{ opacity: 0, scale: 1.04 }}
@@ -511,34 +508,35 @@ export default function LandingPage() {
                     <div>
                       <div className="flex items-center gap-1.5 mb-1.5">
                         <span className="bg-amber-400 text-blue-950 text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1">
-                          <Sparkles className="w-3 h-3 fill-blue-950" /> NEW PARTNERS
-                        </span>
-                        <span className="bg-white/20 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">
-                          COMING SOON 🔒
+                          <Sparkles className="w-3 h-3 fill-blue-950" /> PARTNER HOTELS
                         </span>
                       </div>
                       <h2 className="text-white text-sm sm:text-base font-black uppercase tracking-tight leading-snug">
                         Mumtaz • Malabar • Sankalpa • Coastal Crown • Al Amin
                       </h2>
                       <p className="text-amber-300 font-extrabold text-xs sm:text-sm uppercase tracking-wide mt-1">
-                        Joining Mom's Magic Fast Delivery! 🚀
+                        Now delivering from 5 partner hotels in Yellapur
                       </p>
                       <p className="text-white/80 text-[10px] sm:text-xs font-medium mt-0.5 line-clamp-1 max-w-[280px]">
-                        Your favorite restaurants from Yellapur & nearby are arriving soon.
+                        Order from any of them in one cart.
                       </p>
                     </div>
 
                     <div>
                       <button
                         onClick={() => {
-                          toast("We'll notify you as soon as Mumtaz, Malabar, Sankalpa, Coastal Crown & Al Amin go live! 🔔", {
-                            icon: '🎉',
-                            style: { background: '#1e3a8a', color: '#fff', borderRadius: '16px' }
-                          });
+                          // The hotels section is not rendered while a search is
+                          // showing results, so clear it and scroll once it is back.
+                          if (searchQuery.trim()) {
+                            setSearchQuery('');
+                            requestAnimationFrame(() => hotelsRef.current?.scrollIntoView({ behavior: 'smooth' }));
+                          } else {
+                            hotelsRef.current?.scrollIntoView({ behavior: 'smooth' });
+                          }
                         }}
                         className="bg-gradient-to-r from-[#ff2e74] to-[#e11d48] hover:from-[#ff1a66] text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-4 py-2 rounded-full shadow-[0_4px_15px_rgba(225,29,72,0.4)] border-t border-white/30 flex items-center gap-1.5 active:scale-95 transition-transform cursor-pointer"
                       >
-                        <Bell className="w-3.5 h-3.5" /> NOTIFY ME WHEN LIVE →
+                        <Store className="w-3.5 h-3.5" /> SEE HOTELS →
                       </button>
                     </div>
                   </motion.div>
@@ -564,10 +562,10 @@ export default function LandingPage() {
                           MOM'S SPECIAL FEAST 🔥
                         </span>
                         <h2 className="text-white text-base sm:text-xl font-black uppercase tracking-tight leading-tight mt-1.5 max-w-[240px]">
-                          SAVE BIG ON YOUR CRAVINGS
+                          YOUR CRAVINGS, DELIVERED
                         </h2>
                         <p className="text-amber-300 font-black text-xs sm:text-sm uppercase tracking-wide mt-0.5">
-                          WIN UPTO ₹500 CASHBACK
+                          Hot food from Yellapur's kitchens
                         </p>
                       </div>
 
@@ -657,7 +655,6 @@ export default function LandingPage() {
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 {visibleProducts.map((product) => {
                   const inCart = cartItems.find(i => i.id === product.id);
-                  const originalPrice = Math.round(product.price * 1.25);
 
                   return (
                     <div
@@ -673,13 +670,13 @@ export default function LandingPage() {
                         />
 
                         {hotelBadgeOf(product) && (
-                          <span className="absolute top-1.5 left-1.5 z-10 max-w-[90%] truncate bg-black/70 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs">
+                          <span className="absolute top-1.5 left-1.5 z-10 max-w-[62%] truncate bg-black/70 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs">
                             {hotelBadgeOf(product)}
                           </span>
                         )}
 
                         {product.fires && product.fires >= 2 && (
-                          <span className="absolute top-1.5 left-1.5 bg-rose-500 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs flex items-center gap-0.5">
+                          <span className="absolute top-1.5 right-1.5 bg-rose-500 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs flex items-center gap-0.5">
                             <Flame className="w-2.5 h-2.5" /> Hot
                           </span>
                         )}
@@ -687,33 +684,36 @@ export default function LandingPage() {
                         {/* Floating Pink Circular "+" / Stepper */}
                         <div className="absolute bottom-1.5 right-1.5 z-20">
                           {inCart ? (
-                            <div className="bg-[#e11d48] text-white rounded-full flex items-center gap-1.5 px-2 py-1 shadow-md">
+                            <div className="bg-[#e11d48] text-white rounded-full flex items-center px-0.5 shadow-md">
                               <button
                                 onClick={() => {
                                   playSound(SOUNDS.QUANTITY_TICK);
                                   updateQuantity(product.id, inCart.quantity - 1);
                                 }}
-                                className="text-white hover:text-white/80 active:scale-75 text-xs font-bold cursor-pointer"
+                                aria-label={`Decrease ${product.name}`}
+                                className="w-9 h-9 flex items-center justify-center rounded-full text-white hover:bg-white/15 active:scale-90 cursor-pointer"
                               >
-                                <Minus className="w-3 h-3" />
+                                <Minus className="w-4 h-4 stroke-[3]" />
                               </button>
-                              <span className="text-[11px] font-black">{inCart.quantity}</span>
+                              <span className="min-w-[14px] text-center text-xs font-black">{inCart.quantity}</span>
                               <button
                                 onClick={() => {
                                   playSound(SOUNDS.QUANTITY_TICK);
                                   updateQuantity(product.id, inCart.quantity + 1);
                                 }}
-                                className="text-white hover:text-white/80 active:scale-75 text-xs font-bold cursor-pointer"
+                                aria-label={`Increase ${product.name}`}
+                                className="w-9 h-9 flex items-center justify-center rounded-full text-white hover:bg-white/15 active:scale-90 cursor-pointer"
                               >
-                                <Plus className="w-3 h-3" />
+                                <Plus className="w-4 h-4 stroke-[3]" />
                               </button>
                             </div>
                           ) : (
                             <button
                               onClick={() => handleAddToCart(product)}
                               disabled={isClosed}
-                              className="w-8 h-8 rounded-full bg-[#ff2e74] hover:bg-[#e11d48] text-white shadow-md flex items-center justify-center active:scale-90 transition-transform cursor-pointer"
+                              className="w-10 h-10 rounded-full bg-[#ff2e74] hover:bg-[#e11d48] text-white shadow-md flex items-center justify-center active:scale-90 transition-transform cursor-pointer"
                               title="Add dish"
+                              aria-label={`Add ${product.name}`}
                             >
                               <Plus className="w-4 h-4 stroke-[3]" />
                             </button>
@@ -736,10 +736,6 @@ export default function LandingPage() {
                                 }`}
                               />
                             </span>
-                            <span className="text-[10px] font-extrabold text-amber-500 flex items-center gap-0.5">
-                              <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
-                              {getStableRating(product.id)}
-                            </span>
                           </div>
 
                           <h3 className="font-extrabold text-xs sm:text-[13px] text-gray-900 leading-snug line-clamp-2">
@@ -753,14 +749,11 @@ export default function LandingPage() {
                             <span className="text-xs sm:text-sm font-black text-[#e11d48]">
                               ₹{product.price}
                             </span>
-                            <span className="text-[10px] text-gray-400 line-through">
-                              ₹{originalPrice}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-0.5 text-amber-600 font-bold text-[10px]">
-                            <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
-                            <span>{getStableRating(product.id)}</span>
+                            {(product.originalPrice ?? 0) > product.price && (
+                              <span className="text-[10px] text-gray-500 line-through">
+                                ₹{product.originalPrice}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -783,7 +776,7 @@ export default function LandingPage() {
         ) : (
           <>
             {/* 2. HOTELS SECTION JUST DOWN OF THAT BLUE BOX (IN ROUNDED BOXES, PHOTO BE EMPTY) */}
-            <section>
+            <section ref={hotelsRef}>
           <div className="flex items-center justify-between mb-3 px-1">
             <div>
               <h2 className="text-gray-900 font-black text-base sm:text-lg tracking-tight leading-tight">
@@ -805,6 +798,10 @@ export default function LandingPage() {
                 key={hotel.id}
                 whileTap={{ scale: liveOpen ? 0.96 : 1 }}
                 onClick={() => handleHotelClick(hotel)}
+                role="button"
+                tabIndex={0}
+                aria-label={`${hotel.name}${liveOpen ? '' : ' (closed)'}`}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleHotelClick(hotel); } }}
                 className={`w-[130px] sm:w-[145px] rounded-2xl p-2.5 flex flex-col justify-between shrink-0 transition-all bg-white border ${
                   !liveOpen
                     ? 'border-gray-200 opacity-60 cursor-not-allowed grayscale'
@@ -834,21 +831,16 @@ export default function LandingPage() {
                   )}
 
                   {/* CLOSED overrides anything the hardcoded card claims. */}
-                  {!liveOpen && (
-                    <span className="absolute inset-x-1.5 bottom-1.5 text-[8px] font-black uppercase tracking-wider px-1.5 py-1 rounded-full bg-red-500 text-white text-center">
-                      Closed
-                    </span>
-                  )}
                   <span className={`absolute top-1.5 right-1.5 text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shadow-xs ${
                     !liveOpen
-                      ? 'bg-gray-400 text-white'
+                      ? 'bg-red-500 text-white'
                       : hotel.isOpen
                       ? 'bg-emerald-500 text-white'
                       : hotel.id === 'mumtaz' || hotel.id === 'sankalpa'
                       ? 'bg-blue-600 text-white'
                       : 'bg-amber-400 text-blue-950'
                   }`}>
-                    {hotel.isOpen ? 'OPEN' : hotel.id === 'mumtaz' || hotel.id === 'sankalpa' ? 'MENU' : 'SOON 🔒'}
+                    {!liveOpen ? 'CLOSED' : hotel.isOpen ? 'OPEN' : hotel.id === 'mumtaz' || hotel.id === 'sankalpa' ? 'MENU' : 'SOON 🔒'}
                   </span>
                 </div>
 
@@ -865,11 +857,11 @@ export default function LandingPage() {
 
                   <div className="mt-2 pt-1.5 border-t border-gray-100 flex items-center justify-between">
                     <span className={`text-[9px] font-bold ${
-                      hotel.isOpen ? 'text-emerald-600' : 'text-amber-600'
+                      !liveOpen ? 'text-gray-500' : hotel.isOpen ? 'text-emerald-600' : 'text-amber-600'
                     }`}>
                       {hotel.deliveryTime}
                     </span>
-                    <span className="text-[10px] text-gray-400">→</span>
+                    <span className="text-[10px] text-gray-500" aria-hidden="true">→</span>
                   </div>
                 </div>
               </motion.div>
@@ -952,7 +944,6 @@ export default function LandingPage() {
             <div className="flex items-stretch gap-3 overflow-x-auto no-scrollbar py-1">
               {bestsellersUnder149.slice(0, 10).map((product) => {
                 const inCart = cartItems.find(i => i.id === product.id);
-                const originalPrice = Math.round(product.price * 1.25);
 
                 return (
                   <div
@@ -968,7 +959,7 @@ export default function LandingPage() {
                       />
 
                       {hotelBadgeOf(product) && (
-                        <span className="absolute top-1.5 left-1.5 z-10 max-w-[90%] truncate bg-black/70 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs">
+                        <span className="absolute top-1.5 left-1.5 z-10 max-w-[62%] truncate bg-black/70 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs">
                           {hotelBadgeOf(product)}
                         </span>
                       )}
@@ -976,33 +967,36 @@ export default function LandingPage() {
                       {/* Floating Pink Add Button or Stepper */}
                       <div className="absolute bottom-1.5 right-1.5 z-20">
                         {inCart ? (
-                          <div className="bg-[#e11d48] text-white rounded-full flex items-center gap-1.5 px-2 py-1 shadow-md">
+                          <div className="bg-[#e11d48] text-white rounded-full flex items-center px-0.5 shadow-md">
                             <button
                               onClick={() => {
                                 playSound(SOUNDS.QUANTITY_TICK);
                                 updateQuantity(product.id, inCart.quantity - 1);
                               }}
-                              className="text-white hover:text-white/80 active:scale-75 text-xs font-bold"
+                              aria-label={`Decrease ${product.name}`}
+                              className="w-9 h-9 flex items-center justify-center rounded-full text-white hover:bg-white/15 active:scale-90 cursor-pointer"
                             >
-                              <Minus className="w-3 h-3" />
+                              <Minus className="w-4 h-4 stroke-[3]" />
                             </button>
-                            <span className="text-[11px] font-black">{inCart.quantity}</span>
+                            <span className="min-w-[14px] text-center text-xs font-black">{inCart.quantity}</span>
                             <button
                               onClick={() => {
                                 playSound(SOUNDS.QUANTITY_TICK);
                                 updateQuantity(product.id, inCart.quantity + 1);
                               }}
-                              className="text-white hover:text-white/80 active:scale-75 text-xs font-bold"
+                              aria-label={`Increase ${product.name}`}
+                              className="w-9 h-9 flex items-center justify-center rounded-full text-white hover:bg-white/15 active:scale-90 cursor-pointer"
                             >
-                              <Plus className="w-3 h-3" />
+                              <Plus className="w-4 h-4 stroke-[3]" />
                             </button>
                           </div>
                         ) : (
                           <button
                             onClick={() => handleAddToCart(product)}
                             disabled={isClosed}
-                            className="w-8 h-8 rounded-full bg-[#ff2e74] hover:bg-[#e11d48] text-white shadow-md flex items-center justify-center active:scale-90 transition-transform cursor-pointer"
+                            className="w-10 h-10 rounded-full bg-[#ff2e74] hover:bg-[#e11d48] text-white shadow-md flex items-center justify-center active:scale-90 transition-transform cursor-pointer"
                             title="Add dish"
+                            aria-label={`Add ${product.name}`}
                           >
                             <Plus className="w-4 h-4 stroke-[3]" />
                           </button>
@@ -1043,15 +1037,11 @@ export default function LandingPage() {
                           <span className="text-xs sm:text-sm font-black text-[#e11d48]">
                             ₹{product.price}
                           </span>
-                          <span className="text-[10px] text-gray-400 line-through">
-                            ₹{originalPrice}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1 text-[10px] text-gray-500 mt-0.5">
-                          <Zap className="w-3 h-3 text-amber-500 fill-amber-500" />
-                          <span>25 mins</span>
-                          <span className="text-gray-300">•</span>
-                          <span className="text-amber-600 font-bold">★ {getStableRating(product.id)}</span>
+                          {(product.originalPrice ?? 0) > product.price && (
+                            <span className="text-[10px] text-gray-500 line-through">
+                              ₹{product.originalPrice}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1168,7 +1158,6 @@ export default function LandingPage() {
             <div className="grid grid-cols-2 gap-3 sm:gap-4 mt-3">
               {visibleProducts.map((product) => {
                 const inCart = cartItems.find(i => i.id === product.id);
-                const originalPrice = Math.round(product.price * 1.25);
 
                 return (
                   <div
@@ -1184,13 +1173,13 @@ export default function LandingPage() {
                       />
 
                       {hotelBadgeOf(product) && (
-                        <span className="absolute top-1.5 left-1.5 z-10 max-w-[90%] truncate bg-black/70 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs">
+                        <span className="absolute top-1.5 left-1.5 z-10 max-w-[62%] truncate bg-black/70 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs">
                           {hotelBadgeOf(product)}
                         </span>
                       )}
 
                       {product.fires && product.fires >= 2 && (
-                        <span className="absolute top-1.5 left-1.5 bg-rose-500 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs flex items-center gap-0.5">
+                        <span className="absolute top-1.5 right-1.5 bg-rose-500 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs flex items-center gap-0.5">
                           <Flame className="w-2.5 h-2.5" /> Hot
                         </span>
                       )}
@@ -1198,33 +1187,36 @@ export default function LandingPage() {
                       {/* Floating Pink Circular "+" / Stepper */}
                       <div className="absolute bottom-1.5 right-1.5 z-20">
                         {inCart ? (
-                          <div className="bg-[#e11d48] text-white rounded-full flex items-center gap-1.5 px-2 py-1 shadow-md">
+                          <div className="bg-[#e11d48] text-white rounded-full flex items-center px-0.5 shadow-md">
                             <button
                               onClick={() => {
                                 playSound(SOUNDS.QUANTITY_TICK);
                                 updateQuantity(product.id, inCart.quantity - 1);
                               }}
-                              className="text-white hover:text-white/80 active:scale-75 text-xs font-bold"
+                              aria-label={`Decrease ${product.name}`}
+                              className="w-9 h-9 flex items-center justify-center rounded-full text-white hover:bg-white/15 active:scale-90 cursor-pointer"
                             >
-                              <Minus className="w-3 h-3" />
+                              <Minus className="w-4 h-4 stroke-[3]" />
                             </button>
-                            <span className="text-[11px] font-black">{inCart.quantity}</span>
+                            <span className="min-w-[14px] text-center text-xs font-black">{inCart.quantity}</span>
                             <button
                               onClick={() => {
                                 playSound(SOUNDS.QUANTITY_TICK);
                                 updateQuantity(product.id, inCart.quantity + 1);
                               }}
-                              className="text-white hover:text-white/80 active:scale-75 text-xs font-bold"
+                              aria-label={`Increase ${product.name}`}
+                              className="w-9 h-9 flex items-center justify-center rounded-full text-white hover:bg-white/15 active:scale-90 cursor-pointer"
                             >
-                              <Plus className="w-3 h-3" />
+                              <Plus className="w-4 h-4 stroke-[3]" />
                             </button>
                           </div>
                         ) : (
                           <button
                             onClick={() => handleAddToCart(product)}
                             disabled={isClosed}
-                            className="w-8 h-8 rounded-full bg-[#ff2e74] hover:bg-[#e11d48] text-white shadow-md flex items-center justify-center active:scale-90 transition-transform cursor-pointer"
+                            className="w-10 h-10 rounded-full bg-[#ff2e74] hover:bg-[#e11d48] text-white shadow-md flex items-center justify-center active:scale-90 transition-transform cursor-pointer"
                             title="Add dish"
+                            aria-label={`Add ${product.name}`}
                           >
                             <Plus className="w-4 h-4 stroke-[3]" />
                           </button>
@@ -1272,15 +1264,12 @@ export default function LandingPage() {
                             <span className="text-xs sm:text-sm font-black text-[#e11d48]">
                               ₹{product.price}
                             </span>
-                            <span className="text-[10px] text-gray-400 line-through">
-                              ₹{originalPrice}
-                            </span>
+                            {(product.originalPrice ?? 0) > product.price && (
+                              <span className="text-[10px] text-gray-500 line-through">
+                                ₹{product.originalPrice}
+                              </span>
+                            )}
                           </div>
-                        </div>
-
-                        <div className="flex items-center gap-0.5 text-amber-600 font-bold text-[10px]">
-                          <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
-                          <span>{getStableRating(product.id)}</span>
                         </div>
                       </div>
                     </div>
@@ -1305,7 +1294,7 @@ export default function LandingPage() {
 
         {/* Pexels Attribution */}
         <div className="pt-6 pb-8 text-center border-t border-gray-100">
-          <p className="text-[11px] text-gray-400 font-medium">
+          <p className="text-[11px] text-gray-500 font-medium">
             Food photography provided by{' '}
             <a
               href="https://www.pexels.com"
@@ -1357,8 +1346,9 @@ export default function LandingPage() {
                   <div className="flex items-center gap-1.5">
                     <a
                       href="tel:+919606001790"
-                      className="p-2.5 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-colors shadow-sm flex items-center justify-center"
+                      className="p-3 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-colors shadow-sm flex items-center justify-center"
                       title="Call Now"
+                      aria-label="Call Now"
                     >
                       <Phone className="w-4 h-4" />
                     </a>
@@ -1366,8 +1356,9 @@ export default function LandingPage() {
                       href="https://wa.me/919606001790?text=Hi%2C%20I%20need%20help%20to%20order%20food%20from%20Mom%27s%20Magic!"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2.5 rounded-xl bg-[#25D366] text-white hover:bg-[#20bd5a] transition-colors shadow-sm flex items-center justify-center"
+                      className="p-3 rounded-xl bg-[#25D366] text-white hover:bg-[#20bd5a] transition-colors shadow-sm flex items-center justify-center"
                       title="WhatsApp"
+                      aria-label="WhatsApp"
                     >
                       <MessageCircle className="w-4 h-4" />
                     </a>
@@ -1383,8 +1374,9 @@ export default function LandingPage() {
                   <div className="flex items-center gap-1.5">
                     <a
                       href="tel:+919483235488"
-                      className="p-2.5 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-colors shadow-sm flex items-center justify-center"
+                      className="p-3 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-colors shadow-sm flex items-center justify-center"
                       title="Call Now"
+                      aria-label="Call Now"
                     >
                       <Phone className="w-4 h-4" />
                     </a>
@@ -1392,8 +1384,9 @@ export default function LandingPage() {
                       href="https://wa.me/919483235488?text=Hi%2C%20I%20need%20help%20to%20order%20food%20from%20Mom%27s%20Magic!"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2.5 rounded-xl bg-[#25D366] text-white hover:bg-[#20bd5a] transition-colors shadow-sm flex items-center justify-center"
+                      className="p-3 rounded-xl bg-[#25D366] text-white hover:bg-[#20bd5a] transition-colors shadow-sm flex items-center justify-center"
                       title="WhatsApp"
+                      aria-label="WhatsApp"
                     >
                       <MessageCircle className="w-4 h-4" />
                     </a>

@@ -207,12 +207,9 @@ export default function HotelMumtazMenuPage() {
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <h1 className="text-base font-black text-gray-900 truncate tracking-tight">Hotel Mumtaz</h1>
-                <span className="bg-rose-50 text-[#e11d48] border border-rose-200/70 text-[10px] font-black px-2 py-0.5 rounded-md hidden sm:inline-block">
-                  EST. 1933
-                </span>
               </div>
               <p className="text-xs text-gray-500 font-medium truncate flex items-center gap-1.5">
-                <span>The Original Kaka Hotel</span>
+                <span>Yellapur, Karnataka</span>
                 <span>&bull;</span>
                 <span className="text-[#e11d48] font-bold">{totalCount} Signature Dishes</span>
               </p>
@@ -247,7 +244,7 @@ export default function HotelMumtazMenuPage() {
         <div className="absolute bottom-0 inset-x-0 p-4 sm:p-6 max-w-[1150px] mx-auto">
           <div className="flex flex-wrap items-center gap-2 mb-2">
             <span className="bg-amber-400 text-amber-950 text-[10px] sm:text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm">
-              The Original Kaka Hotel &bull; Since 1933
+              Hotel Mumtaz &bull; Yellapur, Karnataka
             </span>
             <span className="bg-emerald-500/90 text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
@@ -259,7 +256,7 @@ export default function HotelMumtazMenuPage() {
             Hotel Mumtaz
           </h2>
           <p className="text-gray-200 text-xs sm:text-sm font-medium mt-1.5 max-w-xl">
-            Multi-Cuisine Family Restaurant &bull; World Famous Kakas Traditional Biryani, Tandoor &amp; Starters
+            Multi-Cuisine Family Restaurant &bull; Biryani, Tandoor &amp; Starters
           </p>
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-3 text-white/90 text-xs font-medium">
@@ -267,10 +264,7 @@ export default function HotelMumtazMenuPage() {
               <Clock className="w-3.5 h-3.5 text-amber-400" /> 11:00 AM - 11:30 PM
             </span>
             <span className="flex items-center gap-1 bg-black/40 backdrop-blur-xs px-2.5 py-1 rounded-lg">
-              <MapPin className="w-3.5 h-3.5 text-red-400" /> Margao &amp; Fatorda, Goa
-            </span>
-            <span className="flex items-center gap-1 bg-black/40 backdrop-blur-xs px-2.5 py-1 rounded-lg font-bold text-amber-300">
-              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> 4.4 (1.4K+ Reviews)
+              <MapPin className="w-3.5 h-3.5 text-red-400" /> Yellapur, Karnataka
             </span>
           </div>
         </div>
@@ -572,14 +566,15 @@ export default function HotelMumtazMenuPage() {
                             {/* ADD Button or Quantity Stepper */}
                             {item.price !== null && (
                               inCart ? (
-                                <div className="bg-[#e11d48] text-white rounded-xl flex items-center gap-1 px-2 py-1 shadow-xs">
+                                <div className="bg-[#e11d48] text-white rounded-xl flex items-center px-0.5 shadow-xs">
                                   <button
                                     onClick={() => {
                                       playSound(SOUNDS.QUANTITY_TICK);
                                       updateQuantity(inCart.id || itemId, inCart.quantity - 1);
                                     }}
-                                    className="text-white hover:text-white/80 active:scale-75 p-0.5 cursor-pointer"
+                                    className="w-9 h-9 flex items-center justify-center rounded-lg text-white hover:bg-white/15 active:scale-90 cursor-pointer"
                                     title="Decrease quantity"
+                                    aria-label={`Decrease ${item.name}`}
                                   >
                                     <Minus className="w-3.5 h-3.5 stroke-[3]" />
                                   </button>
@@ -591,8 +586,9 @@ export default function HotelMumtazMenuPage() {
                                       playSound(SOUNDS.QUANTITY_TICK);
                                       updateQuantity(inCart.id || itemId, inCart.quantity + 1);
                                     }}
-                                    className="text-white hover:text-white/80 active:scale-75 p-0.5 cursor-pointer"
+                                    className="w-9 h-9 flex items-center justify-center rounded-lg text-white hover:bg-white/15 active:scale-90 cursor-pointer"
                                     title="Increase quantity"
+                                    aria-label={`Increase ${item.name}`}
                                   >
                                     <Plus className="w-3.5 h-3.5 stroke-[3]" />
                                   </button>
@@ -600,7 +596,7 @@ export default function HotelMumtazMenuPage() {
                               ) : (
                                 <button
                                   onClick={() => handleAddToCart(item, dishImage, nonVeg, category.title)}
-                                  className="bg-white hover:bg-rose-50 text-[#e11d48] border-2 border-[#e11d48] hover:border-[#ff2e74] text-xs font-black px-3.5 py-1 rounded-xl shadow-xs flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
+                                  className="bg-white hover:bg-rose-50 text-[#e11d48] border-2 border-[#e11d48] hover:border-[#ff2e74] text-xs font-black px-3.5 min-h-[36px] rounded-xl shadow-xs flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
                                   title={`Add ${item.name} to cart`}
                                 >
                                   <span>ADD</span>
@@ -628,7 +624,7 @@ export default function HotelMumtazMenuPage() {
           </div>
           <h3 className="text-lg font-black text-gray-900">Hotel Mumtaz &bull; Family Restaurant</h3>
           <p className="text-xs text-gray-500 font-medium mt-1">
-            Famous for Kaka's Traditional Dum Biryani, Starters &amp; Multi-Cuisine Dining Since 1933.
+            Biryani, Starters &amp; Multi-Cuisine Dining &bull; Yellapur, Karnataka
           </p>
 
           <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
@@ -641,7 +637,7 @@ export default function HotelMumtazMenuPage() {
           </div>
 
           <div className="mt-6 pt-4 border-t border-rose-100">
-            <p className="text-[11px] text-gray-400 font-medium">
+            <p className="text-[11px] text-gray-500 font-medium">
               Food photography provided by{' '}
               <a
                 href="https://www.pexels.com"

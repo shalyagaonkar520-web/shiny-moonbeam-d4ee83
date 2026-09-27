@@ -20,13 +20,21 @@ export default function BulkOrderPage() {
   const [activeCategory, setActiveCategory] = useState<Category>('Normal');
   const [showUpsell, setShowUpsell] = useState(false);
 
+  // No order-type flag is written here: just opening this tab used to mark
+  // every later normal order as 'bulk'. Checkout derives bulk mode itself.
   useEffect(() => {
-    localStorage.setItem('moms_magic_order_type', 'bulk');
     window.scrollTo(0, 0);
   }, []);
 
 
   const categories: Category[] = ['Normal', 'Ice Cake', 'Party Items', 'Snacks'];
+  const categoryLabels: Record<Category, string> = {
+    'Normal': 'Regular Cakes',
+    'Ice Cake': 'Ice Cakes',
+    'Party Items': 'Party Items',
+    'Snacks': 'Party Snacks',
+  };
+  const nextCategory = categories[categories.indexOf(activeCategory) + 1];
 
   const advanceToNextCategory = (currentCat: Category) => {
     const currentIndex = categories.indexOf(currentCat);
@@ -55,7 +63,7 @@ export default function BulkOrderPage() {
   const totalCartCount = items.reduce((acc, i) => acc + i.quantity, 0);
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-[#fff1f4]/80 via-[#fff8fa]/60 to-[#ffffff] text-gray-900 pb-36 font-sans overflow-hidden">
+    <div className="relative min-h-screen bg-gradient-to-b from-[#fff1f4]/80 via-[#fff8fa]/60 to-[#ffffff] text-gray-900 pb-60 font-sans overflow-hidden">
       
       {/* Soft Ambient Glows matching app's light pink theme */}
       <div className="fixed inset-0 pointer-events-none z-0">
@@ -73,6 +81,7 @@ export default function BulkOrderPage() {
             onClick={() => navigate('/')} 
             className="w-10 h-10 sm:w-11 sm:h-11 bg-rose-50 border border-rose-200/80 rounded-2xl flex items-center justify-center text-gray-700 hover:text-gray-900 hover:bg-rose-100 active:scale-95 transition-all cursor-pointer shrink-0"
             title="Back to Home"
+            aria-label="Back to Home"
           >
             <ChevronLeft className="w-5 h-5 text-gray-800" />
           </button>
@@ -93,6 +102,7 @@ export default function BulkOrderPage() {
               to="/checkout"
               className="w-10 h-10 sm:w-11 sm:h-11 bg-rose-50 border border-rose-200/80 rounded-2xl flex items-center justify-center text-gray-700 hover:text-gray-900 hover:bg-rose-100 active:scale-95 transition-all relative cursor-pointer"
               title="View Cart"
+              aria-label="View Cart"
             >
               <ShoppingBag className="w-5 h-5 text-gray-800" />
               {totalCartCount > 0 && (
@@ -120,7 +130,7 @@ export default function BulkOrderPage() {
               Delicious Celebration Cakes & Snacks
             </h1>
             <p className="text-xs font-semibold text-gray-600 max-w-xl">
-              Freshly prepared with love. Add your customized name & message at checkout!
+              Freshly prepared with love. Tell us the name & message in cooking instructions at checkout.
             </p>
           </div>
 
@@ -203,19 +213,22 @@ export default function BulkOrderPage() {
                           <span className="text-sm sm:text-base font-black text-[#e11d48]">
                             ₹{item.price}
                           </span>
-                          <span className="text-[10px] font-semibold text-gray-400 line-through">
-                            ₹{Math.round(item.price * 1.25)}
-                          </span>
+                          {(item.originalPrice ?? 0) > item.price && (
+                            <span className="text-[10px] font-semibold text-gray-500 line-through">
+                              ₹{item.originalPrice}
+                            </span>
+                          )}
                         </div>
                       </div>
 
                       {/* Add Button or Stepper Pill */}
                       <div>
                         {inCart ? (
-                          <div className="w-full bg-rose-50 border border-rose-300 text-gray-900 rounded-xl flex items-center justify-between px-2 sm:px-3 py-1.5 shadow-2xs">
+                          <div className="w-full bg-rose-50 border border-rose-300 text-gray-900 rounded-xl flex items-center justify-between px-1 sm:px-2 py-0.5 shadow-2xs">
                             <button 
                               onClick={() => updateQuantity(item.id, inCart.quantity - 1)}
-                              className="p-1 rounded-lg hover:bg-rose-100 text-[#e11d48] cursor-pointer"
+                              aria-label={`Decrease ${item.name}`}
+                              className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-rose-100 text-[#e11d48] cursor-pointer"
                             >
                               <Minus className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3]" />
                             </button>
@@ -224,7 +237,8 @@ export default function BulkOrderPage() {
                             </span>
                             <button 
                               onClick={() => updateQuantity(item.id, inCart.quantity + 1)}
-                              className="p-1 rounded-lg hover:bg-rose-100 text-[#e11d48] cursor-pointer"
+                              aria-label={`Increase ${item.name}`}
+                              className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-rose-100 text-[#e11d48] cursor-pointer"
                             >
                               <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3]" />
                             </button>
@@ -249,14 +263,15 @@ export default function BulkOrderPage() {
 
       </div>
 
-      {/* Floating Category Advance Button */}
-      <div className="fixed bottom-20 left-4 right-4 max-w-md mx-auto z-40 flex items-center justify-between gap-3">
+      {/* Floating Category Advance Button. Sits above BottomCartBar (64px nav +
+          ~68px bar) once the cart has items, otherwise just above the nav. */}
+      <div className={`fixed ${totalCartCount > 0 ? 'bottom-[calc(144px+env(safe-area-inset-bottom,0px))] md:bottom-28' : 'bottom-[calc(76px+env(safe-area-inset-bottom,0px))]'} left-4 right-4 max-w-md mx-auto z-40 flex items-center justify-between gap-3`}>
         <button
           onClick={() => advanceToNextCategory(activeCategory)}
           className="w-full py-3.5 px-5 rounded-2xl bg-white/95 backdrop-blur-md border border-rose-200 text-gray-800 hover:bg-rose-50 shadow-lg shadow-rose-500/10 font-black uppercase tracking-wider text-xs flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer"
         >
           <span>
-            {activeCategory === 'Snacks' ? 'Proceed to Checkout 🛒' : `Next: Next Category`}
+            {nextCategory ? `Next: ${categoryLabels[nextCategory]}` : 'Proceed to Checkout 🛒'}
           </span>
           <ArrowRight className="w-4 h-4 text-[#e11d48]" />
         </button>
@@ -294,7 +309,8 @@ export default function BulkOrderPage() {
                 </div>
                 <button 
                   onClick={() => setShowUpsell(false)} 
-                  className="w-9 h-9 bg-rose-50 hover:bg-rose-100 rounded-full flex items-center justify-center text-gray-600 transition-colors cursor-pointer"
+                  aria-label="Close"
+                  className="w-10 h-10 bg-rose-50 hover:bg-rose-100 rounded-full flex items-center justify-center text-gray-600 transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -315,7 +331,7 @@ export default function BulkOrderPage() {
                         </div>
                         <button 
                           onClick={() => { addItem(item); toast.success(`${item.name} added!`); }}
-                          className="w-full py-1.5 bg-[#e11d48] text-white rounded-xl text-[10px] font-black uppercase tracking-wider hover:opacity-95 transition-opacity cursor-pointer"
+                          className="w-full min-h-[36px] py-1.5 bg-[#e11d48] text-white rounded-xl text-[10px] font-black uppercase tracking-wider hover:opacity-95 transition-opacity cursor-pointer"
                         >
                           Add +
                         </button>
@@ -340,7 +356,8 @@ export default function BulkOrderPage() {
                         </div>
                         <button 
                           onClick={() => { addItem(snack); toast.success(`${snack.name} added!`); }}
-                          className="w-9 h-9 bg-[#e11d48] text-white rounded-xl flex items-center justify-center hover:opacity-95 transition-opacity cursor-pointer"
+                          aria-label={`Add ${snack.name}`}
+                          className="w-10 h-10 bg-[#e11d48] text-white rounded-xl flex items-center justify-center hover:opacity-95 transition-opacity cursor-pointer"
                         >
                           <Plus className="w-4 h-4 stroke-[3]" />
                         </button>

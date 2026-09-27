@@ -36,7 +36,6 @@ const AboutFounder = lazy(() => import('./components/AboutFounder'));
 const CelebrationHub = lazy(() => import('./components/CelebrationHub'));
 const CelebrationDesign = lazy(() => import('./components/CelebrationDesign'));
 const AdminPage = lazy(() => import('./components/AdminPage'));
-const OrdersPage = lazy(() => import('./components/OrdersPage'));
 const LuckyWheelPage = lazy(() => import('./components/LuckyWheelPage'));
 const AuthPage = lazy(() => import('./components/AuthPage'));
 const TrackOrderPage = lazy(() => import('./components/TrackOrderPage'));
@@ -99,37 +98,37 @@ export default function App() {
   const handlePushPayload = useCallback((payload: any) => {
       console.log('Foreground FCM notification received:', payload);
       
-      // Render premium Swish-themed notification Toast matching app styles
+      // Brand-styled (white / rose) toast, matching the global Toaster below.
       toast.custom(
         (t) => (
           <div
             className={`${
               t.visible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
-            } transition-all duration-300 max-w-md w-full bg-[#0B0E14] border border-[#4CD964]/20 shadow-[0_12px_45px_rgba(76,217,100,0.15)] rounded-[20px] pointer-events-auto flex p-4 backdrop-blur-[10px]`}
+            } transition-all duration-300 max-w-md w-full bg-white border border-rose-100 shadow-lg shadow-rose-100 rounded-[20px] pointer-events-auto flex p-4`}
           >
             <div className="flex-1 w-0">
               <div className="flex items-start">
                 <div className="flex-shrink-0 pt-0.5">
                   <img
-                    className="h-10 w-10 rounded-full object-cover border border-[#4CD964]/20"
+                    className="h-10 w-10 rounded-full object-cover border border-rose-100"
                     src={payload.notification?.image || '/logo-sm.webp'}
                     alt="Notification Icon"
                   />
                 </div>
                 <div className="ml-3 flex-1">
-                  <p className="text-sm font-bold text-[#4CD964]">
+                  <p className="text-sm font-bold text-gray-900">
                     {payload.notification?.title || 'Order Update'}
                   </p>
-                  <p className="mt-1 text-xs text-white/80 font-medium">
+                  <p className="mt-1 text-xs text-gray-600 font-medium">
                     {payload.notification?.body || 'You have a new notification.'}
                   </p>
                 </div>
               </div>
             </div>
-            <div className="flex border-l border-[#4CD964]/10 pl-3 ml-3 items-center">
+            <div className="flex border-l border-rose-100 pl-3 ml-3 items-center">
               <button
                 onClick={() => toast.dismiss(t.id)}
-                className="text-xs font-bold text-text-muted hover:text-[#4CD964] transition-colors uppercase tracking-[1px]"
+                className="min-h-[40px] px-1 text-xs font-bold text-[#e11d48] hover:text-rose-700 transition-colors uppercase tracking-[1px]"
               >
                 Dismiss
               </button>
@@ -177,13 +176,13 @@ export default function App() {
         position="top-center"
         toastOptions={{
           style: {
-            background: '#1E1E1E',
-            color: '#FAFAFA',
-            border: '1px solid rgba(244, 180, 0, 0.2)',
+            background: '#ffffff',
+            color: '#111827',
+            border: '1px solid #ffe4e6',
             borderRadius: '20px',
             padding: '16px 24px',
             fontWeight: '600',
-            backdropFilter: 'blur(10px)',
+            boxShadow: '0 10px 30px rgba(225, 29, 72, 0.12)',
           }
         }}
       />
@@ -226,7 +225,8 @@ export default function App() {
                   <Route path="/feedback" element={<FeedbackPage />} />
                   <Route path="/about" element={<AboutFounder />} />
                   <Route path="/admin" element={<AdminPage />} />
-                  <Route path="/orders" element={<OrdersPage />} />
+                  {/* The old dark /orders list read stale localStorage; /track is the live list. */}
+                  <Route path="/orders" element={<Navigate to="/track" replace />} />
                   <Route path="/spin" element={<LuckyWheelPage />} />
                   <Route path="/login" element={<AuthPage />} />
                   <Route path="/signin" element={<AuthPage />} />

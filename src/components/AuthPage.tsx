@@ -42,7 +42,7 @@ function getFriendlyErrorMessage(err: any): string {
 }
 
 export default function AuthPage() {
-  useSEO("Sign In / Sign Up - Mom's Magic", "Sign in or register for Mom's Magic Yellapur to get ₹50 welcome bonus and 10-minute food delivery.");
+  useSEO("Sign In / Sign Up - Mom's Magic", "Sign in or register for Mom's Magic Yellapur to order food and track your deliveries.");
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -460,7 +460,7 @@ export default function AuthPage() {
             <div className="pt-3 border-t border-gray-100 grid grid-cols-2 gap-2 text-[11px] text-gray-500 font-medium">
               <div className="flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-[#e11d48]" />
-                <span>10-min delivery</span>
+                <span>30-40 min delivery</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <UtensilsCrossed className="w-3.5 h-3.5 text-[#e11d48]" />

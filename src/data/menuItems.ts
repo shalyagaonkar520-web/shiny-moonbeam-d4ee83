@@ -848,8 +848,3 @@ export const CATEGORY_ICONS: Record<string, { icon: string, bg: string }> = {
 export const COMING_SOON_CATEGORIES = [
   { name: 'Grocery', icon: '🛒', bg: 'from-green-500/20 to-emerald-600/20' }
 ];
-
-export function getFakeOriginalPrice(price: number, originalPrice?: number): number {
-  if (originalPrice) return originalPrice;
-  return Math.round(price / 0.7); // 30% off
-}

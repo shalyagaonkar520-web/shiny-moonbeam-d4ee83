@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Navigation, Check, X, Loader2, AlertTriangle, Store, Locate, ChevronDown, Search } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useLocationStore, NearbyRestaurant } from '../store/locationStore';
 
 import { haversineDistance, reverseGeocode } from '../lib/location';
@@ -35,6 +36,22 @@ async function fetchNearbyRestaurants(lat: number, lng: number, radius: number =
   } catch {
     return [];
   }
+}
+
+// Popup content is built from DOM nodes with textContent. Names and addresses
+// come from OpenStreetMap (crowd-editable), so they must never reach innerHTML.
+function popupNode(title: string, line?: string, italic = false): HTMLElement {
+  const root = document.createElement('div');
+  const b = document.createElement('b');
+  b.textContent = title;
+  root.appendChild(b);
+  if (line) {
+    root.appendChild(document.createElement('br'));
+    const el = document.createElement(italic ? 'i' : 'span');
+    el.textContent = line;
+    root.appendChild(el);
+  }
+  return root;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -102,6 +119,7 @@ export default function LocationPicker() {
       if (L && map) {
         if (markerRef.current) {
           markerRef.current.setLatLng([lat, lng]);
+          markerRef.current.setPopupContent(popupNode('Delivery Location', addr));
         } else {
           const deliveryIcon = L.divIcon({
             className: 'custom-delivery-marker',
@@ -111,15 +129,15 @@ export default function LocationPicker() {
           });
           markerRef.current = L.marker([lat, lng], { icon: deliveryIcon })
             .addTo(map)
-            .bindPopup(`<b>Delivery Location</b><br/>${addr}`);
+            .bindPopup(popupNode('Delivery Location', addr));
         }
 
         // Draw delivery range circle
         if (circleRef.current) map.removeLayer(circleRef.current);
         circleRef.current = L.circle([restaurantLocation.lat, restaurantLocation.lng], {
           radius: maxDeliveryRange * 1000,
-          color: '#FF4D00',
-          fillColor: '#FF4D00',
+          color: '#e11d48',
+          fillColor: '#e11d48',
           fillOpacity: 0.05,
           weight: 1.5,
           dashArray: '8, 6',
@@ -146,7 +164,7 @@ export default function LocationPicker() {
           });
           const m = L.marker([r.lat, r.lng], { icon })
             .addTo(map)
-            .bindPopup(`<b>${r.name}</b>${r.cuisine ? `<br/><i>${r.cuisine}</i>` : ''}`);
+            .bindPopup(popupNode(r.name, r.cuisine || undefined, true));
           nearbyMarkersRef.current.push(m);
         });
       }
@@ -209,11 +227,11 @@ export default function LocationPicker() {
   // ───────────────────────────────────────────────────────────
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser');
+      toast.error('Location is not supported on this device. Search or tap the map instead.');
       return;
     }
     setIsGeolocating(true);
-    
+
     // High accuracy options
     const options = {
       enableHighAccuracy: true,
@@ -225,10 +243,10 @@ export default function LocationPicker() {
       (pos) => {
         const { latitude, longitude, accuracy } = pos.coords;
         console.log(`Location fix: ${latitude}, ${longitude} (Accuracy: ${accuracy}m)`);
-        
+
         // Update state and data
         updateLocation(latitude, longitude);
-        
+
         // Move map with high zoom for precision
         const map = mapInstanceRef.current;
         if (map) {
@@ -242,8 +260,8 @@ export default function LocationPicker() {
         if (err.code === 1) errorMsg = 'Location permission denied. Please allow access in settings.';
         else if (err.code === 2) errorMsg = 'Location unavailable. Ensure GPS is enabled.';
         else if (err.code === 3) errorMsg = 'Location request timed out. Please try again.';
-        
-        alert(errorMsg);
+
+        toast.error(errorMsg);
         setIsGeolocating(false);
       },
       options
@@ -368,19 +386,20 @@ export default function LocationPicker() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[9999] flex flex-col bg-[#0B0E14]"
+        className="fixed inset-0 z-[9999] flex flex-col bg-gradient-to-b from-[#fff1f4] via-[#fff8fa] to-white"
       >
         {/* ─── TOP BAR ─── */}
-        <div className="relative z-50 flex items-center justify-between px-4 md:px-6 h-16 bg-[#0B0E14]/95 backdrop-blur-xl border-b border-white/5">
+        <div className="relative z-50 flex items-center justify-between px-4 md:px-6 h-16 bg-white/95 backdrop-blur-xl border-b border-rose-100">
           <div className="flex items-center gap-3">
-            <MapPin className="w-5 h-5 text-brand" />
-            <span className="font-black text-sm uppercase tracking-widest text-white/80">
+            <MapPin className="w-5 h-5 text-[#e11d48]" />
+            <span className="font-black text-sm uppercase tracking-widest text-gray-900">
               Select Delivery Location
             </span>
           </div>
           <button
             onClick={closeLocationPicker}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all text-white/60 hover:text-white"
+            aria-label="Close"
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-50 border border-rose-100 hover:bg-rose-100 transition-all text-gray-600 hover:text-gray-900"
           >
             <X className="w-5 h-5" />
           </button>
@@ -397,12 +416,13 @@ export default function LocationPicker() {
             transition={{ delay: 0.5, type: 'spring' }}
             onClick={handleUseMyLocation}
             disabled={isGeolocating}
-            className="absolute top-4 right-4 z-[1000] flex items-center gap-2 px-4 py-3 bg-[#161A22]/95 backdrop-blur-xl border border-white/10 rounded-2xl text-white font-bold text-xs uppercase tracking-widest shadow-2xl hover:border-brand/40 transition-all disabled:opacity-50"
+            aria-label={isGeolocating ? 'Locating' : 'Use my location'}
+            className="absolute top-4 right-4 z-[1000] flex items-center gap-2 min-h-[44px] px-4 py-3 bg-white/95 backdrop-blur-xl border border-rose-100 rounded-2xl text-gray-900 font-bold text-xs uppercase tracking-widest shadow-lg shadow-rose-100 hover:border-rose-300 transition-all disabled:opacity-50"
           >
             {isGeolocating ? (
-              <Loader2 className="w-4 h-4 animate-spin text-brand" />
+              <Loader2 className="w-4 h-4 animate-spin text-[#e11d48]" />
             ) : (
-              <Locate className="w-4 h-4 text-brand" />
+              <Locate className="w-4 h-4 text-[#e11d48]" />
             )}
             <span className="hidden sm:inline">{isGeolocating ? 'Locating...' : 'My Location'}</span>
           </motion.button>
@@ -410,18 +430,19 @@ export default function LocationPicker() {
           {/* SEARCH ALL PLACES (OPENSTREETMAP - NO API REQUIRED) */}
           <div className="absolute top-4 left-4 right-36 z-[1000]">
             <div className="relative">
-              <div className="flex items-center gap-2 px-3.5 py-2.5 bg-[#161A22]/95 backdrop-blur-xl border border-white/10 rounded-2xl text-white shadow-2xl focus-within:border-brand transition-all">
+              <div className="flex items-center gap-2 px-3.5 py-1 min-h-[44px] bg-white/95 backdrop-blur-xl border border-rose-100 rounded-2xl text-gray-900 shadow-lg shadow-rose-100 focus-within:border-[#e11d48] transition-all">
                 {isSearching ? (
-                  <Loader2 className="w-4 h-4 text-brand animate-spin shrink-0" />
+                  <Loader2 className="w-4 h-4 text-[#e11d48] animate-spin shrink-0" />
                 ) : (
-                  <Search className="w-4 h-4 text-white/50 shrink-0" />
+                  <Search className="w-4 h-4 text-gray-500 shrink-0" />
                 )}
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => handleSearchPlaces(e.target.value)}
                   placeholder="Search all places, towns, streets..."
-                  className="bg-transparent text-white text-xs font-semibold outline-none w-full placeholder:text-white/40"
+                  aria-label="Search places"
+                  className="bg-transparent text-gray-900 text-xs font-semibold outline-none w-full placeholder:text-gray-400"
                 />
                 {searchQuery && (
                   <button
@@ -429,28 +450,29 @@ export default function LocationPicker() {
                       setSearchQuery('');
                       setSearchResults([]);
                     }}
-                    className="text-white/40 hover:text-white"
+                    aria-label="Clear search"
+                    className="w-9 h-9 -mr-2 flex items-center justify-center shrink-0 text-gray-500 hover:text-gray-900"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-4 h-4" />
                   </button>
                 )}
               </div>
 
               {/* SEARCH RESULTS DROPDOWN */}
               {searchResults.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-[#161A22] border border-white/15 rounded-2xl overflow-hidden shadow-2xl max-h-56 overflow-y-auto z-[1001]">
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-rose-100 rounded-2xl overflow-hidden shadow-xl shadow-rose-100 max-h-56 overflow-y-auto z-[1001]">
                   {searchResults.map((item) => (
                     <button
                       key={item.place_id}
                       onClick={() => handleSelectSearchResult(item)}
-                      className="w-full text-left px-4 py-2.5 hover:bg-white/10 border-b border-white/5 flex items-start gap-2.5 transition-all text-xs"
+                      className="w-full text-left px-4 py-3 hover:bg-rose-50 border-b border-rose-50 flex items-start gap-2.5 transition-all text-xs"
                     >
-                      <MapPin className="w-3.5 h-3.5 text-brand shrink-0 mt-0.5" />
+                      <MapPin className="w-3.5 h-3.5 text-[#e11d48] shrink-0 mt-0.5" />
                       <div className="min-w-0 flex-1">
-                        <p className="text-white font-bold truncate">
+                        <p className="text-gray-900 font-bold truncate">
                           {item.name || item.display_name.split(',')[0]}
                         </p>
-                        <p className="text-white/40 text-[10px] truncate">{item.display_name}</p>
+                        <p className="text-gray-500 text-[10px] truncate">{item.display_name}</p>
                       </div>
                     </button>
                   ))}
@@ -464,7 +486,7 @@ export default function LocationPicker() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="absolute top-18 left-4 right-4 z-[999] flex items-center gap-3 px-4 py-2.5 bg-brand/90 backdrop-blur-xl rounded-2xl text-white shadow-2xl"
+              className="absolute top-18 left-4 right-4 z-[999] flex items-center gap-3 px-4 py-2.5 bg-[#e11d48]/95 backdrop-blur-xl rounded-2xl text-white shadow-lg shadow-rose-200"
             >
               <Navigation className="w-4 h-4 shrink-0 animate-pulse" />
               <p className="font-bold text-xs">
@@ -479,7 +501,7 @@ export default function LocationPicker() {
           initial={{ y: 100 }}
           animate={{ y: 0 }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="relative z-50 bg-[#0B0E14] border-t border-white/5"
+          className="relative z-50 bg-white border-t border-rose-100 rounded-t-[26px] shadow-[0_-8px_30px_rgba(225,29,72,0.08)]"
         >
           {/* Location Details */}
           <div className="px-4 md:px-6 pt-5 pb-4 space-y-4">
@@ -487,12 +509,12 @@ export default function LocationPicker() {
             {selectedLat !== null ? (
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center shrink-0 mt-0.5">
-                    <MapPin className="w-5 h-5 text-brand" />
+                  <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center shrink-0 mt-0.5">
+                    <MapPin className="w-5 h-5 text-[#e11d48]" />
                   </div>
                   <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-4 mb-2">
-                  <p className="text-[10px] font-black uppercase tracking-[3px] text-white/30">
+                  <p className="text-[10px] font-black uppercase tracking-[3px] text-gray-500">
                     Delivery Address
                   </p>
                   <button
@@ -500,10 +522,10 @@ export default function LocationPicker() {
                       setIsManualEntry(!isManualEntry);
                       if (!isManualEntry) setManualAddress(address);
                     }}
-                    className={`px-3 py-1 rounded-lg font-black text-[9px] uppercase tracking-widest transition-all border ${
-                      isManualEntry 
-                        ? 'bg-brand text-white border-brand' 
-                        : 'bg-white/5 text-white/40 border-white/5 hover:text-white'
+                    className={`px-3 py-2 rounded-lg font-black text-[9px] uppercase tracking-widest transition-all border ${
+                      isManualEntry
+                        ? 'bg-[#e11d48] text-white border-[#e11d48]'
+                        : 'bg-rose-50 text-gray-600 border-rose-100 hover:text-gray-900'
                     }`}
                   >
                     {isManualEntry ? '🎯 Select on Map' : '✍️ Edit Manually'}
@@ -517,19 +539,19 @@ export default function LocationPicker() {
                           setAddress(e.target.value);
                         }}
                         placeholder="Type your full address here..."
-                        className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white text-sm font-medium focus:border-brand outline-none transition-all h-24 resize-none"
+                        className="w-full bg-rose-50/40 border border-rose-100 rounded-xl p-3 text-gray-900 text-sm font-medium focus:border-[#e11d48] outline-none transition-all h-24 resize-none"
                       />
                     ) : isLoading ? (
                       <div className="flex items-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin text-brand" />
-                        <span className="text-white/40 text-sm font-medium">Fetching address...</span>
+                        <Loader2 className="w-4 h-4 animate-spin text-[#e11d48]" />
+                        <span className="text-gray-500 text-sm font-medium">Fetching address...</span>
                       </div>
                     ) : (
-                      <p className="text-white font-bold text-sm leading-relaxed truncate">
+                      <p className="text-gray-900 font-bold text-sm leading-relaxed truncate">
                         {address}
                       </p>
                     )}
-                    <p className="text-white/20 text-[10px] font-mono mt-1">
+                    <p className="text-gray-400 text-[10px] font-mono mt-1">
                       {selectedLat.toFixed(6)}, {selectedLng?.toFixed(6)}
                     </p>
                   </div>
@@ -539,22 +561,22 @@ export default function LocationPicker() {
                 <div className="flex items-center gap-3">
                   <div className={`flex-1 px-4 py-3 rounded-xl border ${
                     isDeliverable
-                      ? 'bg-emerald-500/5 border-emerald-500/20'
-                      : 'bg-red-500/5 border-red-500/20'
+                      ? 'bg-emerald-50 border-emerald-200'
+                      : 'bg-red-50 border-red-200'
                   }`}>
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-[10px] font-black uppercase tracking-[2px] text-white/30">
+                        <p className="text-[10px] font-black uppercase tracking-[2px] text-gray-500">
                           Distance
                         </p>
-                        <p className="text-white font-black text-lg italic tracking-tight">
-                          {distance} <span className="text-sm font-bold text-white/40">km</span>
+                        <p className="text-gray-900 font-black text-lg italic tracking-tight">
+                          {distance} <span className="text-sm font-bold text-gray-500">km</span>
                         </p>
                       </div>
                       <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-wider ${
                         isDeliverable
-                          ? 'bg-emerald-500/10 text-emerald-400'
-                          : 'bg-red-500/10 text-red-400'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : 'bg-red-100 text-red-600'
                       }`}>
                         {isDeliverable ? (
                           <>
@@ -574,12 +596,12 @@ export default function LocationPicker() {
 
                 {/* Nearby Restaurants Count */}
                 {(nearbyRestaurants.length > 0 || loadingNearby) && (
-                  <div className="flex items-center gap-2 px-4 py-2.5 bg-white/5 rounded-xl border border-white/5">
-                    <Store className="w-4 h-4 text-brand" />
+                  <div className="flex items-center gap-2 px-4 py-2.5 bg-rose-50/60 rounded-xl border border-rose-100">
+                    <Store className="w-4 h-4 text-[#e11d48]" />
                     {loadingNearby ? (
-                      <span className="text-white/40 text-xs font-bold">Finding nearby restaurants...</span>
+                      <span className="text-gray-500 text-xs font-bold">Finding nearby restaurants...</span>
                     ) : (
-                      <span className="text-white/60 text-xs font-bold">
+                      <span className="text-gray-600 text-xs font-bold">
                         {nearbyRestaurants.length} restaurants within 2km
                       </span>
                     )}
@@ -587,9 +609,9 @@ export default function LocationPicker() {
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-3 px-4 py-4 bg-white/5 rounded-2xl border border-white/5">
-                <ChevronDown className="w-5 h-5 text-brand animate-bounce" />
-                <p className="text-white/40 font-bold text-sm">
+              <div className="flex items-center gap-3 px-4 py-4 bg-rose-50/60 rounded-2xl border border-rose-100">
+                <ChevronDown className="w-5 h-5 text-[#e11d48] animate-bounce" />
+                <p className="text-gray-500 font-bold text-sm">
                   No location selected yet
                 </p>
               </div>
@@ -597,16 +619,16 @@ export default function LocationPicker() {
           </div>
 
           {/* Confirm Button */}
-          <div className="px-4 md:px-6 pb-6 pt-1">
+          <div className="px-4 md:px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-1">
             <button
               onClick={handleConfirmLocation}
               disabled={selectedLat === null || isLoading}
-              className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-2xl ${
+              className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-lg ${
                 selectedLat !== null && !isLoading
                   ? isDeliverable
-                    ? 'bg-brand text-white shadow-brand/30 hover:bg-orange-600'
-                    : 'bg-red-500/80 text-white shadow-red-500/20 hover:bg-red-600'
-                  : 'bg-white/5 text-white/20 cursor-not-allowed border border-white/5'
+                    ? 'bg-[#e11d48] text-white shadow-rose-200 hover:bg-rose-700'
+                    : 'bg-gray-700 text-white shadow-gray-300 hover:bg-gray-800'
+                  : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200 shadow-none'
               }`}
             >
               {isLoading ? (

@@ -225,9 +225,6 @@ export default function HotelAlAminMenuPage() {
             <span className="flex items-center gap-1 bg-black/40 backdrop-blur-xs px-2.5 py-1 rounded-lg">
               <MapPin className="w-3.5 h-3.5 text-red-400" /> Yellapur, Karnataka
             </span>
-            <span className="flex items-center gap-1 bg-black/40 backdrop-blur-xs px-2.5 py-1 rounded-lg font-bold text-amber-300">
-              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> 4.5 (950+ Reviews)
-            </span>
           </div>
         </div>
       </section>
@@ -508,14 +505,15 @@ export default function HotelAlAminMenuPage() {
 
                             {/* ADD Button or Quantity Stepper */}
                             {inCart ? (
-                              <div className="bg-[#e11d48] text-white rounded-xl flex items-center gap-1 px-2 py-1 shadow-xs">
+                              <div className="bg-[#e11d48] text-white rounded-xl flex items-center px-0.5 shadow-xs">
                                 <button
                                   onClick={() => {
                                     playSound(SOUNDS.QUANTITY_TICK);
                                     updateQuantity(inCart.id || item.id, inCart.quantity - 1);
                                   }}
-                                  className="text-white hover:text-white/80 active:scale-75 p-0.5 cursor-pointer"
+                                  className="w-9 h-9 flex items-center justify-center rounded-lg text-white hover:bg-white/15 active:scale-90 cursor-pointer"
                                   title="Decrease quantity"
+                                  aria-label={`Decrease ${item.name}`}
                                 >
                                   <Minus className="w-3.5 h-3.5 stroke-[3]" />
                                 </button>
@@ -527,8 +525,9 @@ export default function HotelAlAminMenuPage() {
                                     playSound(SOUNDS.QUANTITY_TICK);
                                     updateQuantity(inCart.id || item.id, inCart.quantity + 1);
                                   }}
-                                  className="text-white hover:text-white/80 active:scale-75 p-0.5 cursor-pointer"
+                                  className="w-9 h-9 flex items-center justify-center rounded-lg text-white hover:bg-white/15 active:scale-90 cursor-pointer"
                                   title="Increase quantity"
+                                  aria-label={`Increase ${item.name}`}
                                 >
                                   <Plus className="w-3.5 h-3.5 stroke-[3]" />
                                 </button>
@@ -536,7 +535,7 @@ export default function HotelAlAminMenuPage() {
                             ) : (
                               <button
                                 onClick={() => handleAddToCart(item, category.title)}
-                                className="bg-white hover:bg-rose-50 text-[#e11d48] border-2 border-[#e11d48] hover:border-[#ff2e74] text-xs font-black px-3.5 py-1 rounded-xl shadow-xs flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
+                                className="bg-white hover:bg-rose-50 text-[#e11d48] border-2 border-[#e11d48] hover:border-[#ff2e74] text-xs font-black px-3.5 min-h-[36px] rounded-xl shadow-xs flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
                                 title={`Add ${item.name} to cart`}
                               >
                                 <span>ADD</span>
