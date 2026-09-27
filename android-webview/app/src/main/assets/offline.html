@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>You're offline</title>
+<!-- Shown by MainActivity when the site cannot load. Self-contained: no network needed.
+     The Retry link uses momsmagic://retry, which MainActivity intercepts and reloads the site. -->
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:linear-gradient(to bottom,#fff1f4,#fff8fa,#fff);color:#111827;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{background:#fff;border:1px solid #ffe4e6;border-radius:26px;padding:32px 24px;max-width:360px;width:100%;text-align:center;box-shadow:0 10px 30px rgba(225,29,72,.08)}
+.icon{width:64px;height:64px;border-radius:50%;background:#fff1f2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+h1{font-size:20px;font-weight:800;margin-bottom:8px}
+p{font-size:14px;line-height:1.5;color:#6b7280;margin-bottom:24px}
+a.btn{display:block;background:#e11d48;color:#fff;text-decoration:none;font-weight:700;font-size:15px;padding:14px;border-radius:16px}
+a.btn:active{background:#be123c}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="icon">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 2l20 20"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M2 8.82a15 15 0 0 1 4.17-2.65"/><path d="M10.66 5c4.01-.36 8.14.9 11.34 3.76"/><path d="M16.85 11.25a10 10 0 0 1 2.22 1.68"/><path d="M5 12.86a10 10 0 0 1 5.17-2.69"/><path d="M12 20h.01"/></svg>
+  </div>
+  <h1>You're offline</h1>
+  <p>Mom's Magic couldn't load. Check your mobile data or Wi-Fi and try again.</p>
+  <a class="btn" href="momsmagic://retry">Retry</a>
+</div>
+</body>
+</html>

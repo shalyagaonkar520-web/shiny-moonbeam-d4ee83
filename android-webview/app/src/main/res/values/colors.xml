@@ -1,6 +1,7 @@
 <resources>
-    <color name="primary">#FF4D00</color>
-    <color name="bg_dark">#0B0E14</color>
+    <!-- Match the web app's light pink theme -->
+    <color name="bg_pink">#FFF5F7</color>
+    <color name="accent">#E11D48</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
 </resources>
