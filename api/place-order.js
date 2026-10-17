@@ -104,9 +104,15 @@ export default async function handler(req, res) {
       description: str(i.description, 200),
       image: str(i.image, 300),
       category: str(i.category, 60),
-      isVeg: typeof i.isVeg === 'boolean' ? i.isVeg : undefined,
+      // Optional fields are left out rather than set to undefined: the pricer
+      // spreads each item into the order document, and Firestore refuses an
+      // undefined value outright -- which failed every order whose dishes had
+      // no isVeg flag or no combo list, i.e. almost all of them.
+      ...(typeof i.isVeg === 'boolean' ? { isVeg: i.isVeg } : {}),
       // Combo contents, so the kitchen knows what goes in the box.
-      items: Array.isArray(i.items) ? i.items.slice(0, 20).map((x) => str(x, 80)).filter(Boolean) : undefined,
+      ...(Array.isArray(i.items)
+        ? { items: i.items.slice(0, 20).map((x) => str(x, 80)).filter(Boolean) }
+        : {}),
     })),
     couponCode: str(body.couponCode, 40),
     location: { lat, lng },
@@ -124,6 +130,25 @@ export default async function handler(req, res) {
     return bad(res, 422, 'cod_not_available', { distanceKm: priced.distanceKm });
   }
   if (paymentMethod === 'online' && !razorpayConfigured()) return bad(res, 503, 'payments_not_configured');
+
+  // Every kitchen in the cart must be open. This endpoint writes with the
+  // Admin SDK, so the Firestore rule that refuses orders for a closed hotel
+  // does not apply here -- without this check, switching a hotel off in JIS,
+  // or a kitchen pressing STOP TAKING ORDERS, had no effect on server orders.
+  // It runs before any Razorpay order exists, so nobody is charged for food a
+  // closed kitchen will never cook. A hotel with no document is treated as
+  // closed, matching the rule: such an order could never be dispatched.
+  const hotelIds = [...new Set(priced.groups.map((g) => g.hotelId))];
+  const hotelSnaps = await Promise.all(hotelIds.map((id) => adminDb.collection('hotels').doc(id).get()));
+  const closedHotels = [];
+  hotelSnaps.forEach((snap, idx) => {
+    const h = snap.exists ? snap.data() : null;
+    if (!h || h.acceptingOrders !== true || h.status === 'INACTIVE') {
+      const group = priced.groups.find((g) => g.hotelId === hotelIds[idx]);
+      closedHotels.push({ id: hotelIds[idx], name: h?.name || group?.hotelName || hotelIds[idx] });
+    }
+  });
+  if (closedHotels.length) return bad(res, 409, 'hotel_closed', { hotels: closedHotels });
 
   // A signed-in customer's uid is recorded only when their ID token proves it.
   let userId = null;

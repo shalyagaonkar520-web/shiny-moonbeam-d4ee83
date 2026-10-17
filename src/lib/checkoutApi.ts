@@ -1,11 +1,14 @@
 // Calls to the order and payment endpoints, plus the Razorpay loader.
 
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase';
+
 export type PlaceOrderOutcome =
   | { kind: 'ok'; data: PlaceOrderResponse }
   /** Server not configured or unreachable: Checkout falls back to writing the order itself. */
   | { kind: 'unavailable' }
   /** Server refused the order (bad phone, outside the area...): tell the customer. */
-  | { kind: 'rejected'; error: string };
+  | { kind: 'rejected'; error: string; hotels?: string[] };
 
 export interface PlaceOrderResponse {
   orderId: string;
@@ -45,7 +48,14 @@ async function placeOnce(payload: Record<string, unknown>): Promise<PlaceOrderOu
   // Not configured: nothing was written, so the browser fallback is safe.
   if (res.status === 503) return { kind: 'unavailable' };
   if (res.status >= 500) return { kind: 'retry' };
-  return { kind: 'rejected', error: body?.error || 'order_failed' };
+  return {
+    kind: 'rejected',
+    error: body?.error || 'order_failed',
+    // Names of the kitchens that refused, when the refusal is about them.
+    hotels: Array.isArray(body?.hotels)
+      ? body.hotels.map((h: any) => String(h?.name || h?.id || '')).filter(Boolean)
+      : undefined,
+  };
 }
 
 /**
@@ -74,8 +84,15 @@ export async function verifyPaymentOnServer(body: Record<string, string>): Promi
   return false;
 }
 
-export function orderErrorMessage(code: string): string {
+export function orderErrorMessage(code: string, hotels?: string[]): string {
   switch (code) {
+    case 'hotel_closed': {
+      if (!hotels || hotels.length === 0) {
+        return 'One of the kitchens in your cart has stopped taking orders right now. Remove its items and try again.';
+      }
+      const verb = hotels.length > 1 ? 'have' : 'has';
+      return `${hotels.join(' and ')} ${verb} stopped taking orders right now. Remove those items and try again.`;
+    }
     case 'invalid_phone': return 'Please enter a valid 10-digit mobile number.';
     case 'invalid_name': return 'Please enter your name.';
     case 'invalid_location': return 'Please choose your delivery location again.';
@@ -117,4 +134,30 @@ export function preconnectRazorpay() {
   link.href = 'https://checkout.razorpay.com';
   link.setAttribute('data-rzp-preconnect', '');
   document.head.appendChild(link);
+}
+
+/**
+ * Names of the kitchens among `hotelIds` that are not taking orders.
+ *
+ * Used on the browser fallback before an online payment is opened: without it
+ * a customer could pay for a kitchen that is closed, and only then have the
+ * order refused. Returns null when availability could not be read, so the
+ * caller can decline to take money it cannot account for.
+ */
+export async function findClosedHotels(
+  hotelIds: string[]
+): Promise<string[] | null> {
+  try {
+    const snaps = await Promise.all(
+      [...new Set(hotelIds)].map((id) => getDoc(doc(db, 'hotels', id)))
+    );
+    return snaps
+      .filter((s) => {
+        const h: any = s.exists() ? s.data() : null;
+        return !h || h.acceptingOrders !== true || h.status === 'INACTIVE';
+      })
+      .map((s) => String((s.data() as any)?.name || s.id));
+  } catch {
+    return null;
+  }
 }
