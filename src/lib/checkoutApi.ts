@@ -12,7 +12,17 @@ export interface PlaceOrderResponse {
   amount: number;
   pricing?: { subtotal: number; deliveryCharge: number; packagingFee: number; couponDiscount: number; grandTotal: number };
   orders?: any[];
+  // Exactly one of these is filled in, by whichever gateway PAYMENT_PROVIDER
+  // selected: Razorpay's modal needs a key and an order id, UPI needs a link
+  // to open and an id to poll.
   razorpay: { orderId: string; amount: number; key?: string } | null;
+  upi?: {
+    paymentId: string;
+    amount: number;
+    link: string | null;
+    qr: string | null;
+    vpa: string | null;
+  } | null;
   duplicate?: boolean;
 }
 

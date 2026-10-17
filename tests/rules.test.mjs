@@ -83,6 +83,10 @@ expect('rider cannot invent a status', await write('orders/r3', { status: 'refun
 expect('another rider cannot touch it', await write('orders/r3', { status: 'delivered', orderStatus: 'DELIVERED' }, otherRider, { update: true }), false);
 expect('admin can update any order', await write('orders/r3', { status: 'cancelled', orderStatus: 'CANCELLED' }, admin, { update: true }), true);
 
+await seed('orders/r4', order({ riderId: 'rider1', status: 'Preparing', orderStatus: 'READY' }));
+expect('rider can pick up food the hotel marked READY', await write('orders/r4', { riderStatus: 'accepted' }, rider, { update: true }), true);
+expect('rider can start delivery after READY', await write('orders/r4', { status: 'Out For Delivery', orderStatus: 'OUT_FOR_DELIVERY', outForDeliveryAt: '2026-09-27T10:00:00Z' }, rider, { update: true }), true);
+
 // ---- riders
 await seed('riders/rider1', { name: 'R', phone: '1', earnings: 0, status: 'offline' });
 expect('rider can go online', await write('riders/rider1', { status: 'online' }, rider, { update: true }), true);

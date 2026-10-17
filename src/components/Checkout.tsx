@@ -72,6 +72,66 @@ export default function Checkout() {
   const { deliveryLocation, openLocationPicker } = useLocationStore();
   const [formData, setFormData] = useState({ name: '', phone: '', additionalMessage: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  /** Set while a UPI payment is in flight; drives the waiting screen below. */
+  const [upiPayment, setUpiPayment] = useState<{
+    orderId: string;
+    amount: number;
+    link: string | null;
+    qr: string | null;
+    vpa: string | null;
+    onPaid: (paymentId: string) => void;
+  } | null>(null);
+  const [upiElapsed, setUpiElapsed] = useState(0);
+
+  // Poll the server while a UPI payment is outstanding.
+  //
+  // The customer is in GPay or PhonePe and may never return to this tab, so
+  // there is no callback to wait for. The server learns the payment happened
+  // from /api/shalya-webhook and this asks it, every few seconds, until it
+  // says yes. The browser never decides this for itself: `paid` here comes
+  // straight from the order document the webhook wrote.
+  React.useEffect(() => {
+    if (!upiPayment) return;
+
+    let stopped = false;
+    const startedAt = Date.now();
+    const GIVE_UP_MS = 10 * 60 * 1000;
+
+    const tick = async () => {
+      if (stopped) return;
+      setUpiElapsed(Math.floor((Date.now() - startedAt) / 1000));
+
+      try {
+        const res = await fetch(`/api/payment-status?id=${encodeURIComponent(upiPayment.orderId)}`, {
+          cache: 'no-store',
+        });
+        if (res.ok) {
+          const body = await res.json();
+          if (body?.paid && !stopped) {
+            stopped = true;
+            const paidOrder = upiPayment;
+            setUpiPayment(null);
+            paidOrder.onPaid(paidOrder.orderId);
+            return;
+          }
+        }
+      } catch {
+        // Offline or the tunnel is down; keep trying, the order is already
+        // placed server-side and the webhook can still land.
+      }
+
+      if (!stopped && Date.now() - startedAt < GIVE_UP_MS) {
+        timer = window.setTimeout(tick, 4000);
+      }
+    };
+
+    let timer = window.setTimeout(tick, 2500);
+    return () => {
+      stopped = true;
+      clearTimeout(timer);
+    };
+  }, [upiPayment]);
   const settings = useSystemStore((s) => s.settings);
 
   const { user, profile, deductWalletBalance } = useAuthStore();
@@ -561,6 +621,35 @@ export default function Checkout() {
         toast(`Prices were updated: your total is now ₹${data.amount.toFixed(2)}`, { icon: 'ℹ️', duration: 6000 });
       }
 
+      // UPI: the customer leaves for their bank app and there is no callback
+      // into this tab, so the server is the only authority on whether money
+      // arrived. We open the intent, then poll /api/payment-status until it
+      // says paid. Nothing here may mark the order paid by itself.
+      if (wantsOnline && data.upi) {
+        try {
+          localStorage.setItem(PENDING_PAYMENT_KEY, JSON.stringify({ orderId, at: Date.now() }));
+        } catch { /* storage full */ }
+
+        if (data.upi.link) openExternal(data.upi.link);
+        setUpiPayment({
+          orderId,
+          amount: data.upi.amount,
+          link: data.upi.link,
+          qr: data.upi.qr,
+          vpa: data.upi.vpa,
+          // Reuses the same completion path as every other payment route, so a
+          // UPI order is saved, cleared and handed to WhatsApp identically.
+          onPaid: (paymentId: string) =>
+            finish(
+              orders.map((o: any) => ({ ...o, paymentStatus: 'completed', paymentId })),
+              serverTotals,
+              paymentId
+            ),
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       if (wantsOnline && data.razorpay) {
         try {
           localStorage.setItem(PENDING_PAYMENT_KEY, JSON.stringify({ orderId, at: Date.now() }));
@@ -631,10 +720,75 @@ export default function Checkout() {
     );
   }
 
+  // Waiting for a UPI payment. Shown instead of the form so the customer
+  // cannot edit the order or pay a second time while money is in flight.
+  if (upiPayment) {
+    const waitedLong = upiElapsed > 90;
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#fff1f4]/70 to-white flex flex-col items-center justify-center p-6 text-center gap-5">
+        <div className="w-16 h-16 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center">
+          <Loader2 className="w-7 h-7 text-[#e11d48] animate-spin" />
+        </div>
+
+        <div>
+          <h1 className="text-lg font-black text-gray-900">Waiting for your payment</h1>
+          <p className="text-sm text-gray-600 mt-1">
+            Pay <b>₹{upiPayment.amount.toFixed(2)}</b> in your UPI app. This screen updates on its own.
+          </p>
+        </div>
+
+        {upiPayment.qr && (
+          <img
+            src={upiPayment.qr.startsWith('data:') ? upiPayment.qr : `data:image/png;base64,${upiPayment.qr}`}
+            alt="UPI QR code"
+            className="w-48 h-48 rounded-2xl border border-gray-200 bg-white p-2"
+          />
+        )}
+
+        {upiPayment.link && (
+          <button
+            onClick={() => openExternal(upiPayment.link!)}
+            className="px-6 py-3 rounded-full bg-[#e11d48] text-white font-black text-sm active:scale-95 transition-transform cursor-pointer"
+          >
+            Open UPI app
+          </button>
+        )}
+
+        {upiPayment.vpa && (
+          <p className="text-xs text-gray-500">
+            Or pay manually to <b className="text-gray-800">{upiPayment.vpa}</b>
+          </p>
+        )}
+
+        {/* A UPI credit can take a minute to be noticed. Say so, rather than
+            letting the customer decide it failed and pay a second time. */}
+        {waitedLong && (
+          <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 max-w-xs">
+            Still checking. If you have already paid, keep this open — confirmation can take a
+            minute. Please do not pay again.
+          </p>
+        )}
+
+        <button
+          onClick={() => {
+            // Abandons the wait, never the order: it stays awaiting_payment on
+            // the server, so a late credit is still matched and the kitchen is
+            // told then.
+            setUpiPayment(null);
+            navigate(`/track/${upiPayment.orderId}`, { replace: true });
+          }}
+          className="text-xs font-bold text-gray-500 underline mt-2 cursor-pointer"
+        >
+          I'll check later
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#fff1f4]/70 via-[#fff8fa]/60 to-[#ffffff] text-gray-900 pb-36 pt-3 px-3 sm:px-6">
       <div className="max-w-md mx-auto space-y-3.5">
-        
+
         {/* 1. TOP HEADER (MATCHING SCREENSHOT) */}
         <div className="flex items-center justify-between py-1.5 px-1">
           <div className="flex items-center gap-2.5">

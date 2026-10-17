@@ -171,6 +171,31 @@ export async function createShalyaOrder(amountRupees, receipt) {
   return { ...payment, id: payment.id };
 }
 
+/**
+ * The `upi://pay?...` deep link the customer's bank app opens.
+ *
+ * Built here rather than taken from the gateway, because the destination is a
+ * fixed VPA the owner controls: the gateway's job is to *detect* the credit,
+ * not to collect it. If the gateway does return its own link, createShalyaOrder
+ * prefers that one.
+ *
+ * `tn` carries the order id so the bank's narration has something to match on,
+ * but banks truncate and mangle that field, so nothing may depend on it — the
+ * UTR is what actually binds a payment to an order.
+ */
+export function upiIntentLink(amountRupees, orderId) {
+  const vpa = process.env.SHALYA_UPI_VPA;
+  if (!vpa) return null;
+  const params = new URLSearchParams({
+    pa: vpa,
+    pn: process.env.SHALYA_UPI_NAME || "Mom's Magic",
+    am: Number(amountRupees).toFixed(2),
+    cu: 'INR',
+    tn: `Order ${orderId}`.slice(0, 50),
+  });
+  return `upi://pay?${params.toString()}`;
+}
+
 /** The payment as the gateway currently reports it, or null. */
 export async function fetchShalyaPayment(paymentId) {
   if (!paymentId) return null;

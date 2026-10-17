@@ -177,6 +177,63 @@ const okServer = (payment) => async (r, body) => {
     await c.close();
   }
 
+  // ---- F: UPI through Shalya Pay. The customer leaves for their bank app, so
+  // the browser must wait on the server rather than deciding anything itself.
+  {
+    const upiServer = async (r, body) => {
+      const amount = 69;
+      r.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({
+          ok: true, orderId: body.orderId, amount,
+          pricing: { subtotal: 69, deliveryCharge: 0, packagingFee: 0, couponDiscount: 0, grandTotal: amount },
+          orders: [{ id: body.orderId, orderGroupId: body.orderId, items: body.items, payableAmount: amount, status: 'awaiting_payment', createdAt: new Date().toISOString(), deliveryLocation: body.location }],
+          razorpay: null,
+          upi: {
+            paymentId: 'sp_TEST', amount,
+            link: 'upi://pay?pa=test@okicici&am=69.00&cu=INR',
+            qr: null, vpa: 'test@okicici',
+          },
+        }),
+      });
+    };
+    const { c, calls } = await newCtx(browser, { server: upiServer });
+    // Unpaid for the first two polls, then paid — the real thing takes a moment
+    // for the bank alert to arrive and the webhook to land.
+    calls.status = [];
+    await c.route('**/api/payment-status**', (r) => {
+      calls.status.push(r.request().url());
+      const paid = calls.status.length > 2;
+      r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, paid, status: paid ? 'pending' : 'awaiting_payment' }) });
+    });
+
+    const p = await c.newPage();
+    p.on('pageerror', (e) => errors.push('F: ' + e.message));
+    await addDishAndOpenCheckout(p);
+    await p.goto(BASE + '/checkout', { waitUntil: 'load' }); await p.waitForTimeout(2500);
+    await p.getByRole('button', { name: /pay online/i }).click();
+    await p.waitForTimeout(500);
+    await p.getByRole('button', { name: /confirm order/i }).click();
+
+    // The waiting screen must appear before anything is confirmed.
+    await p.waitForTimeout(1500);
+    const waitingText = await p.locator('body').innerText();
+    check('F waiting-for-payment screen shown', /waiting for your payment/i.test(waitingText));
+    check('F shows the amount to pay', /69/.test(waitingText));
+    check('F offers the UPI id as a fallback', /test@okicici/.test(waitingText));
+    check('F not confirmed while unpaid', !/\/track\//.test(p.url()));
+    check('F no WhatsApp before payment', calls.wa.length === 0);
+
+    // Now let the polling see a paid order.
+    await p.waitForURL(/\/track\//, { timeout: 25000 }).catch(() => {});
+    await p.waitForTimeout(1500);
+    check('F polled payment-status', calls.status.length >= 2, `(${calls.status.length} polls)`);
+    check('F confirmed only after the server said paid', /\/track\//.test(p.url()));
+    check('F WhatsApp sent after payment', calls.wa.length > 0);
+    check('F no browser Firestore write', calls.firestoreWrites === 0);
+    await c.close();
+  }
+
   console.log('page errors:', errors.length ? errors.slice(0, 5) : 'none');
   console.log(fail ? `\n${fail} FAILED` : '\nALL PASSED');
   await browser.close();

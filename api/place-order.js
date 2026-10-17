@@ -3,7 +3,8 @@ import { getApps } from 'firebase-admin/app';
 import { adminDb } from './_firebaseAdmin.js';
 import { priceOrder, SERVICE_RADIUS_KM, COD_MAX_KM } from './_pricing.js';
 import { announceOnce } from './_orderMessage.js';
-import { paymentsConfigured, createPaymentOrder } from './_payments.js';
+import { paymentsConfigured, createPaymentOrder, usingShalya } from './_payments.js';
+import { upiIntentLink } from './_shalyaPay.js';
 
 // POST /api/place-order
 //
@@ -242,6 +243,22 @@ export default async function handler(req, res) {
       grandTotal: priced.grandTotal,
     },
     orders: docs,
-    razorpay: razorpay ? { orderId: razorpay.id, amount: razorpay.amount, key: process.env.RAZORPAY_KEY_ID } : null,
+    // Razorpay's modal needs a key and an order; UPI needs a link to open and
+    // an id to poll. Only the active provider's block is filled in, so checkout
+    // can tell which screen to show without being told the provider separately.
+    razorpay: razorpay && !usingShalya()
+      ? { orderId: razorpay.id, amount: razorpay.amount, key: process.env.RAZORPAY_KEY_ID }
+      : null,
+    upi: razorpay && usingShalya()
+      ? {
+          paymentId: razorpay.id,
+          amount: priced.grandTotal,
+          // The gateway's own link wins when it returns one; otherwise build
+          // the intent for the owner's VPA, which is where the money goes.
+          link: razorpay.payLink || upiIntentLink(priced.grandTotal, orderId),
+          qr: razorpay.qr || null,
+          vpa: process.env.SHALYA_UPI_VPA || null,
+        }
+      : null,
   });
 }
