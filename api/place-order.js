@@ -3,7 +3,7 @@ import { getApps } from 'firebase-admin/app';
 import { adminDb } from './_firebaseAdmin.js';
 import { priceOrder, SERVICE_RADIUS_KM, COD_MAX_KM } from './_pricing.js';
 import { announceOnce } from './_orderMessage.js';
-import { razorpayConfigured, createRazorpayOrder } from './_payments.js';
+import { paymentsConfigured, createPaymentOrder } from './_payments.js';
 
 // POST /api/place-order
 //
@@ -123,7 +123,7 @@ export default async function handler(req, res) {
   if (paymentMethod === 'cod' && priced.distanceKm > COD_MAX_KM && priced.grandTotal > 0) {
     return bad(res, 422, 'cod_not_available', { distanceKm: priced.distanceKm });
   }
-  if (paymentMethod === 'online' && !razorpayConfigured()) return bad(res, 503, 'payments_not_configured');
+  if (paymentMethod === 'online' && !paymentsConfigured()) return bad(res, 503, 'payments_not_configured');
 
   // A signed-in customer's uid is recorded only when their ID token proves it.
   let userId = null;
@@ -134,11 +134,16 @@ export default async function handler(req, res) {
   let razorpay = null;
   if (paymentMethod === 'online' && priced.grandTotal > 0) {
     try {
-      razorpay = await createRazorpayOrder(priced.grandTotal, orderId);
+      razorpay = await createPaymentOrder(priced.grandTotal, orderId);
     } catch (err) {
-      console.error('place-order: Razorpay order failed', err);
+      console.error('place-order: payment order failed', err);
       return bad(res, 422, 'payment_setup_failed');
     }
+    // Shalya Pay returns null rather than throwing when the gateway is
+    // unreachable — it runs on a PC behind a tunnel, so that is an expected
+    // state. 503 is the code checkout already handles by offering Cash on
+    // Delivery, instead of leaving the customer on a dead payment screen.
+    if (!razorpay) return bad(res, 503, 'payments_not_configured');
   }
 
   const nowIso = new Date().toISOString();

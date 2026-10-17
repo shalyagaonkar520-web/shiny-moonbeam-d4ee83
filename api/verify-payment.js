@@ -1,5 +1,5 @@
 import { adminDb } from './_firebaseAdmin.js';
-import { razorpayConfigured, validCheckoutSignature, markGroupPaid } from './_payments.js';
+import { paymentsConfigured, validCheckoutSignature, markGroupPaid } from './_payments.js';
 
 // POST /api/verify-payment
 // { orderId, razorpay_order_id, razorpay_payment_id, razorpay_signature }
@@ -13,7 +13,7 @@ const ORDER_ID = /^[0-9]{13}[A-Z2-9]{10}$/;
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'method_not_allowed' });
-  if (!adminDb || !razorpayConfigured()) return res.status(503).json({ ok: false, error: 'payments_not_configured' });
+  if (!adminDb || !paymentsConfigured()) return res.status(503).json({ ok: false, error: 'payments_not_configured' });
 
   let body = req.body || {};
   if (typeof body === 'string') {

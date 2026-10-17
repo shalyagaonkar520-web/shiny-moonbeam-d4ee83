@@ -5,6 +5,7 @@ const { priceOrder, couponDiscountFor } = await import(base + '_pricing.js');
 process.env.RAZORPAY_KEY_SECRET = 'test_secret';
 const { validCheckoutSignature } = await import(base + '_payments.js');
 const { createHmac } = await import('node:crypto');
+const { Readable } = await import('node:stream');
 const place = (await import(base + 'place-order.js')).default;
 
 let fail = 0;
@@ -76,6 +77,81 @@ const forged = await webhook(new Request('https://x/api/razorpay-webhook', {
   body: JSON.stringify({ event: 'payment.captured', payload: { payment: { entity: { id: 'pay_x', order_id: 'order_x', amount: 100 } } } }),
 }));
 check('forged webhook refused', forged.status === 503 || forged.status === 401, `(status ${forged.status})`);
+
+// 9. Shalya Pay — the self-hosted UPI gateway.
+// Its notifications are what mark an order paid, and upstream a "payment" is a
+// bank SMS parsed on a home PC, so these checks matter more than usual.
+process.env.SHALYA_WEBHOOK_SECRET = 'shalya_whsec_test';
+const { validShalyaWebhook, normalisePayment, isPaidStatus } = await import(base + '_shalyaPay.js');
+
+const nowS = () => String(Math.floor(Date.now() / 1000));
+const shalyaSign = (ts, raw, secret = 'shalya_whsec_test') =>
+  createHmac('sha256', secret).update(`${ts}.${raw}`).digest('hex');
+
+const bodyPaid = JSON.stringify({ id: 'sp_1', orderId: 'ord_1', amount: 19900, status: 'paid', utr: '4299' });
+
+const ts = nowS();
+check('shalya: correctly signed webhook accepted',
+  validShalyaWebhook(bodyPaid, { 'x-timestamp': ts, 'x-signature': shalyaSign(ts, bodyPaid) }).ok);
+
+check('shalya: wrong signature refused',
+  !validShalyaWebhook(bodyPaid, { 'x-timestamp': ts, 'x-signature': 'deadbeef' }).ok);
+
+check('shalya: signature from another secret refused',
+  !validShalyaWebhook(bodyPaid, { 'x-timestamp': ts, 'x-signature': shalyaSign(ts, bodyPaid, 'attacker') }).ok);
+
+// A body edited after signing must not verify, or the amount could be raised
+// or the order id swapped in transit.
+const tampered = bodyPaid.replace('19900', '100');
+check('shalya: tampered body refused',
+  !validShalyaWebhook(tampered, { 'x-timestamp': ts, 'x-signature': shalyaSign(ts, bodyPaid) }).ok);
+
+// Replay: a request captured an hour ago, still perfectly signed.
+const oldTs = String(Math.floor(Date.now() / 1000) - 3600);
+check('shalya: replayed old request refused',
+  validShalyaWebhook(bodyPaid, { 'x-timestamp': oldTs, 'x-signature': shalyaSign(oldTs, bodyPaid) }).error === 'stale_timestamp');
+
+check('shalya: missing signature header refused',
+  !validShalyaWebhook(bodyPaid, { 'x-timestamp': ts }).ok);
+
+// Fails closed: no secret configured must never mean "anything goes".
+const savedSecret = process.env.SHALYA_WEBHOOK_SECRET;
+delete process.env.SHALYA_WEBHOOK_SECRET;
+check('shalya: unconfigured secret fails closed',
+  validShalyaWebhook(bodyPaid, { 'x-timestamp': ts, 'x-signature': shalyaSign(ts, bodyPaid) }).error === 'webhook_secret_not_configured');
+process.env.SHALYA_WEBHOOK_SECRET = savedSecret;
+
+// Field normalisation, so a small difference in the real spec does not read
+// undefined and quietly compare equal to nothing.
+const n1 = normalisePayment({ id: 'sp_2', order_id: 'ord_2', amount: 5000, state: 'SUCCESS', rrn: '9931' });
+check('shalya: snake_case and alternate names normalise',
+  n1.orderId === 'ord_2' && n1.amountPaise === 5000 && n1.utr === '9931' && n1.status === 'success');
+
+const n2 = normalisePayment({ payment: { id: 'sp_3', merchantOrderId: 'ord_3', amountRupees: 199, status: 'paid', utr: '7' } });
+check('shalya: nested payment and rupee amounts normalise',
+  n2.orderId === 'ord_3' && n2.amountPaise === 19900);
+
+check('shalya: paid synonyms recognised',
+  isPaidStatus('paid') && isPaidStatus('SUCCESS') && isPaidStatus('captured'));
+check('shalya: pending and failed are not paid',
+  !isPaidStatus('pending') && !isPaidStatus('failed') && !isPaidStatus(''));
+
+// The provider switch must default to Razorpay, so a deployment that sets
+// nothing keeps using the licensed aggregator.
+const { PAYMENT_PROVIDER, usingShalya } = await import(base + '_payments.js');
+check('payment provider defaults to razorpay', PAYMENT_PROVIDER === 'razorpay' && !usingShalya());
+
+// The webhook endpoint stays inert while Razorpay is the live gateway.
+const shalyaHook = (await import(base + 'shalya-webhook.js')).default;
+let hookStatus = 0;
+await shalyaHook(
+  Object.assign(Readable.from([bodyPaid]), {
+    method: 'POST',
+    headers: { 'x-timestamp': ts, 'x-signature': shalyaSign(ts, bodyPaid) },
+  }),
+  { status(code) { hookStatus = code; return { json: () => {} }; } }
+);
+check('shalya webhook inert while razorpay is active', hookStatus === 503, `(status ${hookStatus})`);
 
 console.log(fail ? `\n${fail} FAILED` : '\nALL PASSED');
 process.exit(fail ? 1 : 0);

@@ -1,9 +1,65 @@
-// Razorpay helpers shared by place-order, verify-payment and the webhook.
+// Payment helpers shared by place-order, verify-payment and the webhooks.
+//
+// Two gateways are supported and PAYMENT_PROVIDER chooses between them:
+//   razorpay (default) — the licensed aggregator, unchanged.
+//   shalya             — the self-hosted UPI gateway, see ./_shalyaPay.js.
+// It defaults to razorpay, so a deployment that sets nothing keeps working
+// exactly as before and the new path stays inert until it is switched on
+// deliberately. Switching back is one environment variable, not a code change,
+// which matters when the alternative is a PC at home serving live payments.
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { adminDb } from './_firebaseAdmin.js';
 import { loadGroup, announceOnce, sendTelegram } from './_orderMessage.js';
+import {
+  shalyaConfigured,
+  createShalyaOrder,
+  fetchShalyaPayment,
+  isPaidStatus,
+} from './_shalyaPay.js';
+
+export const PAYMENT_PROVIDER = (process.env.PAYMENT_PROVIDER || 'razorpay').toLowerCase();
+export const usingShalya = () => PAYMENT_PROVIDER === 'shalya';
 
 export const razorpayConfigured = () => !!(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET);
+
+/** Is the gateway currently selected by PAYMENT_PROVIDER usable? */
+export const paymentsConfigured = () => (usingShalya() ? shalyaConfigured() : razorpayConfigured());
+
+/**
+ * Creates an order with whichever gateway is selected.
+ * Returns null when the gateway is unreachable — place-order turns that into a
+ * 503 so checkout can offer Cash on Delivery rather than stranding the customer.
+ */
+export async function createPaymentOrder(amountRupees, receipt) {
+  if (usingShalya()) return createShalyaOrder(amountRupees, receipt);
+  return createRazorpayOrder(amountRupees, receipt);
+}
+
+/**
+ * One payment, in one shape, whichever gateway reported it.
+ * `utr` is only ever set by Shalya Pay, where confirmation is inferred from a
+ * bank credit alert and the UPI reference is the only unforgeable identifier.
+ */
+export async function fetchPayment(paymentId) {
+  if (usingShalya()) return fetchShalyaPayment(paymentId);
+  const rzp = await fetchRazorpayPayment(paymentId);
+  if (!rzp) return null;
+  return {
+    id: rzp.id,
+    orderId: rzp.order_id,
+    amountPaise: Number(rzp.amount),
+    status: String(rzp.status || '').toLowerCase(),
+    utr: rzp.acquirer_data?.rrn ?? null,
+    raw: rzp,
+  };
+}
+
+/** Razorpay calls an authorised-but-uncaptured payment good; Shalya has its own words. */
+function paymentSucceeded(status) {
+  return usingShalya()
+    ? isPaidStatus(status)
+    : ['authorized', 'captured'].includes(String(status || '').toLowerCase());
+}
 
 /** Creates a Razorpay order for an amount the server computed. */
 export async function createRazorpayOrder(amountRupees, receipt) {
@@ -80,13 +136,22 @@ export async function markGroupPaid(razorpayOrderId, paymentId, expect = {}) {
     return { ok: false, error: 'amount_mismatch' };
   }
 
-  // A checkout signature proves Razorpay authorised the payment; also confirm
-  // with Razorpay that it belongs to this order and is for the full amount.
-  const payment = await fetchRazorpayPayment(paymentId);
+  // A valid signature proves the gateway authorised the payment; also ask the
+  // gateway directly that it belongs to this order and is for the full amount.
+  // A null reply means the gateway was unreachable, not that the payment is
+  // bad, so the signature alone has to carry it — which is why the signature
+  // check upstream of here is never optional.
+  const payment = await fetchPayment(paymentId);
   if (payment) {
-    if (payment.order_id !== razorpayOrderId) return { ok: false, error: 'payment_order_mismatch' };
-    if (Number(payment.amount) !== record.amountPaise) return { ok: false, error: 'amount_mismatch' };
-    if (!['authorized', 'captured'].includes(payment.status)) return { ok: false, error: 'payment_not_successful' };
+    if (payment.orderId && payment.orderId !== razorpayOrderId) {
+      return { ok: false, error: 'payment_order_mismatch' };
+    }
+    if (payment.amountPaise !== record.amountPaise) return { ok: false, error: 'amount_mismatch' };
+    if (!paymentSucceeded(payment.status)) return { ok: false, error: 'payment_not_successful' };
+    // Shalya Pay infers payments from bank credit alerts, where an amount on
+    // its own cannot tell two simultaneous customers apart. Refuse to mark an
+    // order paid unless the gateway gave a UPI reference to pin it to.
+    if (usingShalya() && !payment.utr) return { ok: false, error: 'missing_utr' };
   }
 
   const groupId = record.groupId;
@@ -108,7 +173,14 @@ export async function markGroupPaid(razorpayOrderId, paymentId, expect = {}) {
         ? { paymentStatus: 'completed', paymentId, paidAt, status: 'pending', orderStatus: 'NEW' }
         : { paymentStatus: 'completed', paymentId, paidAt, refundNeeded: true });
     });
-    tx.update(recordRef, { paymentId, paidAt });
+    // Keeping the UTR and the provider on the payment record is what makes a
+    // disputed UPI payment traceable back to a specific bank credit later.
+    tx.update(recordRef, {
+      paymentId,
+      paidAt,
+      utr: payment?.utr ?? null,
+      provider: PAYMENT_PROVIDER,
+    });
     return waiting ? 'paid' : 'late';
   });
 
