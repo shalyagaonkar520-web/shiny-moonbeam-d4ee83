@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { openExternal } from '../lib/openExternal';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
@@ -724,8 +725,21 @@ export default function Checkout() {
   // cannot edit the order or pay a second time while money is in flight.
   if (upiPayment) {
     const waitedLong = upiElapsed > 90;
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-[#fff1f4]/70 to-white flex flex-col items-center justify-center p-6 text-center gap-5">
+    // Rendered into document.body rather than in place.
+    //
+    // It has to cover the bottom nav and the cart bar: those stayed tappable
+    // underneath, and the cart still held the items (it is only cleared once
+    // payment completes), so a customer tired of waiting could reach Cart ->
+    // Checkout and pay a second time for food they had already paid for.
+    // place-order only dedupes a repeat of the same order id, and that second
+    // trip makes a fresh one.
+    //
+    // A plain z-index could not do it: App wraps every route in a Framer Motion
+    // opacity animation, and that creates a stacking context, so a z-index set
+    // in here is only ever compared against its siblings inside the page. A
+    // portal leaves that context entirely.
+    return createPortal(
+      <div className="fixed inset-0 z-[200] overflow-y-auto bg-gradient-to-b from-[#fff1f4] to-white flex flex-col items-center justify-center p-6 text-center gap-5">
         <div className="w-16 h-16 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center">
           <Loader2 className="w-7 h-7 text-[#e11d48] animate-spin" />
         </div>
@@ -781,7 +795,8 @@ export default function Checkout() {
         >
           I'll check later
         </button>
-      </div>
+      </div>,
+      document.body
     );
   }
 

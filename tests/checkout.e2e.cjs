@@ -224,6 +224,22 @@ const okServer = (payment) => async (r, body) => {
     check('F not confirmed while unpaid', !/\/track\//.test(p.url()));
     check('F no WhatsApp before payment', calls.wa.length === 0);
 
+    // The waiting screen must cover the bottom nav. It did not at first: the
+    // page is inside a Framer Motion opacity animation, which makes a stacking
+    // context, so the overlay's z-index never competed with the nav outside it.
+    // The nav stayed tappable and the cart still held the items, so a customer
+    // tired of waiting could reach Cart -> Checkout and pay twice.
+    const cartTab = p.getByRole('button', { name: /cart/i }).first();
+    await cartTab.click({ timeout: 2000 }).catch(() => { /* covered: expected */ });
+    await p.waitForTimeout(800);
+    // The route legitimately stays /checkout — the overlay is rendered by that
+    // page. What must not happen is the nav taking the customer elsewhere, so
+    // the assertion is that the waiting screen is still what they are looking at.
+    const stillWaiting = await p.locator('body').innerText();
+    check('F bottom nav cannot be reached while paying',
+      /waiting for your payment/i.test(stillWaiting));
+    check('F still only one order placed', calls.place.length === 1, `(${calls.place.length})`);
+
     // Now let the polling see a paid order.
     await p.waitForURL(/\/track\//, { timeout: 25000 }).catch(() => {});
     await p.waitForTimeout(1500);
