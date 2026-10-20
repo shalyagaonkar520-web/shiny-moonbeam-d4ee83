@@ -34,7 +34,7 @@ const ROTATING_SEARCH_PLACEHOLDERS = [
 // Photo is empty placeholder until user provides reference photo!
 const PARTNER_HOTELS = [
   {
-    id: 'moms_magic',
+    id: 'mintoo',
     name: "Mintoo",
     tagline: "All Orders",
     isOpen: true,
@@ -819,7 +819,7 @@ export default function LandingPage() {
                       alt={hotel.name}
                       loading="lazy"
                       decoding="async"
-                      className={`w-full h-full ${hotel.id === 'moms_magic' ? 'object-contain p-1.5' : 'object-cover'}`}
+                      className={`w-full h-full ${hotel.id === 'mintoo' ? 'object-contain p-1.5' : 'object-cover'}`}
                     />
                   ) : (
                     /* Clean Empty Photo Box Placeholder */

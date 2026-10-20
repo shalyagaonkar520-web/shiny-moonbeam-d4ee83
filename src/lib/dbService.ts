@@ -66,7 +66,7 @@ import { db } from '../firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 
 export class DbService {
-  private static STORAGE_KEY = 'moms_magic_admin_settings';
+  private static STORAGE_KEY = 'mintoo_admin_settings';
   private static SETTINGS_DOC_REF = 'system/settings';
 
   /**

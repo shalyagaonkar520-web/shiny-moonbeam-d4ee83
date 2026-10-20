@@ -263,7 +263,7 @@ export default function TrackingPage() {
   useEffect(() => {
     if (!view?.dest) return;
     let cancelled = false;
-    fetchRoute(view.dest, `moms_magic_route_${destKey}`).then((r) => !cancelled && setRoute(r));
+    fetchRoute(view.dest, `mintoo_route_${destKey}`).then((r) => !cancelled && setRoute(r));
     return () => { cancelled = true; };
   }, [destKey]);
 

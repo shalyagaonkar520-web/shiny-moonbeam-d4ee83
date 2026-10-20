@@ -84,7 +84,7 @@ export default function TrackOrderPage() {
   useEffect(() => {
     let stored: any[] = [];
     try {
-      stored = JSON.parse(localStorage.getItem('moms_magic_orders') || '[]');
+      stored = JSON.parse(localStorage.getItem('mintoo_orders') || '[]');
     } catch {
       stored = [];
     }

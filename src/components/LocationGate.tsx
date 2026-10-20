@@ -36,7 +36,7 @@ function geolocationErrorMessage(err: unknown): string {
  * changes it -- so nobody orders to yesterday's address by accident.
  */
 
-const CONFIRMED_KEY = 'moms_magic_location_confirmed';
+const CONFIRMED_KEY = 'mintoo_location_confirmed';
 
 function readConfirmed(): boolean {
   try {

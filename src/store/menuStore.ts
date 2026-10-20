@@ -34,10 +34,10 @@ export const useMenuStore = create<MenuState>((set, get) => ({
           return { id: doc.id, ...data, image: fallback?.image || data.image };
         });
         set({ menuItems: items, isLoading: false, error: null });
-        localStorage.setItem('moms_magic_menu_cache', JSON.stringify(items));
+        localStorage.setItem('mintoo_menu_cache', JSON.stringify(items));
       } else {
         // Collection is empty or doesn't exist
-        const cached = localStorage.getItem('moms_magic_menu_cache');
+        const cached = localStorage.getItem('mintoo_menu_cache');
         if (cached) {
           try {
             const parsed = JSON.parse(cached);

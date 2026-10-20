@@ -5,7 +5,7 @@ const GOOD_TAGS = ['Tasty food', 'Good portion', 'Well packed', 'On time', 'Poli
 const BAD_TAGS = ['Late delivery', 'Cold food', 'Wrong item', 'Poor packing', 'Less quantity'];
 const STAR_WORDS = ['', 'Terrible', 'Bad', 'Okay', 'Good', 'Loved it!'];
 
-const ratedKey = (orderId: string) => `moms_magic_rated_${orderId}`;
+const ratedKey = (orderId: string) => `mintoo_rated_${orderId}`;
 
 export function hasRatedLocally(orderId: string): boolean {
   try {

@@ -16,9 +16,9 @@ async function newCtx(browser, { server, razorpay } = {}) {
   await c.addInitScript((loc) => {
     if (!sessionStorage.getItem('seeded')) {
       localStorage.setItem('delivery-location-storage', JSON.stringify({ state: { deliveryLocation: loc }, version: 0 }));
-      localStorage.setItem('moms_magic_user_name', 'Test Customer');
-      localStorage.setItem('moms_magic_user_phone', '9876543210');
-      sessionStorage.setItem('moms_magic_location_confirmed', '1');
+      localStorage.setItem('mintoo_user_name', 'Test Customer');
+      localStorage.setItem('mintoo_user_phone', '9876543210');
+      sessionStorage.setItem('mintoo_location_confirmed', '1');
       sessionStorage.setItem('seeded', '1');
     }
   }, LOC);
@@ -85,9 +85,9 @@ const okServer = (payment) => async (r, body) => {
     const p = await c.newPage();
     p.on('pageerror', (e) => errors.push('A: ' + e.message));
     await addDishAndOpenCheckout(p);
-    const before = await p.evaluate(() => JSON.parse(localStorage.getItem('moms-magic-cart') || '{}')?.state?.items?.length || 0);
+    const before = await p.evaluate(() => JSON.parse(localStorage.getItem('mintoo-cart') || '{}')?.state?.items?.length || 0);
     await p.reload({ waitUntil: 'load' }); await p.waitForTimeout(2500);
-    const after = await p.evaluate(() => JSON.parse(localStorage.getItem('moms-magic-cart') || '{}')?.state?.items?.length || 0);
+    const after = await p.evaluate(() => JSON.parse(localStorage.getItem('mintoo-cart') || '{}')?.state?.items?.length || 0);
     check('A cart persisted across reload', before > 0 && after === before, `(${before} -> ${after})`);
 
     await p.goto(BASE + '/checkout', { waitUntil: 'load' }); await p.waitForTimeout(2500);
@@ -104,7 +104,7 @@ const okServer = (payment) => async (r, body) => {
     check('A COD requested', sent.paymentMethod === 'cod');
     check('A navigated to tracking', /\/track\/[0-9]{13}/.test(p.url()), p.url().replace(BASE, ''));
     check('A WhatsApp opened with order id', calls.wa.some((u) => decodeURIComponent(u).includes(sent.orderId || '@@')), `(${calls.wa.length} opens)`);
-    const cartAfter = await p.evaluate(() => JSON.parse(localStorage.getItem('moms-magic-cart') || '{}')?.state?.items?.length ?? -1);
+    const cartAfter = await p.evaluate(() => JSON.parse(localStorage.getItem('mintoo-cart') || '{}')?.state?.items?.length ?? -1);
     check('A cart cleared after order', cartAfter === 0);
     check('A no browser Firestore write (server path)', calls.firestoreWrites === 0);
     await c.close();
@@ -123,7 +123,7 @@ const okServer = (payment) => async (r, body) => {
     check('B rejection message shown', /outside our delivery area/i.test(txt));
     check('B stayed on checkout', p.url().endsWith('/checkout'));
     check('B no WhatsApp', calls.wa.length === 0);
-    const kept = await p.evaluate(() => JSON.parse(localStorage.getItem('moms-magic-cart') || '{}')?.state?.items?.length || 0);
+    const kept = await p.evaluate(() => JSON.parse(localStorage.getItem('mintoo-cart') || '{}')?.state?.items?.length || 0);
     check('B cart kept', kept > 0);
     await c.close();
   }

@@ -128,7 +128,7 @@ export const handler: Handler = async (event) => {
           body: message,
           icon: '/pwa-icon-192.png',
           badge: '/pwa-icon-192.png',
-          tag: 'moms-magic-broadcast',
+          tag: 'mintoo-broadcast',
           requireInteraction: true,
           ...(imageUrl ? { image: imageUrl } : {}),
           data: {

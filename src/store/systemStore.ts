@@ -81,7 +81,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
         // toggle must stick. Defaults only fill fields the document lacks.
         const data = { ...DEFAULT_SETTINGS, ...(docSnap.data() as Partial<AdminSettings>) };
         set({ settings: data });
-        localStorage.setItem('moms_magic_admin_settings', JSON.stringify(data));
+        localStorage.setItem('mintoo_admin_settings', JSON.stringify(data));
       }
     }, (error) => {
       console.error("Error listening to settings:", error);

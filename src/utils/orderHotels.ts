@@ -82,8 +82,15 @@ export function getOrderHotelId(items: AnyItem[]): string | null {
  * which keeps one code path instead of a special case for "our own" food.
  */
 export const OWN_KITCHEN = {
+  // Deliberately NOT renamed with the rest of the rebrand. This value is
+  // written onto every order line as `hotelId` and read back by the super
+  // admin panel, which is a separate app with its own deploy. Changing it here
+  // alone would make new orders arrive with a kitchen the panel does not
+  // recognise, while every order placed so far still says 'moms-magic'.
+  // Flip it in both repos at once, or not at all; the name below is what
+  // anyone actually sees.
   id: 'moms-magic',
-  name: "Mintoo Kitchen",
+  name: 'Mintoo Kitchen',
 } as const;
 
 export interface HotelOrderGroup {

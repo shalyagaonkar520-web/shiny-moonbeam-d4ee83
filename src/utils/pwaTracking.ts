@@ -5,11 +5,11 @@ import { doc, setDoc } from 'firebase/firestore';
  * Gets the existing unique anonymous device ID or generates a new one.
  */
 export function getOrCreateDeviceId(): string {
-  let deviceId = localStorage.getItem('moms_magic_device_id');
+  let deviceId = localStorage.getItem('mintoo_device_id');
   if (!deviceId) {
     // Generate a unique anonymous ID using random string segments
     deviceId = 'device_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    localStorage.setItem('moms_magic_device_id', deviceId);
+    localStorage.setItem('mintoo_device_id', deviceId);
   }
   return deviceId;
 }
@@ -20,7 +20,7 @@ export function getOrCreateDeviceId(): string {
  */
 export async function trackPWAInstallation(): Promise<void> {
   try {
-    const isAlreadyLogged = localStorage.getItem('moms_magic_pwa_installed_logged');
+    const isAlreadyLogged = localStorage.getItem('mintoo_pwa_installed_logged');
     if (isAlreadyLogged === 'true') {
       console.log('PWA installation already logged to Firestore.');
       return;
@@ -68,7 +68,7 @@ export async function trackPWAInstallation(): Promise<void> {
     }, { merge: true });
 
     // Cache locally to bypass future checks
-    localStorage.setItem('moms_magic_pwa_installed_logged', 'true');
+    localStorage.setItem('mintoo_pwa_installed_logged', 'true');
     console.log('PWA installation successfully tracked in Firestore!');
   } catch (error) {
     console.error('Error tracking PWA installation in Firestore:', error);

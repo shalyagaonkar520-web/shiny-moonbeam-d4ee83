@@ -145,7 +145,7 @@ export default function AdminPage() {
     }
 
     setSendingNotification(true);
-    const token = localStorage.getItem('moms_magic_admin_token') || '';
+    const token = localStorage.getItem('mintoo_admin_token') || '';
     toast.loading('Broadcasting push notifications...', { id: 'push-broadcast' });
 
     try {
@@ -778,7 +778,7 @@ export default function AdminPage() {
           email: data.email || email.trim(),
           role: 'super_admin' as const,
         });
-        localStorage.setItem('moms_magic_admin_token', data.token);
+        localStorage.setItem('mintoo_admin_token', data.token);
         toast.success('Welcome back, Admin!');
         setIsLoggingIn(false);
         return;
@@ -813,7 +813,7 @@ export default function AdminPage() {
       };
       
       setUser(adminUser);
-      localStorage.setItem('moms_magic_admin_token', await firebaseUser.getIdToken());
+      localStorage.setItem('mintoo_admin_token', await firebaseUser.getIdToken());
       toast.success(`Welcome back, ${adminUser.name}!`);
     } catch (err: any) {
       toast.error(err.message || 'Invalid admin credentials');
@@ -825,7 +825,7 @@ export default function AdminPage() {
   // Secure Settings Save Handler
   const handleSaveSettings = async (updates: Partial<typeof settings> = {}) => {
     setIsSaving(true);
-    const token = localStorage.getItem('moms_magic_admin_token') || '';
+    const token = localStorage.getItem('mintoo_admin_token') || '';
     
     // Send only the fields that differ from the stored settings, so saving the
     // delivery fee cannot also rewrite websiteStatus or emergencyStop with a
@@ -856,7 +856,7 @@ export default function AdminPage() {
 
   // Toggling operational shortcuts directly
   const handleToggleState = async (key: keyof typeof settings, value: any) => {
-    const token = localStorage.getItem('moms_magic_admin_token') || '';
+    const token = localStorage.getItem('mintoo_admin_token') || '';
     
     // UI optimistic update first
     setLocalSettings(prev => ({ ...prev, [key]: value }));
@@ -871,7 +871,7 @@ export default function AdminPage() {
 
   // Emergency lockdown trigger
   const handleEmergencyTrigger = async () => {
-    const token = localStorage.getItem('moms_magic_admin_token') || '';
+    const token = localStorage.getItem('mintoo_admin_token') || '';
     const success = await triggerEmergencyStop(token);
     if (success) {
       toast.error('SYSTEM SHUTDOWN ACTIVATED! All ordering pipelines locked.', { icon: '🚨', duration: 4000 });
@@ -880,7 +880,7 @@ export default function AdminPage() {
 
   // Emergency lockdown reset
   const handleEmergencyReset = async () => {
-    const token = localStorage.getItem('moms_magic_admin_token') || '';
+    const token = localStorage.getItem('mintoo_admin_token') || '';
     const success = await resetEmergencyStop(token);
     if (success) {
       toast.success('System restored. Ordering channels online.', { icon: '✅' });
@@ -1042,7 +1042,7 @@ export default function AdminPage() {
               <button 
                 onClick={() => {
                   logout();
-                  localStorage.removeItem('moms_magic_admin_token');
+                  localStorage.removeItem('mintoo_admin_token');
                   // End the admin's Firebase session too (custom-token or email login).
                   signOut(auth).catch(() => {});
                   toast.success('Logged out successfully');

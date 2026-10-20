@@ -65,7 +65,7 @@ export function reorder(order: { items?: any[] }): ReorderResult {
 /** The full order saved on this device at checkout (it keeps each item's cart id). */
 export function localOrder(orderId: string): any | null {
   try {
-    const stored = JSON.parse(localStorage.getItem('moms_magic_orders') || '[]');
+    const stored = JSON.parse(localStorage.getItem('mintoo_orders') || '[]');
     return stored.find((o: any) => o?.id === orderId) || null;
   } catch {
     return null;

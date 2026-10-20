@@ -58,9 +58,9 @@ export default function ProfilePage() {
 
   // Load user data on mount
   useEffect(() => {
-    const savedName = localStorage.getItem('moms_magic_user_name') || profile?.name || user?.displayName || '';
-    const savedPhone = localStorage.getItem('moms_magic_user_phone') || profile?.phone || user?.phoneNumber || '';
-    const savedAddress = localStorage.getItem('moms_magic_user_address') || deliveryLocation?.address || '';
+    const savedName = localStorage.getItem('mintoo_user_name') || profile?.name || user?.displayName || '';
+    const savedPhone = localStorage.getItem('mintoo_user_phone') || profile?.phone || user?.phoneNumber || '';
+    const savedAddress = localStorage.getItem('mintoo_user_address') || deliveryLocation?.address || '';
 
     setName(savedName);
     setPhone(savedPhone);
@@ -69,7 +69,7 @@ export default function ProfilePage() {
     // Recent orders saved on this device. When a phone is known, only that
     // number's orders are listed, so a shared family phone doesn't mix accounts.
     try {
-      const storedOrders: any[] = JSON.parse(localStorage.getItem('moms_magic_orders') || '[]');
+      const storedOrders: any[] = JSON.parse(localStorage.getItem('mintoo_orders') || '[]');
       const myPhone = normalizePhone(savedPhone);
       const mine = storedOrders
         .filter((o) => o && o.id)
@@ -115,10 +115,10 @@ export default function ProfilePage() {
       return;
     }
 
-    localStorage.setItem('moms_magic_user_name', name.trim());
-    localStorage.setItem('moms_magic_user_phone', phone.trim());
+    localStorage.setItem('mintoo_user_name', name.trim());
+    localStorage.setItem('mintoo_user_phone', phone.trim());
     if (address.trim()) {
-      localStorage.setItem('moms_magic_user_address', address.trim());
+      localStorage.setItem('mintoo_user_address', address.trim());
     }
 
     setIsSaved(true);

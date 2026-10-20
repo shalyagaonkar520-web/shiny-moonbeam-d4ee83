@@ -1,3 +1,9 @@
+// Must stay the first import. Modules evaluate in import order, so this
+// carries the pre-rename storage keys over to their mintoo_* names before any
+// store below reads them. Move it down and carts, saved addresses and admin
+// sessions all look empty on the first load after the rename.
+import './lib/storageMigration';
+
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';

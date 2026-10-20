@@ -19,7 +19,11 @@ const HOTELS = [
   { id: 'malabar', name: 'Hotel Malabar', prefix: 'malabar-', match: ['Hotel Malabar', "Kaka's Hotel Malabar"] },
   { id: 'sankalpa', name: 'Hotel Sankalpa', prefix: 'sankalpa-', match: ['Hotel Sankalpa'] },
 ];
-const OWN_KITCHEN = { id: 'moms-magic', name: "Mintoo Kitchen" };
+// `id` is deliberately not renamed with the rest of the rebrand: it is written
+// onto every order line as `hotelId` and read by the super admin panel, and
+// every order placed so far carries 'moms-magic'. Must match
+// src/utils/orderHotels.ts. The name is the part anyone sees.
+const OWN_KITCHEN = { id: 'moms-magic', name: 'Mintoo Kitchen' };
 
 function hotelOf(item) {
   return (

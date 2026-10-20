@@ -50,7 +50,7 @@ interface SavedAddressState {
 }
 
 // Addresses live on the device for everyone (guests included), under a
-// moms_magic_ key so account deletion clears them. For a signed-in customer
+// mintoo_ key so account deletion clears them. For a signed-in customer
 // they are mirrored to profile.addresses in Firestore, so they follow the
 // customer to a new phone; see useSavedAddresses for the merge.
 export const useSavedAddressStore = create<SavedAddressState>()(
@@ -102,7 +102,7 @@ export const useSavedAddressStore = create<SavedAddressState>()(
         });
       },
     }),
-    { name: 'moms_magic_saved_addresses' }
+    { name: 'mintoo_saved_addresses' }
   )
 );
 

@@ -21,16 +21,22 @@ const getMultiplier = (plan: SubscriptionPlan) => {
 // The cart is kept for a few hours. It used to live only in memory and be
 // wiped on every load, so Android killing the app while the customer was in
 // their UPI app, WhatsApp or location settings emptied the cart.
-const CART_KEY = 'moms-magic-cart';
+const CART_KEY = 'mintoo-cart';
 const CART_MAX_AGE_MS = 6 * 60 * 60 * 1000;
 
-// Leftovers from the old undo feature.
+// Leftovers from the old undo feature, and from when the cart lived in
+// sessionStorage. These are cleanups of names that are already dead, so they
+// keep their pre-rename spelling; the mintoo_* twins are listed too because
+// the storage migration copies anything it finds under the old names.
 try {
   localStorage.removeItem('moms_magic_cart');
+  localStorage.removeItem('mintoo_cart');
   localStorage.removeItem('lastRemovedItem');
   localStorage.removeItem('moms_magic_last_removed');
+  localStorage.removeItem('mintoo_last_removed');
   localStorage.removeItem('undoItem');
   sessionStorage.removeItem('moms-magic-cart');
+  sessionStorage.removeItem('mintoo-cart');
 } catch (e) {}
 
 export const useCartStore = create<CartStore>()(persist((set, get) => {

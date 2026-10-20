@@ -35,7 +35,7 @@ import {
 const RAZORPAY_KEY_ID = 'rzp_live_T1Y1yu09Jbjo6b';
 
 // { orderId, at } of an online payment that was opened but not finished here.
-const PENDING_PAYMENT_KEY = 'moms_magic_pending_payment';
+const PENDING_PAYMENT_KEY = 'mintoo_pending_payment';
 
 // Every order -- food and bulk alike -- goes to this one WhatsApp number.
 const WHATSAPP_ORDER_NUMBER = '919606001790';
@@ -251,7 +251,7 @@ export default function Checkout() {
 
   // Clear the old party flag left on devices by previous versions.
   React.useEffect(() => {
-    if (!isBulkOrder) localStorage.removeItem('moms_magic_order_type');
+    if (!isBulkOrder) localStorage.removeItem('mintoo_order_type');
   }, [isBulkOrder]);
 
   React.useEffect(() => {
@@ -264,8 +264,8 @@ export default function Checkout() {
   // Check store open & restore saved user info
   React.useEffect(() => {
     // Time lock / closure restrictions removed - always open
-    const savedName    = localStorage.getItem('moms_magic_user_name');
-    const savedPhone   = localStorage.getItem('moms_magic_user_phone');
+    const savedName    = localStorage.getItem('mintoo_user_name');
+    const savedPhone   = localStorage.getItem('mintoo_user_phone');
     if (savedName || savedPhone) {
       setFormData((prev) => ({ 
         ...prev, 
@@ -315,8 +315,8 @@ export default function Checkout() {
     }
 
     const customerName = formData.name.trim();
-    localStorage.setItem('moms_magic_user_name', customerName);
-    localStorage.setItem('moms_magic_user_phone', phone);
+    localStorage.setItem('mintoo_user_name', customerName);
+    localStorage.setItem('mintoo_user_phone', phone);
 
     const mapsViewLink = `https://maps.google.com/?q=${deliveryLocation.lat},${deliveryLocation.lng}`;
     const mapsNavLink  = `https://maps.google.com/maps?daddr=${deliveryLocation.lat},${deliveryLocation.lng}`;
@@ -442,9 +442,9 @@ export default function Checkout() {
     /** Hand-off once an order exists: save a copy, empty the cart, open tracking and WhatsApp. */
     const finish = (orders: any[], totals: Totals, paymentId?: string) => {
       try {
-        const existing = JSON.parse(localStorage.getItem('moms_magic_orders') || '[]');
+        const existing = JSON.parse(localStorage.getItem('mintoo_orders') || '[]');
         orders.forEach((o) => existing.unshift(o));
-        localStorage.setItem('moms_magic_orders', JSON.stringify(existing.slice(0, 50)));
+        localStorage.setItem('mintoo_orders', JSON.stringify(existing.slice(0, 50)));
       } catch {
         /* storage full: tracking still works from the server */
       }

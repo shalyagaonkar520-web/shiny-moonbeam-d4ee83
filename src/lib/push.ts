@@ -9,7 +9,7 @@ type PushBridge = {
   requestNotificationPermission?: () => void;
 };
 
-const TOKEN_KEY = 'moms_magic_push_token';
+const TOKEN_KEY = 'mintoo_push_token';
 
 function bridge(): PushBridge | undefined {
   return (window as unknown as { AndroidBridge?: PushBridge }).AndroidBridge;

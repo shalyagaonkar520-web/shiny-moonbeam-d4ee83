@@ -20,7 +20,7 @@ export default function AdminCouponManager() {
 
   const saveCoupons = async (updatedCoupons: Coupon[]) => {
     try {
-      const token = localStorage.getItem('moms_magic_admin_token') || undefined;
+      const token = localStorage.getItem('mintoo_admin_token') || undefined;
       await updateSettings({ coupons: updatedCoupons }, token);
       
       // Also directly update firestore just in case

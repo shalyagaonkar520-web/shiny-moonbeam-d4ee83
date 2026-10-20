@@ -51,10 +51,10 @@ export default function MMCleanBookingSheet({ service, branding, onClose }: Prop
     // The app already knows these from earlier food orders; no reason to make
     // the customer type them again.
     name: (() => {
-      try { return localStorage.getItem('moms_magic_user_name') || ''; } catch { return ''; }
+      try { return localStorage.getItem('mintoo_user_name') || ''; } catch { return ''; }
     })(),
     phone: (() => {
-      try { return localStorage.getItem('moms_magic_user_phone') || ''; } catch { return ''; }
+      try { return localStorage.getItem('mintoo_user_phone') || ''; } catch { return ''; }
     })(),
     address: '',
     date: days[0].date,

@@ -118,9 +118,9 @@ export const useAuthStore = create<AuthStore>((set, get) => {
           // New User Registration
           const newProfile: UserProfile = {
             uid: firebaseUser.uid,
-            name: firebaseUser.displayName || localStorage.getItem('moms_magic_user_name') || 'Guest User',
+            name: firebaseUser.displayName || localStorage.getItem('mintoo_user_name') || 'Guest User',
             email: firebaseUser.email || '',
-            phone: firebaseUser.phoneNumber || localStorage.getItem('moms_magic_user_phone') || '',
+            phone: firebaseUser.phoneNumber || localStorage.getItem('mintoo_user_phone') || '',
             walletBalance: 0,
             rewardPoints: 0,
             addresses: [],
@@ -152,9 +152,9 @@ export const useAuthStore = create<AuthStore>((set, get) => {
       // Resilient fallback: ensure user profile is always populated so app is never blocked
       const fallbackProfile: UserProfile = {
         uid: firebaseUser.uid,
-        name: firebaseUser.displayName || localStorage.getItem('moms_magic_user_name') || 'Customer',
+        name: firebaseUser.displayName || localStorage.getItem('mintoo_user_name') || 'Customer',
         email: firebaseUser.email || '',
-        phone: firebaseUser.phoneNumber || localStorage.getItem('moms_magic_user_phone') || '',
+        phone: firebaseUser.phoneNumber || localStorage.getItem('mintoo_user_phone') || '',
         walletBalance: 0,
         rewardPoints: 0,
         addresses: [],
@@ -177,22 +177,22 @@ export const useAuthStore = create<AuthStore>((set, get) => {
     }
     if (firebaseUser) {
       if (firebaseUser.phoneNumber) {
-        localStorage.setItem('moms_magic_user_phone', firebaseUser.phoneNumber);
+        localStorage.setItem('mintoo_user_phone', firebaseUser.phoneNumber);
       }
       if (firebaseUser.displayName) {
-        localStorage.setItem('moms_magic_user_name', firebaseUser.displayName);
+        localStorage.setItem('mintoo_user_name', firebaseUser.displayName);
       }
       set({ user: firebaseUser });
       await syncProfile(firebaseUser);
     } else {
       // Check if local guest session exists in localStorage
-      const localName = localStorage.getItem('moms_magic_user_name');
-      const localPhone = localStorage.getItem('moms_magic_user_phone');
+      const localName = localStorage.getItem('mintoo_user_name');
+      const localPhone = localStorage.getItem('mintoo_user_phone');
       if (localName || localPhone) {
         const localProfile: UserProfile = {
           uid: 'local_' + (localPhone?.replace(/\D/g, '') || 'user'),
           name: localName || 'Guest User',
-          email: localStorage.getItem('moms_magic_user_email') || '',
+          email: localStorage.getItem('mintoo_user_email') || '',
           phone: localPhone || '',
           walletBalance: 0,
           rewardPoints: 0,
@@ -229,10 +229,10 @@ export const useAuthStore = create<AuthStore>((set, get) => {
           res = await signInWithPopup(auth, new GoogleAuthProvider());
         }
         if (res.user.displayName) {
-          localStorage.setItem('moms_magic_user_name', res.user.displayName);
+          localStorage.setItem('mintoo_user_name', res.user.displayName);
         }
         if (res.user.phoneNumber) {
-          localStorage.setItem('moms_magic_user_phone', res.user.phoneNumber);
+          localStorage.setItem('mintoo_user_phone', res.user.phoneNumber);
         }
       } catch (error) {
         console.error('Google sign-in error:', error);
@@ -247,7 +247,7 @@ export const useAuthStore = create<AuthStore>((set, get) => {
       try {
         const res = await signInWithEmailAndPassword(auth, email, password);
         if (res.user.displayName) {
-          localStorage.setItem('moms_magic_user_name', res.user.displayName);
+          localStorage.setItem('mintoo_user_name', res.user.displayName);
         }
       } catch (error) {
         console.error('Email login error:', error);
@@ -262,9 +262,9 @@ export const useAuthStore = create<AuthStore>((set, get) => {
       try {
         const credential = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(credential.user, { displayName: name });
-        localStorage.setItem('moms_magic_user_name', name);
+        localStorage.setItem('mintoo_user_name', name);
         if (phone) {
-          localStorage.setItem('moms_magic_user_phone', phone);
+          localStorage.setItem('mintoo_user_phone', phone);
         }
         await syncProfile(credential.user);
       } catch (error) {
@@ -278,8 +278,8 @@ export const useAuthStore = create<AuthStore>((set, get) => {
     quickPhoneLogin: (name, phone) => {
       const cleanName = name.trim() || 'Guest Customer';
       const cleanPhone = phone.trim();
-      localStorage.setItem('moms_magic_user_name', cleanName);
-      if (cleanPhone) localStorage.setItem('moms_magic_user_phone', cleanPhone);
+      localStorage.setItem('mintoo_user_name', cleanName);
+      if (cleanPhone) localStorage.setItem('mintoo_user_phone', cleanPhone);
 
       const localProfile: UserProfile = {
         uid: 'local_' + (cleanPhone.replace(/\D/g, '') || Date.now().toString()),
@@ -306,9 +306,9 @@ export const useAuthStore = create<AuthStore>((set, get) => {
       } catch (error) {
         console.error('Logout error:', error);
       } finally {
-        localStorage.removeItem('moms_magic_user_phone');
-        localStorage.removeItem('moms_magic_user_name');
-        localStorage.removeItem('moms_magic_user_email');
+        localStorage.removeItem('mintoo_user_phone');
+        localStorage.removeItem('mintoo_user_name');
+        localStorage.removeItem('mintoo_user_email');
         set({ user: null, profile: null, loading: false });
       }
     },
@@ -350,7 +350,7 @@ export const useAuthStore = create<AuthStore>((set, get) => {
         // cloud account, so for them this is the whole deletion.
         try {
           Object.keys(localStorage)
-            .filter((k) => k.startsWith('moms_magic_') || k === 'delivery-location-storage')
+            .filter((k) => k.startsWith('mintoo_') || k === 'delivery-location-storage')
             .forEach((k) => localStorage.removeItem(k));
         } catch {
           /* storage unavailable */

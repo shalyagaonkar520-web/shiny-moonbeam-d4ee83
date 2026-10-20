@@ -21,7 +21,11 @@ export interface LiveHotelStatus {
  * already matches, so this is the single place that needs to know.
  */
 const ID_ALIASES: Record<string, string> = {
-  moms_magic: 'moms-magic',
+  // The storefront calls its own kitchen "mintoo" since the rename, but the
+  // panel owns the hotels collection and its document is still "moms-magic".
+  // That id cannot be changed from this repo, so the alias is what keeps the
+  // open/closed lookup working.
+  mintoo: 'moms-magic',
 };
 
 function panelId(storefrontId: string): string {
