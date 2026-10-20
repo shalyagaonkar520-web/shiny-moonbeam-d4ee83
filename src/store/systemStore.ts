@@ -16,7 +16,7 @@ interface SystemState {
 
 const DEFAULT_SETTINGS: AdminSettings = {
   websiteStatus: 'ON',
-  maintenanceMessage: "Mom's Magic is Open! Welcome ❤️",
+  maintenanceMessage: "Mintoo is Open! Welcome ❤️",
   openTime: '12:00',
   closeTime: '22:45',
   reopenMessage: 'Orders are accepted between 12:00 PM and 10:45 PM daily.',
@@ -113,7 +113,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
       emergencyStop: true,
       websiteStatus: 'OFF',
       deliveryPause: true,
-      maintenanceMessage: "Mom's Magic order lines are currently locked down due to an emergency. We'll be back shortly! 🚨"
+      maintenanceMessage: "Mintoo order lines are currently locked down due to an emergency. We'll be back shortly! 🚨"
     });
   },
 
@@ -122,7 +122,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
       emergencyStop: false,
       websiteStatus: 'ON',
       deliveryPause: false,
-      maintenanceMessage: "Mom's Magic is temporarily closed. We'll reopen soon ❤️"
+      maintenanceMessage: "Mintoo is temporarily closed. We'll reopen soon ❤️"
     });
   }
 }));

@@ -40,7 +40,7 @@ export default function SiteClosedGate({ children }: { children: React.ReactNode
           We're closed right now
         </h1>
         <p className="text-gray-600">
-          Mom's Magic is not taking orders at the moment. Please check back a
+          Mintoo is not taking orders at the moment. Please check back a
           little later — we'll be right here.
         </p>
         <a

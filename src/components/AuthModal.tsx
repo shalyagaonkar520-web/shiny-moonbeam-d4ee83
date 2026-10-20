@@ -91,7 +91,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = 'signin' }: A
       setSubmitLoading(true);
       try {
         await signUpWithEmail(email.trim(), password.trim(), name.trim(), phone.trim());
-        toast.success(`Welcome to Mom's Magic, ${name.trim()}! 🍲`);
+        toast.success(`Welcome to Mintoo, ${name.trim()}! 🍲`);
         onClose();
       } catch (err: any) {
         toast.error(getFriendlyErrorMessage(err));
@@ -165,7 +165,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = 'signin' }: A
                   🍲
                 </span>
                 <span className="text-[11px] font-black uppercase tracking-widest text-[#e11d48]">
-                  Mom's Magic Yellapur
+                  Mintoo Yellapur
                 </span>
               </div>
               <h2 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">

@@ -25,9 +25,9 @@ export default defineConfig(({mode}) => {
         injectRegister: false,
         includeAssets: ['favicon.ico', 'robots.txt', 'pwa-icon-192.png', 'pwa-icon-512.png'],
         manifest: {
-          name: "Mom's Magic",
-          short_name: "Mom's Magic",
-          description: "Order fresh food online from Mom's Magic. Fast delivery in Yellapur, Dandeli and nearby areas.",
+          name: "Mintoo",
+          short_name: "Mintoo",
+          description: "Order fresh food online from Mintoo. Fast delivery in Yellapur, Dandeli and nearby areas.",
           theme_color: "#fff5f7",
           background_color: "#fff5f7",
           display: "standalone",

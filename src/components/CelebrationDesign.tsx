@@ -38,7 +38,7 @@ const OCCASION_TYPES = [
 const WHATSAPP_NUMBER = '919606001790';
 
 export default function CelebrationDesign() {
-  useSEO("Design Celebration", "Submit your budget and event details to plan a custom balloon and stage setup with Moms Magic.");
+  useSEO("Design Celebration", "Submit your budget and event details to plan a custom balloon and stage setup with Mintoo.");
   const navigate = useNavigate();
   const [galleryIdx, setGalleryIdx] = useState(0);
   const [form, setForm] = useState({
@@ -100,7 +100,7 @@ export default function CelebrationDesign() {
       `Please share beautiful setup ideas based on my budget! ✨`,
       ``,
       `━━━━━━━━━━━━━━━━`,
-      `🌟 Powered by Moms Magic`,
+      `🌟 Powered by Mintoo`,
     ].join('\n');
 
     const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
@@ -117,7 +117,7 @@ export default function CelebrationDesign() {
       `📅 <b>Date:</b> ${escHtml(form.date)}`,
       ``,
       `━━━━━━━━━━━━━━━━`,
-      `🌟 <b>Moms Magic</b> - Celebration Booking`,
+      `🌟 <b>Mintoo</b> - Celebration Booking`,
     ].join('\n');
 
     await notifyTelegram(tgMessage);
@@ -153,7 +153,7 @@ export default function CelebrationDesign() {
           </button>
           <div className="flex-1 text-center">
             <span className="text-[10px] font-black uppercase tracking-widest text-purple-400">
-              Mom's Magic Creates ✨
+              Mintoo Creates ✨
             </span>
           </div>
           <div className="w-11" />

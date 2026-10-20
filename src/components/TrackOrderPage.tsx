@@ -72,7 +72,7 @@ function StageBar({ stage }: { stage: Stage }) {
 }
 
 export default function TrackOrderPage() {
-  useSEO('Track Order', "Track your Mom's Magic order.");
+  useSEO('Track Order', "Track your Mintoo order.");
   const navigate = useNavigate();
   const [orderId, setOrderId] = useState('');
   const [checking, setChecking] = useState(false);

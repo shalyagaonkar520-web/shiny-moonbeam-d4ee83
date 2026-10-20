@@ -42,7 +42,7 @@ function getFriendlyErrorMessage(err: any): string {
 }
 
 export default function AuthPage() {
-  useSEO("Sign In / Sign Up - Mom's Magic", "Sign in or register for Mom's Magic Yellapur to order food and track your deliveries.");
+  useSEO("Sign In / Sign Up - Mintoo", "Sign in or register for Mintoo Yellapur to order food and track your deliveries.");
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -97,7 +97,7 @@ export default function AuthPage() {
       setSubmitLoading(true);
       try {
         await signUpWithEmail(email.trim(), password.trim(), name.trim(), phone.trim());
-        toast.success(`Welcome to Mom's Magic, ${name.trim()}! 🍲`);
+        toast.success(`Welcome to Mintoo, ${name.trim()}! 🍲`);
         navigate('/profile');
       } catch (err: any) {
         toast.error(getFriendlyErrorMessage(err));
@@ -218,7 +218,7 @@ export default function AuthPage() {
           </button>
 
           <span className="text-[11px] font-black uppercase tracking-wider text-[#e11d48]">
-            Mom's Magic Yellapur
+            Mintoo Yellapur
           </span>
         </div>
 

@@ -33,7 +33,7 @@ interface LocationStore {
   isLoading: boolean;
 }
 
-// Fixed restaurant location (Mom's Magic Kitchen - Yellapur area)
+// Fixed restaurant location (Mintoo Kitchen - Yellapur area)
 const RESTAURANT_LOCATION = { lat: 14.9643, lng: 74.7121 };
 const MAX_DELIVERY_RANGE = 5; // km
 

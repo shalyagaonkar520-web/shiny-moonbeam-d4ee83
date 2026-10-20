@@ -15,7 +15,7 @@ import { toStage, Stage, STAGE_STEPS, STAGE_TITLE } from '../lib/orderStage';
 import { useSystemStore } from '../store/systemStore';
 import { openExternal } from '../lib/openExternal';
 
-// Mom's Magic kitchen, where every delivery starts.
+// Mintoo kitchen, where every delivery starts.
 const KITCHEN = { lat: 14.9643, lng: 74.7121 };
 // Typical time from order to food leaving the kitchen, and town riding speed.
 const PREP_MINUTES = 20;
@@ -175,7 +175,7 @@ const bikeIcon = L.divIcon({
 export default function TrackingPage() {
   const { orderId = '' } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
-  useSEO('Live Tracking', "Track your Mom's Magic order live.");
+  useSEO('Live Tracking', "Track your Mintoo order live.");
   const supportNumber = useSystemStore((s) => s.settings?.whatsappNumber) || '+919606001790';
 
   const [view, setView] = useState<TrackView | null>(null);
@@ -327,7 +327,7 @@ export default function TrackingPage() {
     if (!mapEl.current || map.current) return;
     const m = L.map(mapEl.current, { zoomControl: false, attributionControl: false }).setView([KITCHEN.lat, KITCHEN.lng], 15);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(m);
-    L.marker([KITCHEN.lat, KITCHEN.lng], { icon: kitchenIcon }).addTo(m).bindPopup("Mom's Magic kitchen");
+    L.marker([KITCHEN.lat, KITCHEN.lng], { icon: kitchenIcon }).addTo(m).bindPopup("Mintoo kitchen");
     map.current = m;
     // The page fades in, so the container gets its final size after Leaflet first measures it.
     // Re-frame too: a fit done before the final size lands off-centre.
@@ -603,7 +603,7 @@ export default function TrackingPage() {
 
           <button
             onClick={() => {
-              const text = `Hi Mom's Magic, I need help with my order #${orderId}`;
+              const text = `Hi Mintoo, I need help with my order #${orderId}`;
               openExternal(`https://wa.me/${supportNumber.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`);
             }}
             className="w-full py-3.5 rounded-2xl bg-white border border-rose-100 shadow-sm text-gray-900 font-black text-sm flex items-center justify-center gap-2"

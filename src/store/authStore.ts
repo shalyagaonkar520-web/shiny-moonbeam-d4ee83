@@ -42,7 +42,7 @@ function getNativeBridge(): NativeBridge | undefined {
 }
 
 function isAndroidWebView(): boolean {
-  return /MomsMagicApp|; wv\)/.test(navigator.userAgent);
+  return /MintooApp|; wv\)/.test(navigator.userAgent);
 }
 
 function authError(code: string, message: string): Error {

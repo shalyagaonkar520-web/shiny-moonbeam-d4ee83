@@ -35,7 +35,7 @@ const ROTATING_SEARCH_PLACEHOLDERS = [
 const PARTNER_HOTELS = [
   {
     id: 'moms_magic',
-    name: "Mom's Magic",
+    name: "Mintoo",
     tagline: "All Orders",
     isOpen: true,
     badge: "Open Now",
@@ -136,8 +136,8 @@ const WHATS_ON_YOUR_MIND = [
 
 export default function LandingPage() {
   useSEO(
-    "Mom's Magic - Food Order",
-    "Order Chicken Biryani, Shawarma, Noodles, Veg Meals, Fast Food and Special Combo Offers from Moms Magic. Fast delivery in Yellapur, Dandeli and nearby areas."
+    "Mintoo - Food Order",
+    "Order Chicken Biryani, Shawarma, Noodles, Veg Meals, Fast Food and Special Combo Offers from Mintoo. Fast delivery in Yellapur, Dandeli and nearby areas."
   );
 
   const navigate = useNavigate();
@@ -218,7 +218,7 @@ export default function LandingPage() {
     }
     if (!hotel.isOpen) {
       playSound(SOUNDS.CLICK || SOUNDS.ADD_TO_CART);
-      toast(`${hotel.name} is coming soon to Mom's Magic! 🔒 We are setting up their delicious menu.`, {
+      toast(`${hotel.name} is coming soon to Mintoo! 🔒 We are setting up their delicious menu.`, {
         icon: '⏳',
         style: {
           background: '#1e3a8a',
@@ -231,7 +231,7 @@ export default function LandingPage() {
       });
       return;
     }
-    // Mom's magic is active, scroll to menu
+    // Mintoo is active, scroll to menu
     bestsellersRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
@@ -266,7 +266,7 @@ export default function LandingPage() {
   // remaining hotels, each badged with the hotel that cooks it.
   const allProducts = useMemo(() => [...menuItems, ...PARTNER_HOTEL_PRODUCTS], [menuItems]);
 
-  /** Hotel name to print on a card, or null for Al Amin / Mom's Magic items. */
+  /** Hotel name to print on a card, or null for Al Amin / Mintoo items. */
   const hotelBadgeOf = (product: any): string | null =>
     product?.showHotelBadge ? product.hotelName : null;
 
@@ -445,7 +445,7 @@ export default function LandingPage() {
                   type="button"
                   onClick={() => setIsAuthModalOpen(true)}
                   className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-300 hover:from-amber-300 hover:to-amber-200 text-blue-950 font-black text-xs shadow-md active:scale-95 transition-all cursor-pointer whitespace-nowrap"
-                  title="Sign In / Login to Mom's Magic"
+                  title="Sign In / Login to Mintoo"
                 >
                   <LogIn className="w-3.5 h-3.5 text-blue-950" />
                   <span className="hidden sm:inline">Sign In / Login</span>
@@ -542,7 +542,7 @@ export default function LandingPage() {
                     </div>
                   </motion.div>
                 ) : (
-                  /* Slide 2: Mom's Magic Feast Banner with Real Food Photo */
+                  /* Slide 2: Mintoo Feast Banner with Real Food Photo */
                   <motion.div
                     key="feast-banner"
                     initial={{ opacity: 0, scale: 1.04 }}

@@ -71,7 +71,7 @@ const CELEBRATION_CARDS = [
 ];
 
 export default function CelebrationHub() {
-  useSEO("Celebration Hub", "Host your birthday party, function setup, or luxury celebration with custom decorations from Moms Magic.");
+  useSEO("Celebration Hub", "Host your birthday party, function setup, or luxury celebration with custom decorations from Mintoo.");
   const navigate = useNavigate();
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -116,7 +116,7 @@ export default function CelebrationHub() {
       ``,
       `Please contact me and help me set this up based on my budget! ✨`,
       `━━━━━━━━━━━━━━━━`,
-      `🌟 Powered by Moms Magic`,
+      `🌟 Powered by Mintoo`,
     ].join('\n');
 
     const waUrl = `https://wa.me/919606001790?text=${encodeURIComponent(message)}`;
@@ -131,7 +131,7 @@ export default function CelebrationHub() {
       `📸 <b>Reference Style:</b> ${escHtml(GALLERY_IMAGES[galleryIdx].label)}`,
       ``,
       `━━━━━━━━━━━━━━━━`,
-      `🌟 <b>Moms Magic</b> - Celebration Hub`,
+      `🌟 <b>Mintoo</b> - Celebration Hub`,
     ].join('\n');
 
     await notifyTelegram(tgMessage);

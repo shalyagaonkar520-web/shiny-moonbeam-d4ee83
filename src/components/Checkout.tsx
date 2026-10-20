@@ -372,7 +372,7 @@ export default function Checkout() {
           ? `🎉 *NEW EVENT ORDER!* 🎉`
           : hotelName
           ? `🏨 *NEW ORDER - ${hotelName.toUpperCase()}!* 🏨`
-          : `📦 *NEW ORDER - MOM'S MAGIC!* 📦`,
+          : `📦 *NEW ORDER - MINTOO!* 📦`,
         `🆔 *Order:* ${orderId}`,
         GAP,
         hotelName ? `🏨 *Hotel:* ${hotelName}` : '',
@@ -398,7 +398,7 @@ export default function Checkout() {
         `📍 *Track:* ${trackUrl}`,
         GAP,
         `━━━━━━━━━━━━━━━━`,
-        hotelName ? `🏨 *${hotelName} Order via Mom's Magic*` : `🍽️ *Mom's Magic - All Orders*`,
+        hotelName ? `🏨 *${hotelName} Order via Mintoo*` : `🍽️ *Mintoo - All Orders*`,
         `👉 https://momsmagic.shop`,
         `━━━━━━━━━━━━━━━━`,
       ].filter((l) => l !== '').map((l) => (l === GAP ? '' : l)).join('\n');
@@ -564,7 +564,7 @@ export default function Checkout() {
         amount: opts.amount,
         currency: 'INR',
         ...(opts.orderId ? { order_id: opts.orderId } : {}),
-        name: "Mom's Magic",
+        name: "Mintoo",
         description: `Order ${orderId}`,
         handler: onPaid,
         prefill: { name: customerName, contact: phone },
@@ -708,7 +708,7 @@ export default function Checkout() {
           </div>
           <h2 className="text-xl font-black text-gray-900">Your Cart is Empty</h2>
           <p className="text-xs text-gray-500">
-            Explore Mom's Magic menu and add your favorite dishes to place an order!
+            Explore Mintoo menu and add your favorite dishes to place an order!
           </p>
           <button
             onClick={() => navigate('/food')}
@@ -850,18 +850,18 @@ export default function Checkout() {
             <div className="w-11 h-11 rounded-full overflow-hidden border border-rose-100 shadow-xs shrink-0 bg-rose-50 p-1 flex items-center justify-center">
               <img
                 src="/logo-sm.webp"
-                alt="Mom's Magic"
+                alt="Mintoo"
                 className="w-full h-full object-contain"
               />
             </div>
             <div>
               <h2 className="text-sm sm:text-base font-black text-gray-900 leading-snug">
                 {/* Name the hotel the food is actually from. This used to be hardcoded to
-                    "Mom's Magic - All Orders", so a Hotel Sankalpa order showed the wrong
+                    "Mintoo - All Orders", so a Hotel Sankalpa order showed the wrong
                     kitchen on screen even though the WhatsApp message named it correctly. */}
                 {summaryHotelName
-                  ? `${summaryHotelName} via Mom's Magic`
-                  : "Mom's Magic - All Orders"}
+                  ? `${summaryHotelName} via Mintoo`
+                  : "Mintoo - All Orders"}
               </h2>
               <p className="text-[11px] text-gray-500 font-medium">
                 {deliveryLocation ? deliveryLocation.address.split(',')[0] : 'Yellapur'} • {activeItems.length} items

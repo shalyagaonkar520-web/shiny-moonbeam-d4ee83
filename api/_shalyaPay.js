@@ -188,7 +188,7 @@ export function upiIntentLink(amountRupees, orderId) {
   if (!vpa) return null;
   const params = new URLSearchParams({
     pa: vpa,
-    pn: process.env.SHALYA_UPI_NAME || "Mom's Magic",
+    pn: process.env.SHALYA_UPI_NAME || "Mintoo",
     am: Number(amountRupees).toFixed(2),
     cu: 'INR',
     tn: `Order ${orderId}`.slice(0, 50),

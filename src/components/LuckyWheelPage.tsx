@@ -151,8 +151,8 @@ export default function LuckyWheelPage() {
         console.error('Failed to save spin results', err);
         toast.error(
           err?.code === 'permission-denied'
-            ? "Your spin could not be recorded. Please contact Mom's Magic with your code before claiming."
-            : "Your spin could not be saved (network problem). Please contact Mom's Magic with your code.",
+            ? "Your spin could not be recorded. Please contact Mintoo with your code before claiming."
+            : "Your spin could not be saved (network problem). Please contact Mintoo with your code.",
           { duration: 8000 }
         );
       }
@@ -161,7 +161,7 @@ export default function LuckyWheelPage() {
   
   const handleClaim = () => {
     let cleanPhone = '+919606001790'; // Admin Phone to send claim to
-    let message = `Hello Moms Magic! 🎡\n\nI just spun the Lucky Wheel and won: *${wonPrize}*! 🎉\n\nMy Phone Number: ${phone}\nOTP Code Used: ${code.toUpperCase()}`;
+    let message = `Hello Mintoo! 🎡\n\nI just spun the Lucky Wheel and won: *${wonPrize}*! 🎉\n\nMy Phone Number: ${phone}\nOTP Code Used: ${code.toUpperCase()}`;
     const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
 
     // A prize claim is free food leaving the kitchen, so it belongs on the order
@@ -177,7 +177,7 @@ export default function LuckyWheelPage() {
         `🔢 <b>Code:</b> ${esc(code.toUpperCase())}`,
         '',
         '━━━━━━━━━━━━━━━━',
-        '🌟 <b>Moms Magic</b> - Lucky Wheel',
+        '🌟 <b>Mintoo</b> - Lucky Wheel',
       ].join('\n')
     );
     openExternal(waUrl);

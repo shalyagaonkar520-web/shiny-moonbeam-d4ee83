@@ -16,7 +16,7 @@ export default function InstallAppModal() {
       await deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') {
-        toast.success("Thank you for installing Mom's Magic! 🎉", {
+        toast.success("Thank you for installing Mintoo! 🎉", {
           icon: '📲',
           style: {
             background: '#ffffff',
@@ -84,7 +84,7 @@ export default function InstallAppModal() {
                   Official Web App
                 </span>
                 <h2 className="text-xl sm:text-2xl font-black text-gray-900 leading-tight">
-                  Install Mom's Magic
+                  Install Mintoo
                 </h2>
                 <p className="text-xs font-semibold text-gray-500">
                   Instant 10-Minute Food & Cake Delivery

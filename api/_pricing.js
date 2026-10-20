@@ -19,7 +19,7 @@ const HOTELS = [
   { id: 'malabar', name: 'Hotel Malabar', prefix: 'malabar-', match: ['Hotel Malabar', "Kaka's Hotel Malabar"] },
   { id: 'sankalpa', name: 'Hotel Sankalpa', prefix: 'sankalpa-', match: ['Hotel Sankalpa'] },
 ];
-const OWN_KITCHEN = { id: 'moms-magic', name: "Mom's Magic Kitchen" };
+const OWN_KITCHEN = { id: 'moms-magic', name: "Mintoo Kitchen" };
 
 function hotelOf(item) {
   return (
