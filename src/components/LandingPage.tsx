@@ -560,7 +560,7 @@ export default function LandingPage() {
                     <div className="absolute inset-0 p-4 sm:p-5 flex flex-col justify-between text-left z-10">
                       <div>
                         <span className="inline-block bg-amber-400 text-black text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-sm">
-                          MOM'S SPECIAL FEAST 🔥
+                          MINTOO SPECIAL FEAST 🔥
                         </span>
                         <h2 className="text-white text-base sm:text-xl font-black uppercase tracking-tight leading-tight mt-1.5 max-w-[240px]">
                           YOUR CRAVINGS, DELIVERED
