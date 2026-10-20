@@ -34,6 +34,8 @@ import { useInstallModalStore } from './store/installModalStore';
 const FeedbackPage = lazy(() => import('./components/FeedbackPage'));
 const AboutFounder = lazy(() => import('./components/AboutFounder'));
 const CelebrationHub = lazy(() => import('./components/CelebrationHub'));
+// Home cleaning. Its own chunk: most visits are for food and never touch it.
+const MMCleanPage = lazy(() => import('./components/MMCleanPage'));
 const CelebrationDesign = lazy(() => import('./components/CelebrationDesign'));
 const AdminPage = lazy(() => import('./components/AdminPage'));
 const LuckyWheelPage = lazy(() => import('./components/LuckyWheelPage'));
@@ -220,6 +222,7 @@ export default function App() {
                   <Route path="/hotel-coastal-crown" element={<HotelCoastalCrownMenuPage />} />
                   <Route path="/hotel-malabar" element={<HotelMalabarMenuPage />} />
                   <Route path="/hotel-sankalpa" element={<HotelSankalpaMenuPage />} />
+                  <Route path="/clean" element={<MMCleanPage />} />
                   <Route path="/celebration" element={<CelebrationHub />} />
                   <Route path="/celebration/design" element={<CelebrationDesign />} />
                   <Route path="/feedback" element={<FeedbackPage />} />

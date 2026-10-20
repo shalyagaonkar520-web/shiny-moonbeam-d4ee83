@@ -13,7 +13,7 @@
     "lint": "tsc --noEmit",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
-    "test": "node tests/server.test.mjs",
+    "test": "node tests/server.test.mjs && node tests/mmclean.test.mjs",
     "test:e2e": "node tests/checkout.e2e.cjs",
     "test:rules": "npx -y firebase-tools@13 emulators:exec --only firestore --project demo-momsmagic \"node tests/rules.test.mjs\""
   },

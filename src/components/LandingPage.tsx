@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, Plus, Minus, ChevronDown, Clock,
   ArrowRight, X, Sparkles, User, ShoppingBag, Flame,
-  Store, Image as ImageIcon, Phone, HelpCircle, MessageCircle, Download, LogIn
+  Store, Image as ImageIcon, Phone, HelpCircle, MessageCircle, Download, LogIn,
+  ChevronRight
 } from 'lucide-react';
 import { useMenuStore } from '../store/menuStore';
 import { useCartStore } from '../store/cartStore';
@@ -868,6 +869,33 @@ export default function LandingPage() {
             );
             })}
           </div>
+        </section>
+
+        {/* 2b. MM CLEAN ENTRY. Deliberately drawn, not photographed: the home
+            page should not pay for a cross-origin image for a section most
+            visits scroll straight past. The page itself handles the
+            coming-soon state, so this tile does not need to read Firestore. */}
+        <section>
+          <button
+            onClick={() => navigate('/clean')}
+            className="w-full flex items-center gap-3 text-left bg-gradient-to-r from-emerald-50 to-teal-50/60 border border-emerald-100 rounded-3xl p-3.5 active:scale-[0.99] transition-transform cursor-pointer"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-white border border-emerald-100 flex items-center justify-center text-2xl shrink-0">
+              🧹
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h2 className="text-gray-900 font-black text-base tracking-tight">MM Clean</h2>
+                <span className="text-[9px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                  New
+                </span>
+              </div>
+              <p className="text-xs text-gray-600 font-medium leading-snug mt-0.5">
+                Home cleaning by verified pros · Pay after the service
+              </p>
+            </div>
+            <ChevronRight className="w-5 h-5 text-emerald-600 shrink-0" />
+          </button>
         </section>
 
         {/* 3. "WHAT'S ON YOUR MIND?" SECTION (CIRCULAR DISH PLATES LIKE USER'S REFERENCE) */}
