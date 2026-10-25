@@ -1,5 +1,5 @@
-import { getAuth } from 'firebase-admin/auth';
 import { getApps } from 'firebase-admin/app';
+import { loadAdminAuth } from './_adminAuth.js';
 import { adminDb } from './_firebaseAdmin.js';
 import { priceOrder, SERVICE_RADIUS_KM, COD_MAX_KM } from './_pricing.js';
 import { announceOnce } from './_orderMessage.js';
@@ -154,7 +154,10 @@ export default async function handler(req, res) {
   // A signed-in customer's uid is recorded only when their ID token proves it.
   let userId = null;
   if (typeof body.idToken === 'string' && body.idToken && getApps().length) {
-    try { userId = (await getAuth(getApps()[0]).verifyIdToken(body.idToken)).uid; } catch { /* guest order */ }
+    try {
+      const { getAuth } = await loadAdminAuth();
+      if (getAuth) userId = (await getAuth(getApps()[0]).verifyIdToken(body.idToken)).uid;
+    } catch { /* guest order */ }
   }
 
   let razorpay = null;

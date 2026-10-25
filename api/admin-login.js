@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { getApps } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
+import { loadAdminAuth } from './_adminAuth.js';
 import { adminDb } from './_firebaseAdmin.js';
 
 // Admin login, checked on the server.
@@ -61,11 +61,13 @@ function recordFailure(ip) {
   if (failures.size > 5000) failures.clear();
 }
 
-/** Firebase Auth with admin rights, or null when the Admin SDK is not configured. */
-function adminAuth() {
+/** Firebase Auth with admin rights, or null when the Admin SDK is unavailable. */
+async function adminAuth() {
   if (!adminDb) return null;
   const apps = getApps();
-  return apps.length ? getAuth(apps[0]) : null;
+  if (!apps.length) return null;
+  const { getAuth } = await loadAdminAuth();
+  return getAuth ? getAuth(apps[0]) : null;
 }
 
 /** Constant-time compare, so a wrong password cannot be found byte by byte. */
@@ -88,7 +90,9 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') {
-    return res.status(405).json({ ok: false, error: 'Method Not Allowed' });
+    // TEMPORARY DIAGNOSTIC -- remove once firebase-admin/auth loads on Vercel.
+    const { error: authLoadError } = await loadAdminAuth();
+    return res.status(405).json({ ok: false, error: 'Method Not Allowed', authModule: authLoadError ? 'unavailable: ' + authLoadError : 'ok' });
   }
 
   if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
@@ -126,7 +130,7 @@ export default async function handler(req, res) {
   // A Firebase session for the admin, so Firestore rules can tell it apart
   // from a customer. Null (and the admin UI warns) when the SDK is missing.
   let firebaseToken = null;
-  const auth = adminAuth();
+  const auth = await adminAuth();
   if (auth) {
     try {
       firebaseToken = await auth.createCustomToken(ADMIN_UID, { admin: true });
