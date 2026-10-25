@@ -6,7 +6,7 @@ import {
   Search, Plus, Minus, ChevronDown, Clock,
   ArrowRight, X, Sparkles, User, ShoppingBag, Flame,
   Store, Image as ImageIcon, Phone, HelpCircle, MessageCircle, Download, LogIn,
-  ChevronRight
+  ChevronRight, MapPin
 } from 'lucide-react';
 import { useMenuStore } from '../store/menuStore';
 import { useCartStore } from '../store/cartStore';
@@ -95,7 +95,7 @@ const PARTNER_HOTELS = [
   }
 ];
 
-// "What's On Your Mind?" Circular Dish Plates (Matching user's reference photo)
+// "What's on your mind?" Circular Dish Plates (Matching user's reference photo)
 const WHATS_ON_YOUR_MIND = [
   {
     id: 'biryani',
@@ -399,183 +399,176 @@ export default function LandingPage() {
     return () => observer.disconnect();
   }, [hasMoreProducts, visibleProducts.length]);
 
+  // The header shows the address the way food apps do: the first part bold
+  // ("Main Road") and the rest underneath in grey ("Yellapur, Karnataka").
+  const addressParts = (deliveryLocation?.address || '')
+    .split(',')
+    .map((part: string) => part.trim())
+    .filter(Boolean);
+  const locationHeading = addressParts[0] || 'Set location';
+  const locationDetail = addressParts.length > 1
+    ? addressParts.slice(1).join(', ')
+    : deliveryLocation ? 'Delivery location' : 'Choose where to deliver';
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#fff1f4]/70 via-[#fff8fa]/60 to-[#ffffff] text-gray-900 font-sans pb-36">
-      
-      {/* 1. THE ROYAL BLUE FRAME (TOP HEADER) - CLEAN BLUE AND WHITE */}
-      <header className="bg-gradient-to-b from-[#1836c2] via-[#1534be] to-[#102ea8] text-white pt-3.5 pb-5 px-4 rounded-b-[32px] shadow-[0_10px_35px_rgba(24,54,194,0.25)] relative z-40">
-        <div className="max-w-xl mx-auto">
-          
-          {/* Top Row: Location Selector + Help to Order + Profile */}
-          <div className="flex items-center justify-between gap-2">
-            
-            {/* Left: Location Dropdown */}
-            <div 
+    <div className="min-h-screen bg-[#f6f6f7] text-gray-900 font-sans pb-36">
+
+      {/* Header. White, like every major food app: where it's going on the
+          left, who's ordering on the right, search underneath. It used to be a
+          royal-blue block with a yellow Sign In pill and a red "?", which put
+          three accent colours on screen before a single dish. */}
+      <header className="safe-top bg-white border-b border-gray-100">
+        <div className="max-w-xl mx-auto px-4 pt-3 pb-3">
+          <div className="flex items-center justify-between gap-3">
+            <button
+              type="button"
               onClick={openLocationPicker}
-              className="flex flex-col cursor-pointer group select-none min-w-0 flex-1 max-w-[170px] sm:max-w-xs"
+              className="flex items-start gap-2 min-w-0 flex-1 text-left cursor-pointer group"
+              aria-label="Change delivery location"
             >
-              <div className="flex items-center gap-1">
-                <span className="text-xs sm:text-[13px] font-black tracking-tight flex items-center gap-1 group-hover:text-amber-300 transition-colors">
-                  Current location
-                  <ChevronDown className="w-3.5 h-3.5 text-white/80 group-hover:translate-y-0.5 transition-transform" />
+              <MapPin className="w-5 h-5 text-[#e11d48] mt-0.5 shrink-0" strokeWidth={2.5} />
+              <span className="min-w-0">
+                <span className="flex items-center gap-1">
+                  <span className="text-[15px] font-black text-gray-900 truncate">
+                    {locationHeading}
+                  </span>
+                  <ChevronDown className="w-4 h-4 text-gray-700 shrink-0 group-hover:translate-y-0.5 transition-transform" />
                 </span>
-              </div>
-              <p className="text-[10px] sm:text-[11px] text-white/85 font-medium truncate leading-tight mt-0.5">
-                {deliveryLocation ? deliveryLocation.address : 'Set delivery location'}
-              </p>
-            </div>
+                <span className="block text-xs text-gray-500 font-medium truncate leading-tight">
+                  {locationDetail}
+                </span>
+              </span>
+            </button>
 
-            {/* Right: Install App + Help to Order Button + Sign In / Login */}
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
                 onClick={() => setShowHelpToOrder(true)}
-                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white font-bold text-xs border border-white/30 active:scale-95 transition-all cursor-pointer shadow-xs"
-                title="Need Help with Ordering?"
-                aria-label="Help to order"
+                className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center active:scale-95 transition-all cursor-pointer"
+                title="Help with your order"
+                aria-label="Help with your order"
               >
-                <span className="hidden sm:inline">Help?</span>
-                <span aria-hidden="true">❓</span>
+                <HelpCircle className="w-[18px] h-[18px]" />
               </button>
 
-              {/* SIGN IN / LOGIN ADDED AT SIDE OF HELP */}
               {!user && !profile ? (
                 <button
                   type="button"
                   onClick={() => setIsAuthModalOpen(true)}
-                  className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-300 hover:from-amber-300 hover:to-amber-200 text-blue-950 font-black text-xs shadow-md active:scale-95 transition-all cursor-pointer whitespace-nowrap"
-                  title="Sign In / Login to Mintoo"
+                  className="h-9 pl-2.5 pr-3 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-xs flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+                  title="Sign in to Mintoo"
                 >
-                  <LogIn className="w-3.5 h-3.5 text-blue-950" />
-                  <span className="hidden sm:inline">Sign In / Login</span>
-                  <span className="sm:hidden">Sign In</span>
+                  <User className="w-4 h-4" />
+                  Sign in
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={() => navigate('/profile')}
-                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white font-bold text-xs border border-white/30 active:scale-95 transition-all cursor-pointer shadow-xs"
-                  title="My Profile & Account"
+                  className="w-9 h-9 rounded-full bg-[#e11d48] text-white font-black text-sm flex items-center justify-center uppercase active:scale-95 transition-all cursor-pointer"
+                  title="My account"
+                  aria-label="My account"
                 >
-                  <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-400 to-amber-200 text-blue-950 font-black text-[10px] flex items-center justify-center uppercase shrink-0">
-                    {profile?.name?.charAt(0) || user?.displayName?.charAt(0) || 'U'}
-                  </div>
-                  <span className="max-w-[70px] sm:max-w-[100px] truncate">
-                    {profile?.name || user?.displayName || 'Account'}
-                  </span>
+                  {profile?.name?.charAt(0) || user?.displayName?.charAt(0) || 'U'}
                 </button>
               )}
             </div>
           </div>
 
-          {/* Search Bar: White Rounded Pill */}
-          <div className="mt-3.5 relative">
-            <div className="relative flex items-center">
-              <Search className="w-4 h-4 text-gray-400 absolute left-4 pointer-events-none" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={ROTATING_SEARCH_PLACEHOLDERS[searchIndex]}
-                className="w-full bg-white text-gray-800 text-xs sm:text-sm font-semibold rounded-full pl-11 pr-9 py-2.5 sm:py-3 shadow-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all"
-              />
-              {searchQuery && (
-                <button 
-                  onClick={() => setSearchQuery('')}
-                  aria-label="Clear search"
-                  className="absolute right-1.5 w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-full"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
+          {/* Search */}
+          <div className="mt-3 relative flex items-center">
+            <Search className="w-[18px] h-[18px] text-gray-400 absolute left-3.5 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={ROTATING_SEARCH_PLACEHOLDERS[searchIndex]}
+              aria-label="Search for dishes or restaurants"
+              className="w-full bg-gray-100 text-gray-900 text-sm font-medium rounded-xl pl-11 pr-10 py-3 placeholder-gray-500 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#e11d48]/30 transition-all"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                aria-label="Clear search"
+                className="absolute right-1.5 w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-full"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
+        </div>
+      </header>
 
-          {/* Partner-hotels banner. All five are live, so no "coming soon" copy. */}
-          <div className="mt-4 relative rounded-2xl overflow-hidden shadow-xl border border-white/20 bg-blue-950">
-            <div className="relative h-44 sm:h-52 w-full overflow-hidden">
+      {/* Offers carousel. Hidden while searching so results sit directly
+          under the search box. Sentence case: a page of all-caps headings
+          reads as shouting rather than as a menu. */}
+      {!searchQuery.trim() && (
+        <div className="max-w-xl mx-auto px-4 mt-3">
+          <div className="relative rounded-2xl overflow-hidden shadow-sm bg-gray-900">
+            <div className="relative h-40 sm:h-48 w-full overflow-hidden">
               <AnimatePresence mode="wait">
                 {activeBannerIndex === 0 ? (
-                  /* Slide 1: Partner hotels now delivering */
                   <motion.div
                     key="hotels-banner"
-                    initial={{ opacity: 0, scale: 1.04 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.4 }}
-                    className="absolute inset-0 bg-gradient-to-r from-[#0c2269] via-[#102d8a] to-[#1a44c2] p-4 sm:p-5 flex flex-col justify-between text-left"
+                    transition={{ duration: 0.35 }}
+                    className="absolute inset-0 bg-gradient-to-br from-[#e11d48] via-[#d6194a] to-[#9f1239] p-4 sm:p-5 flex flex-col justify-between text-left"
                   >
                     <div>
-                      <div className="flex items-center gap-1.5 mb-1.5">
-                        <span className="bg-amber-400 text-blue-950 text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1">
-                          <Sparkles className="w-3 h-3 fill-blue-950" /> PARTNER HOTELS
-                        </span>
-                      </div>
-                      <h2 className="text-white text-sm sm:text-base font-black uppercase tracking-tight leading-snug">
-                        Mumtaz • Malabar • Sankalpa • Coastal Crown • Al Amin
+                      <span className="inline-flex items-center gap-1 bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
+                        <Sparkles className="w-3 h-3" /> 5 partner kitchens
+                      </span>
+                      <h2 className="text-white text-lg sm:text-xl font-black leading-tight mt-2 max-w-[260px]">
+                        Yellapur&apos;s favourite hotels, one cart
                       </h2>
-                      <p className="text-amber-300 font-extrabold text-xs sm:text-sm uppercase tracking-wide mt-1">
-                        Now delivering from 5 partner hotels in Yellapur
-                      </p>
-                      <p className="text-white/80 text-[10px] sm:text-xs font-medium mt-0.5 line-clamp-1 max-w-[280px]">
-                        Order from any of them in one cart.
+                      <p className="text-white/80 text-xs font-medium mt-1 line-clamp-1 max-w-[270px]">
+                        Order from any of them in one cart
                       </p>
                     </div>
-
                     <div>
                       <button
-                        onClick={() => {
-                          // The hotels section is not rendered while a search is
-                          // showing results, so clear it and scroll once it is back.
-                          if (searchQuery.trim()) {
-                            setSearchQuery('');
-                            requestAnimationFrame(() => hotelsRef.current?.scrollIntoView({ behavior: 'smooth' }));
-                          } else {
-                            hotelsRef.current?.scrollIntoView({ behavior: 'smooth' });
-                          }
-                        }}
-                        className="bg-gradient-to-r from-[#ff2e74] to-[#e11d48] hover:from-[#ff1a66] text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-4 py-2 rounded-full shadow-[0_4px_15px_rgba(225,29,72,0.4)] border-t border-white/30 flex items-center gap-1.5 active:scale-95 transition-transform cursor-pointer"
+                        onClick={() => hotelsRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                        className="bg-white text-[#e11d48] text-xs font-black px-4 py-2 rounded-full shadow-sm flex items-center gap-1.5 active:scale-95 transition-transform cursor-pointer"
                       >
-                        <Store className="w-3.5 h-3.5" /> SEE HOTELS →
+                        <Store className="w-3.5 h-3.5" /> See hotels
                       </button>
                     </div>
                   </motion.div>
                 ) : (
-                  /* Slide 2: Mintoo Feast Banner with Real Food Photo */
                   <motion.div
                     key="feast-banner"
-                    initial={{ opacity: 0, scale: 1.04 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.4 }}
+                    transition={{ duration: 0.35 }}
                     className="absolute inset-0"
                   >
                     <img
                       src="/banner_food_feast.webp"
-                      alt="Food Feast"
+                      alt=""
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#0c2269]/95 via-[#0d277d]/80 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
                     <div className="absolute inset-0 p-4 sm:p-5 flex flex-col justify-between text-left z-10">
                       <div>
-                        <span className="inline-block bg-amber-400 text-black text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-sm">
-                          MINTOO SPECIAL FEAST 🔥
+                        <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
+                          Mintoo special
                         </span>
-                        <h2 className="text-white text-base sm:text-xl font-black uppercase tracking-tight leading-tight mt-1.5 max-w-[240px]">
-                          YOUR CRAVINGS, DELIVERED
+                        <h2 className="text-white text-lg sm:text-xl font-black leading-tight mt-2 max-w-[230px]">
+                          Your cravings, delivered hot
                         </h2>
-                        <p className="text-amber-300 font-black text-xs sm:text-sm uppercase tracking-wide mt-0.5">
-                          Hot food from Yellapur's kitchens
+                        <p className="text-white/80 text-xs font-medium mt-1">
+                          From Yellapur&apos;s best kitchens
                         </p>
                       </div>
-
                       <div>
                         <button
                           onClick={() => bestsellersRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                          className="bg-gradient-to-r from-[#ff2e74] to-[#e11d48] text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-4 py-2 rounded-full shadow-md flex items-center gap-1 active:scale-95 transition-transform"
+                          className="bg-white text-gray-900 text-xs font-black px-4 py-2 rounded-full shadow-sm flex items-center gap-1 active:scale-95 transition-transform cursor-pointer"
                         >
-                          ORDER NOW →
+                          Order now <ChevronRight className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
@@ -583,16 +576,13 @@ export default function LandingPage() {
                 )}
               </AnimatePresence>
 
-              {/* Slider Dots */}
-              <div className="absolute bottom-2.5 right-3.5 z-20 flex items-center gap-1.5">
+              <div className="absolute bottom-3 right-3.5 z-20 flex items-center gap-1.5">
                 {[0, 1].map((idx) => (
                   <button
                     key={idx}
                     onClick={() => setActiveBannerIndex(idx)}
                     className={`h-1.5 rounded-full transition-all duration-300 ${
-                      activeBannerIndex === idx 
-                        ? 'w-5 bg-amber-400' 
-                        : 'w-1.5 bg-white/50 hover:bg-white'
+                      activeBannerIndex === idx ? 'w-5 bg-white' : 'w-1.5 bg-white/50 hover:bg-white/80'
                     }`}
                     aria-label={`Slide ${idx + 1}`}
                   />
@@ -601,9 +591,8 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-      </header>
+      )}
 
-      {/* MAIN BODY: PURE BLUE AND WHITE, NO BLACK! */}
       <main className="max-w-xl mx-auto px-4 mt-5 space-y-6">
         
         {searchQuery.trim() ? (
@@ -649,7 +638,7 @@ export default function LandingPage() {
                   onClick={() => setSearchQuery('')}
                   className="mt-2 text-xs font-bold text-white bg-[#e11d48] hover:bg-[#ff2e74] px-4 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
                 >
-                  View All Dishes
+                  View all dishes
                 </button>
               </div>
             ) : (
@@ -765,7 +754,7 @@ export default function LandingPage() {
                     <div ref={loadMoreRef} className="col-span-2 flex justify-center py-4">
                       <button
                         onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
-                        className="text-xs font-bold text-[#1836c2] bg-blue-50 hover:bg-blue-100 px-5 py-2.5 rounded-full transition-colors cursor-pointer"
+                        className="text-xs font-bold text-[#e11d48] bg-rose-50 hover:bg-rose-100 px-5 py-2.5 rounded-full transition-colors cursor-pointer"
                       >
                         Show more dishes ({filteredProducts.length - visibleCount} left)
                       </button>
@@ -776,16 +765,16 @@ export default function LandingPage() {
           </section>
         ) : (
           <>
-            {/* 2. HOTELS SECTION JUST DOWN OF THAT BLUE BOX (IN ROUNDED BOXES, PHOTO BE EMPTY) */}
+            {/* 2. HOTELS */}
             <section ref={hotelsRef}>
           <div className="flex items-center justify-between mb-3 px-1">
             <div>
               <h2 className="text-gray-900 font-black text-base sm:text-lg tracking-tight leading-tight">
-                Top Hotels & Restaurants
+                Top hotels & restaurants
               </h2>
               <p className="text-xs text-gray-500 font-medium">Yellapur's most loved kitchens</p>
             </div>
-            <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full">
+            <span className="text-[11px] font-bold text-gray-600 bg-gray-100 px-2.5 py-0.5 rounded-full">
               6 Locations
             </span>
           </div>
@@ -807,8 +796,8 @@ export default function LandingPage() {
                   !liveOpen
                     ? 'border-gray-200 opacity-60 cursor-not-allowed grayscale'
                     : hotel.isOpen
-                    ? 'border-blue-600/30 shadow-md shadow-blue-500/5 ring-1 ring-blue-500/20 cursor-pointer'
-                    : 'border-gray-200 hover:border-blue-300 shadow-sm cursor-pointer'
+                    ? 'border-gray-200 shadow-sm hover:shadow-md cursor-pointer'
+                    : 'border-gray-200 hover:border-gray-300 shadow-sm cursor-pointer'
                 }`}
               >
                 {/* Hotel Photo Container (Empty Placeholder for Coming Soon hotels as requested) */}
@@ -823,11 +812,11 @@ export default function LandingPage() {
                     />
                   ) : (
                     /* Clean Empty Photo Box Placeholder */
-                    <div className="w-full h-full bg-gradient-to-b from-blue-50/70 to-slate-100 flex flex-col items-center justify-center p-2 text-center">
-                      <div className="w-8 h-8 rounded-full bg-white shadow-xs flex items-center justify-center mb-1 text-blue-500">
+                    <div className="w-full h-full bg-gray-100 flex flex-col items-center justify-center p-2 text-center">
+                      <div className="w-8 h-8 rounded-full bg-white shadow-xs flex items-center justify-center mb-1 text-gray-400">
                         <Store className="w-4 h-4" />
                       </div>
-                      <span className="text-[9px] font-bold text-blue-600/80">Photo</span>
+                      <span className="text-[9px] font-bold text-gray-400">Photo</span>
                     </div>
                   )}
 
@@ -838,8 +827,8 @@ export default function LandingPage() {
                       : hotel.isOpen
                       ? 'bg-emerald-500 text-white'
                       : hotel.id === 'mumtaz' || hotel.id === 'sankalpa'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-amber-400 text-blue-950'
+                      ? 'bg-gray-900 text-white'
+                      : 'bg-gray-200 text-gray-700'
                   }`}>
                     {!liveOpen ? 'CLOSED' : hotel.isOpen ? 'OPEN' : hotel.id === 'mumtaz' || hotel.id === 'sankalpa' ? 'MENU' : 'SOON 🔒'}
                   </span>
@@ -902,12 +891,12 @@ export default function LandingPage() {
         <section>
           <div className="flex items-center justify-between mb-3 px-1">
             <h2 className="text-gray-900 font-black text-base sm:text-lg tracking-tight">
-              What's On Your Mind?
+              What's on your mind?
             </h2>
             {selectedMindCategory && (
               <button 
                 onClick={() => setSelectedMindCategory(null)}
-                className="text-xs font-bold text-[#1836c2] hover:underline"
+                className="text-xs font-bold text-[#e11d48] hover:underline"
               >
                 Reset
               </button>
@@ -931,8 +920,8 @@ export default function LandingPage() {
                   <div 
                     className={`w-[68px] h-[68px] sm:w-[76px] sm:h-[76px] rounded-full p-1.5 flex items-center justify-center bg-white border shadow-sm transition-all duration-200 ${
                       isSelected 
-                        ? 'border-[#1836c2] ring-3 ring-blue-600/20 scale-105 shadow-md' 
-                        : 'border-gray-200 group-hover:border-blue-300 group-hover:scale-105'
+                        ? 'border-[#e11d48] ring-3 ring-rose-600/20 scale-105 shadow-md' 
+                        : 'border-gray-200 group-hover:border-rose-300 group-hover:scale-105'
                     }`}
                   >
                     <img
@@ -944,7 +933,7 @@ export default function LandingPage() {
                     />
                   </div>
                   <span className={`text-[11px] font-bold mt-1.5 tracking-tight text-center max-w-[70px] truncate transition-colors ${
-                    isSelected ? 'text-[#1836c2] font-black' : 'text-gray-800'
+                    isSelected ? 'text-[#e11d48] font-black' : 'text-gray-800'
                   }`}>
                     {cat.name}
                   </span>
@@ -959,11 +948,11 @@ export default function LandingPage() {
           <section ref={bestsellersRef} className="bg-white rounded-3xl p-4 border border-gray-200/80 shadow-xs">
             <div className="flex items-center justify-between mb-3 px-1">
               <div>
-                <h3 className="text-xl font-black text-[#e11d48] tracking-tight leading-none">
-                  Bestsellers
+                <h3 className="text-gray-900 font-black text-base sm:text-lg tracking-tight leading-tight">
+                  Bestsellers under ₹149
                 </h3>
-                <span className="text-xs font-bold text-amber-600 block mt-0.5">
-                  under ₹149 ✨
+                <span className="text-xs text-gray-500 font-medium block">
+                  Great value dishes from our kitchens
                 </span>
               </div>
             </div>
@@ -976,7 +965,7 @@ export default function LandingPage() {
                 return (
                   <div
                     key={product.id}
-                    className="w-[155px] sm:w-[170px] bg-white rounded-2xl p-2.5 border border-gray-150 shadow-xs flex flex-col justify-between shrink-0 hover:shadow-md transition-shadow"
+                    className="w-[155px] sm:w-[170px] bg-white rounded-2xl p-2.5 border border-gray-200 shadow-xs flex flex-col justify-between shrink-0 hover:shadow-md transition-shadow"
                   >
                     {/* Food Image Container with Floating Pink "+" */}
                     <div className="relative aspect-square rounded-xl overflow-hidden bg-gray-50">
@@ -1085,7 +1074,7 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 px-1 gap-2">
             <div className="flex items-center gap-2">
               <h3 className="text-gray-900 font-black text-base sm:text-lg tracking-tight">
-                {selectedMindCategory ? `Dishes for "${selectedMindCategory.replace('_', ' ').toUpperCase()}"` : 'All Dishes'}
+                {selectedMindCategory ? `${selectedMindCategory.replace('_', ' ').replace(/\w/g, (c) => c.toUpperCase())} dishes` : 'All dishes'}
               </h3>
               <span className="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                 {filteredProducts.length} items
@@ -1146,7 +1135,7 @@ export default function LandingPage() {
                   }}
                   className={`flex-shrink-0 text-xs font-bold px-4 py-2 rounded-full transition-all cursor-pointer ${
                     isActive 
-                      ? 'bg-[#1836c2] text-white shadow-sm' 
+                      ? 'bg-[#e11d48] text-white shadow-sm' 
                       : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
                   }`}
                 >
@@ -1177,7 +1166,7 @@ export default function LandingPage() {
                   setPriceSort('relevance');
                   setPriceCap(null);
                 }}
-                className="mt-3 text-xs font-bold text-[#1836c2] bg-blue-50 px-4 py-2 rounded-full"
+                className="mt-3 text-xs font-bold text-[#e11d48] bg-rose-50 px-4 py-2 rounded-full"
               >
                 Clear filters
               </button>
@@ -1308,7 +1297,7 @@ export default function LandingPage() {
                   <div ref={loadMoreRef} className="col-span-2 flex justify-center py-4">
                     <button
                       onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
-                      className="text-xs font-bold text-[#1836c2] bg-blue-50 hover:bg-blue-100 px-5 py-2.5 rounded-full transition-colors cursor-pointer"
+                      className="text-xs font-bold text-[#e11d48] bg-rose-50 hover:bg-rose-100 px-5 py-2.5 rounded-full transition-colors cursor-pointer"
                     >
                       Show more dishes ({filteredProducts.length - visibleCount} left)
                     </button>
@@ -1328,7 +1317,7 @@ export default function LandingPage() {
               href="https://www.pexels.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#1836c2] hover:underline font-semibold"
+              className="text-[#e11d48] hover:underline font-semibold"
             >
               Pexels
             </a>

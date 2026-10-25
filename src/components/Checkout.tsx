@@ -8,7 +8,7 @@ import { useLocationStore, SERVICE_RADIUS_KM } from '../store/locationStore';
 import CheckoutSavedAddresses from './CheckoutSavedAddresses';
 import { getOrderPushToken, askForOrderUpdates } from '../lib/push';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, MapPin, Ticket, Calendar, ShieldCheck, ChevronLeft, Loader2, Lock } from 'lucide-react';
+import { Send, MapPin, Ticket, Calendar, ShieldCheck, ChevronLeft, Loader2, Lock, Info } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useCityStore } from '../store/cityStore';
 import { calculateDeliveryCharge } from '../types';
@@ -199,6 +199,10 @@ export default function Checkout() {
   }
 
   const payableAmount = Math.max(0, grandTotal - walletDeduction);
+
+  // What the bill shows as "You're saving". Only genuine savings: a delivery
+  // charge that was waived, and any coupon. Wallet money is the customer's own.
+  const orderSavings = (isFreeDelivery ? baseDeliveryCharge : 0) + couponDiscount;
 
   // Hotel shown in the on-screen order summary. Derived from the items so it stays
   // in step with the WhatsApp and Telegram messages and the saved order.
@@ -701,7 +705,7 @@ export default function Checkout() {
   // Empty Cart State
   if (activeItems.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#fff1f4]/70 via-[#fff8fa]/60 to-[#ffffff] text-gray-900 pb-32 pt-8 px-4 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-[#f6f6f7] text-gray-900 pb-32 pt-8 px-4 flex flex-col items-center justify-center">
         <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-lg border border-rose-100 space-y-4">
           <div className="w-20 h-20 rounded-full bg-rose-50 text-[#ff4d6d] flex items-center justify-center mx-auto shadow-inner">
             <Ticket className="w-10 h-10" />
@@ -801,7 +805,7 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#fff1f4]/70 via-[#fff8fa]/60 to-[#ffffff] text-gray-900 pb-36 pt-3 px-3 sm:px-6">
+    <div className="min-h-screen bg-[#f6f6f7] text-gray-900 pb-36 pt-3 px-3 sm:px-6">
       <div className="max-w-md mx-auto space-y-3.5">
 
         {/* 1. TOP HEADER (MATCHING SCREENSHOT) */}
@@ -835,13 +839,6 @@ export default function Checkout() {
           </div>
         </div>
 
-        {/* 2. PINK BANNER: NO CONFUSING FEES. NO HIDDEN CHARGES (MATCHING SCREENSHOT) */}
-        <div className="bg-[#ff2e74] text-white py-2.5 px-4 rounded-2xl shadow-sm text-center">
-          <p className="text-xs sm:text-[13px] font-black tracking-wide">
-            No confusing fees. No hidden charges.
-          </p>
-        </div>
-
         {/* 3. RESTAURANT & ITEMS CARD (MATCHING SCREENSHOT) */}
         <div className="bg-white rounded-[26px] p-4 sm:p-5 border border-rose-100/90 shadow-sm space-y-4 text-left">
           
@@ -864,7 +861,7 @@ export default function Checkout() {
                   : "Mintoo - All Orders"}
               </h2>
               <p className="text-[11px] text-gray-500 font-medium">
-                {deliveryLocation ? deliveryLocation.address.split(',')[0] : 'Yellapur'} • {activeItems.length} items
+                {deliveryLocation ? deliveryLocation.address.split(',')[0] : 'Yellapur'} • {activeItems.length} {activeItems.length === 1 ? 'item' : 'items'}
               </p>
             </div>
           </div>
@@ -905,7 +902,7 @@ export default function Checkout() {
                   </div>
 
                   {/* Center: Stepper Pill */}
-                  <div className="flex items-center bg-rose-50/60 border border-rose-150 rounded-full shadow-2xs shrink-0">
+                  <div className="flex items-center bg-rose-50/60 border border-rose-200 rounded-full shadow-2xs shrink-0">
                     <button
                       type="button"
                       onClick={() => updateQuantity(item.id, qty - 1)}
@@ -953,113 +950,92 @@ export default function Checkout() {
           </div>
         </div>
 
-        {/* 4. BILL DETAILS CARD (MATCHING SCREENSHOT WITH NO CONFUSING FEES) */}
-        <div className="bg-gradient-to-br from-[#ffdbe6]/35 via-[#ffeef3]/25 to-white rounded-[26px] p-4 sm:p-5 border border-rose-200/70 shadow-sm space-y-3 text-left">
-          <div className="flex justify-between items-center text-xs sm:text-[13px] font-medium text-gray-700 bg-rose-50/70 p-2.5 rounded-xl border border-rose-300 ring-1 ring-rose-200/50 shadow-2xs">
-            <span className="font-bold text-gray-700">Cart Total</span>
-            <span className="font-black text-gray-900 text-sm">₹{subtotal.toFixed(2)}</span>
-          </div>
+        {/* 4. BILL DETAILS. Laid out the way every major food app does it:
+            line items, a dashed rule, then the amount to pay. Fees that are
+            not charged are simply not listed, rather than struck through. */}
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-200 shadow-sm text-left">
+          <h3 className="text-sm font-black text-gray-900 mb-3">Bill details</h3>
 
-          {/* Delivery Fees (Why this?) */}
-          <div className="flex justify-between items-center text-xs sm:text-[13px] font-medium text-gray-700">
-            <div className="flex items-center gap-1">
-              <span>Delivery Fees</span>
-              <button
-                type="button"
-                onClick={() =>
-                  toast(
-                    isFreeDelivery
-                      ? `Delivery is free right now (${freeDeliveryReason.replace(' 🎉', '')}).`
-                      : `₹20 for the first 2 km, then ₹10 per km. Your address is ${distanceKm} km away.`,
-                    { id: 'why-delivery' }
-                  )
-                }
-                className="text-[#e11d48] text-[11px] font-bold underline py-1"
-              >
-                (Why this?)
-              </button>
+          <div className="space-y-2.5 text-[13px] text-gray-700">
+            <div className="flex justify-between items-center">
+              <span>Item total</span>
+              <span className="font-semibold text-gray-900">₹{subtotal.toFixed(2)}</span>
             </div>
-            <div className="text-right">
+
+            <div className="flex justify-between items-center">
+              <span className="flex items-center gap-1">
+                Delivery fee
+                <button
+                  type="button"
+                  onClick={() =>
+                    toast(
+                      isFreeDelivery
+                        ? `Delivery is free right now (${freeDeliveryReason.replace(' 🎉', '')}).`
+                        : `₹20 for the first 2 km, then ₹10 per km. Your address is ${distanceKm} km away.`,
+                      { id: 'why-delivery' }
+                    )
+                  }
+                  className="text-gray-400 hover:text-gray-600 p-0.5 cursor-pointer"
+                  aria-label="How the delivery fee is worked out"
+                >
+                  <Info className="w-3.5 h-3.5" />
+                </button>
+              </span>
               {isFreeDelivery ? (
-                <div className="flex items-center gap-1.5">
+                <span className="flex items-center gap-1.5">
                   {baseDeliveryCharge > 0 && (
-                    <span className="line-through text-gray-400 text-[11px]">₹{baseDeliveryCharge.toFixed(2)}</span>
+                    <span className="line-through text-gray-400 text-xs">₹{baseDeliveryCharge.toFixed(2)}</span>
                   )}
-                  <span className="text-emerald-600 font-black text-xs uppercase">FREE</span>
-                </div>
+                  <span className="text-emerald-600 font-bold">FREE</span>
+                </span>
               ) : (
-                <span className="font-bold text-gray-900">₹{deliveryCharge.toFixed(2)}</span>
+                <span className="font-semibold text-gray-900">₹{deliveryCharge.toFixed(2)}</span>
               )}
             </div>
-          </div>
 
-          {/* Platform fees */}
-          <div className="flex justify-between items-center text-xs sm:text-[13px] font-medium text-gray-400">
-            <span className="line-through">Platform fees</span>
-            <span className="text-[11px] font-bold text-gray-600">We're not those guys</span>
-          </div>
+            {packagingFee > 0 && (
+              <div className="flex justify-between items-center">
+                <span>
+                  Packaging <span className="text-gray-400 text-xs">· Hotel Mumtaz</span>
+                </span>
+                <span className="font-semibold text-gray-900">₹{packagingFee.toFixed(2)}</span>
+              </div>
+            )}
 
-          {/* Packaging Fees */}
-          <div className="flex justify-between items-center text-xs sm:text-[13px] font-medium text-gray-700">
-            {packagingFee > 0 ? (
-              <>
-                <div className="flex items-center gap-1">
-                  <span>Packaging Fees</span>
-                  <span className="text-rose-600 text-[10px] font-bold">(Hotel Mumtaz)</span>
-                </div>
-                <span className="font-bold text-gray-900">₹{packagingFee.toFixed(2)}</span>
-              </>
-            ) : (
-              <>
-                <span className="line-through text-gray-400">Packaging Fees</span>
-                <span className="text-[11px] font-bold text-emerald-600 uppercase">FREE</span>
-              </>
+            {couponDiscount > 0 && (
+              <div className="flex justify-between items-center text-emerald-700">
+                <span>Coupon · {appliedCoupon}</span>
+                <span className="font-semibold">−₹{couponDiscount.toFixed(2)}</span>
+              </div>
+            )}
+
+            {walletDeduction > 0 && (
+              <div className="flex justify-between items-center text-emerald-700">
+                <span>Wallet</span>
+                <span className="font-semibold">−₹{walletDeduction.toFixed(2)}</span>
+              </div>
             )}
           </div>
 
-          {/* Coupon Discount */}
-          {couponDiscount > 0 && (
-            <div className="flex justify-between items-center text-xs sm:text-[13px] font-medium text-emerald-600">
-              <span>Coupon Discount ({appliedCoupon})</span>
-              <span className="font-black">-₹{couponDiscount.toFixed(2)}</span>
+          <div className="border-t border-dashed border-gray-300 my-3.5" />
+
+          <div className="flex justify-between items-baseline">
+            <span className="text-[15px] font-black text-gray-900">To pay</span>
+            <span className="text-[17px] font-black text-gray-900">₹{payableAmount.toFixed(2)}</span>
+          </div>
+
+          {/* Savings, stated once and only when real: a waived delivery
+              charge and any coupon. Wallet money is the customer's own, so it
+              is not counted as a saving. */}
+          {orderSavings > 0 && (
+            <div className="mt-3.5 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs font-bold px-3 py-2.5">
+              You&apos;re saving ₹{orderSavings.toFixed(2)} on this order
             </div>
           )}
 
-          {/* Wallet Deduction */}
-          {walletDeduction > 0 && (
-            <div className="flex justify-between items-center text-xs sm:text-[13px] font-medium text-emerald-600">
-              <span>Wallet Discount</span>
-              <span className="font-black">-₹{walletDeduction.toFixed(2)}</span>
-            </div>
-          )}
-
-          {/* Total Payable */}
-          <div className="pt-3 border-t border-gray-100 flex justify-between items-baseline">
-            <span className="text-sm sm:text-base font-black text-gray-900">Total Payable</span>
-            <span className="text-xl sm:text-2xl font-black text-[#e11d48]">
-              ₹{payableAmount.toFixed(2)}
-            </span>
-          </div>
-
-          {/* CERTIFIED NO NONSENSE Pink Badge (EXACT FROM SCREENSHOT) */}
-          <div className="mt-3.5 p-3 rounded-2xl bg-gradient-to-r from-rose-50 via-pink-50/70 to-rose-50 border border-rose-200/80 flex items-center justify-between gap-2.5">
-            <p className="text-xs font-bold text-gray-700 leading-snug">
-              Somewhere, an app just invented a new fee. <span className="text-[#e11d48] font-black">Not us.</span>
-            </p>
-
-            {/* Pink Certified Stamp Badge */}
-            <div className="shrink-0 w-16 h-16 rounded-full border-2 border-dashed border-[#e11d48] bg-white flex flex-col items-center justify-center p-1 text-center shadow-xs rotate-[-5deg]">
-              <span className="text-[6.5px] font-black text-[#e11d48] tracking-widest uppercase leading-none">
-                CERTIFIED
-              </span>
-              <span className="text-sm font-black text-[#e11d48] my-0.5 leading-none">
-                ✔
-              </span>
-              <span className="text-[6px] font-black text-[#e11d48] tracking-tight uppercase leading-none">
-                NO NONSENSE
-              </span>
-            </div>
-          </div>
+          <p className="mt-3 text-[11px] text-gray-500 font-medium">
+            No platform fee. No hidden charges.
+          </p>
         </div>
 
         {/* 5. CHECKBOXES (NEED CUTLERY & COOKING REQUEST) */}
@@ -1256,16 +1232,16 @@ export default function Checkout() {
           type="button"
           onClick={handleSubmit}
           disabled={isSubmitting || activeItems.length === 0}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#ff4d6d] via-[#f43f5e] to-[#e11d48] text-white font-black text-sm sm:text-base uppercase tracking-wider shadow-lg shadow-rose-500/30 flex items-center justify-center gap-2 active:scale-98 transition-all disabled:opacity-50 cursor-pointer"
+          className="w-full py-4 rounded-xl bg-[#e11d48] hover:bg-[#be123c] text-white font-black text-[15px] shadow-md shadow-rose-500/20 flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer"
         >
           {isSubmitting ? (
             <>
               <Loader2 className="w-5 h-5 animate-spin" />
-              <span>Placing Order...</span>
+              <span>Placing order…</span>
             </>
           ) : (
             <>
-              <span>Confirm Order • ₹{payableAmount.toFixed(2)}</span>
+              <span>Confirm order · ₹{payableAmount.toFixed(2)}</span>
               <Send className="w-4 h-4" />
             </>
           )}

@@ -23,6 +23,19 @@
 }
 
 @layer base {
+  /* Tailwind v4 changed the default border colour from gray-200 to
+     currentColor, so any `border` without a colour class drew a hard black
+     line -- the dark outline around the Bestsellers cards and the checkout
+     quantity stepper came from this. This is the compatibility rule from
+     Tailwind's own v4 upgrade guide; an explicit colour class still wins. */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
