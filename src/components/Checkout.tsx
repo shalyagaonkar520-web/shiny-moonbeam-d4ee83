@@ -26,6 +26,7 @@ import {
   placeOrderOnServer,
   verifyPaymentOnServer,
   orderErrorMessage,
+  findClosedHotels,
   loadRazorpay,
   preconnectRazorpay,
 } from '../lib/checkoutApi';
@@ -606,7 +607,7 @@ export default function Checkout() {
     });
 
     if (outcome.kind === 'rejected') {
-      toast.error(orderErrorMessage(outcome.error));
+      toast.error(orderErrorMessage(outcome.error, outcome.hotels));
       setIsSubmitting(false);
       return;
     }
@@ -681,6 +682,23 @@ export default function Checkout() {
     }
 
     // ---- fallback: the order server is unavailable
+    // Check the kitchens are open before anything else. The Firestore rules
+    // would refuse the write anyway, but for an online payment that refusal
+    // would come after the customer had already paid.
+    const closed = await findClosedHotels(groupItemsByHotel(activeItems).map((g) => g.hotelId));
+    if (closed && closed.length) {
+      toast.error(orderErrorMessage('hotel_closed', closed));
+      setIsSubmitting(false);
+      return;
+    }
+    if (wantsOnline && closed === null) {
+      // Availability could not be read: do not take money that might have to
+      // be refunded by hand.
+      toast.error('Could not confirm the kitchen is open. Check your connection and try again, or choose Cash on Delivery.');
+      setIsSubmitting(false);
+      return;
+    }
+
     if (wantsOnline) {
       await openRazorpay({ amount: Math.round(payableAmount * 100) }, async (r) => {
         const { orders, saved } = await writeOrderFromBrowser(r.razorpay_payment_id);
