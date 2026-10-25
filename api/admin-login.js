@@ -90,9 +90,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') {
-    // TEMPORARY DIAGNOSTIC -- remove once firebase-admin/auth loads on Vercel.
-    const { error: authLoadError } = await loadAdminAuth();
-    return res.status(405).json({ ok: false, error: 'Method Not Allowed', authModule: authLoadError ? 'unavailable: ' + authLoadError : 'ok' });
+    return res.status(405).json({ ok: false, error: 'Method Not Allowed' });
   }
 
   if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {

@@ -1,5 +1,10 @@
 // firebase-admin/auth, loaded on first use instead of at import time.
 //
+// (The original failure turned out to be firebase-admin 14 -> jwks-rsa 4 ->
+// ESM-only jose 6, which Vercel could not require(); firebase-admin is now on
+// 13. Loading lazily stays as a guard so an optional feature can never again
+// stop the endpoint from loading.)
+//
 // place-order and admin-login used to import it at the top of the file. On
 // Vercel that import failed, and because it ran while the function was
 // loading, every request to those two endpoints died with
