@@ -103,6 +103,7 @@ export function orderErrorMessage(code: string, hotels?: string[]): string {
       const verb = hotels.length > 1 ? 'have' : 'has';
       return `${hotels.join(' and ')} ${verb} stopped taking orders right now. Remove those items and try again.`;
     }
+    case 'dish_unavailable': return 'Some dishes in your cart are not available right now. Remove them and try again.';
     case 'invalid_phone': return 'Please enter a valid 10-digit mobile number.';
     case 'invalid_name': return 'Please enter your name.';
     case 'invalid_location': return 'Please choose your delivery location again.';

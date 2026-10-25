@@ -20,6 +20,7 @@ import { db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { getItemHotelTag, getItemHotel, getOrderHotelName, getOrderHotelId, groupItemsByHotel } from '../utils/orderHotels';
 import DishImage from './DishImage';
+import { useDishAvailabilityStore } from '../store/dishAvailabilityStore';
 import { notifyTelegram } from '../lib/notifyTelegram';
 import { couponDiscountFor, couponGivesFreeDelivery, istHour, normaliseIndianMobile, CouponRule } from '../lib/pricing';
 import {
@@ -583,6 +584,15 @@ export default function Checkout() {
       rzp.on('payment.failed', (r: any) => toast.error('Payment failed: ' + (r?.error?.description || 'please try again')));
       rzp.open();
     };
+
+    // A dish the kitchen switched off in the panel after it went into the cart.
+    const isOrderable = useDishAvailabilityStore.getState().isOrderable;
+    const offDishes = activeItems.filter((i: any) => !isOrderable(getItemHotel(i)?.id, i.name));
+    if (offDishes.length) {
+      const names = offDishes.map((i: any) => i.name).join(', ');
+      toast.error(`${names} ${offDishes.length > 1 ? 'are' : 'is'} not available right now. Remove ${offDishes.length > 1 ? 'them' : 'it'} from your cart and try again.`);
+      return;
+    }
 
     setIsSubmitting(true);
 

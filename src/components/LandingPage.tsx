@@ -20,6 +20,7 @@ import { playSound, SOUNDS } from '../utils/audio';
 import { useSEO } from '../utils/seo';
 import DishImage from './DishImage';
 import { PARTNER_HOTEL_PRODUCTS } from '../data/partnerHotelItems';
+import { useDishOrderable } from '../store/dishAvailabilityStore';
 
 const ROTATING_SEARCH_PLACEHOLDERS = [
   'Search "Chicken Dum Biryani"',
@@ -258,7 +259,15 @@ export default function LandingPage() {
   // `menuItems` is Hotel Al Amin's menu, so it stays first and its cards carry
   // no hotel badge; PARTNER_HOTEL_PRODUCTS then adds Sankalpa followed by the
   // remaining hotels, each badged with the hotel that cooks it.
-  const allProducts = useMemo(() => [...menuItems, ...PARTNER_HOTEL_PRODUCTS], [menuItems]);
+  // Dishes switched off in the panel are left out everywhere on this screen.
+  const isOrderable = useDishOrderable();
+  const allProducts = useMemo(
+    () => [
+      ...menuItems.filter((item) => isOrderable('al_amin', item.name)),
+      ...PARTNER_HOTEL_PRODUCTS.filter((item) => isOrderable(item.hotelId, item.name)),
+    ],
+    [menuItems, isOrderable]
+  );
 
   /** Hotel name to print on a card, or null for Al Amin / Minto items. */
   const hotelBadgeOf = (product: any): string | null =>

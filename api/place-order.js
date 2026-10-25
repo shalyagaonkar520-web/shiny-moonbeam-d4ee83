@@ -1,5 +1,6 @@
 import { getApps } from 'firebase-admin/app';
 import { loadAdminAuth } from './_adminAuth.js';
+import { unavailableDishes } from './_dishAvailability.js';
 import { adminDb } from './_firebaseAdmin.js';
 import { priceOrder, SERVICE_RADIUS_KM, COD_MAX_KM } from './_pricing.js';
 import { announceOnce } from './_orderMessage.js';
@@ -150,6 +151,11 @@ export default async function handler(req, res) {
     }
   });
   if (closedHotels.length) return bad(res, 409, 'hotel_closed', { hotels: closedHotels });
+
+  // Dishes the kitchen switched off (or that are outside their serving window)
+  // in the panel. Also before any payment order, for the same reason.
+  const offDishes = await unavailableDishes(adminDb, priced.groups);
+  if (offDishes.length) return bad(res, 409, 'dish_unavailable', { dishes: offDishes });
 
   // A signed-in customer's uid is recorded only when their ID token proves it.
   let userId = null;

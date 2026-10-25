@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { CartItem, Product, SubscriptionPlan } from '../types';
+import { useDishAvailabilityStore } from './dishAvailabilityStore';
+import { getItemHotel } from '../utils/orderHotels';
 
 interface CartStore {
   items: CartItem[];
@@ -51,6 +53,9 @@ export const useCartStore = create<CartStore>()(persist((set, get) => {
     items: [],
     total: 0,
     addItem: (product, subscriptionPlan = null, quantity = 1) => {
+      // Menus already hide dishes switched off in the panel; this catches a
+      // screen that was open when the switch flipped.
+      if (!useDishAvailabilityStore.getState().isOrderable(getItemHotel(product)?.id, product.name)) return;
       const items = get().items;
       const existingIndex = items.findIndex(i => i.id === product.id);
       let newItems;

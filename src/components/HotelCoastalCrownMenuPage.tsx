@@ -16,6 +16,7 @@ import {
   ShoppingBag
 } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
+import { useDishOrderable } from '../store/dishAvailabilityStore';
 import toast from 'react-hot-toast';
 import { playSound, SOUNDS } from '../utils/audio';
 import { HOTEL_COASTAL_CROWN_MENU, CoastalCrownMenuItem } from '../data/hotelCoastalCrownMenu';
@@ -108,11 +109,14 @@ export default function HotelCoastalCrownMenuPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Dishes the kitchen has switched off in the panel are not shown.
+  const isOrderable = useDishOrderable();
   const filteredMenu = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
     return HOTEL_COASTAL_CROWN_MENU.map((category) => {
       const filteredItems = category.items.filter((item) => {
+        if (!isOrderable('coastal_crown', item.name)) return false;
         if (query) {
           const matchName = item.name.toLowerCase().includes(query);
           const matchCat = category.title.toLowerCase().includes(query);
@@ -131,7 +135,7 @@ export default function HotelCoastalCrownMenuPage() {
         items: filteredItems
       };
     }).filter((cat) => cat.items.length > 0);
-  }, [searchQuery, dietFilter]);
+  }, [searchQuery, dietFilter, isOrderable]);
 
   const totalItemsCount = useMemo(
     () => HOTEL_COASTAL_CROWN_MENU.reduce((sum, c) => sum + c.items.length, 0),

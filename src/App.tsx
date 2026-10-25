@@ -48,6 +48,7 @@ const AddressesPage = lazy(() => import('./components/AddressesPage'));
 // Store
 import { useSystemStore } from './store/systemStore';
 import { useMenuStore } from './store/menuStore';
+import { useDishAvailabilityStore } from './store/dishAvailabilityStore';
 
 function GoldenParticles() {
   return null;
@@ -90,9 +91,12 @@ export default function App() {
   useEffect(() => {
     const unsubscribeSettings = listenSettings();
     const unsubscribeMenu = listenToMenu();
+    // Which dishes the kitchens have switched off in the panel.
+    const unsubscribeDishes = useDishAvailabilityStore.getState().subscribe();
     return () => {
       unsubscribeSettings();
       unsubscribeMenu();
+      unsubscribeDishes();
     };
   }, [listenSettings, listenToMenu]);
 

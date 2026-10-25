@@ -16,6 +16,7 @@ import {
   Minus
 } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
+import { useDishOrderable } from '../store/dishAvailabilityStore';
 import toast from 'react-hot-toast';
 import { playSound, SOUNDS } from '../utils/audio';
 import { HOTEL_MUMTAZ_MENU } from '../data/hotelMumtazMenu';
@@ -152,11 +153,14 @@ export default function HotelMumtazMenuPage() {
   };
 
   // Filtered menu calculation
+  // Dishes the kitchen has switched off in the panel are not shown.
+  const isOrderable = useDishOrderable();
   const filteredMenu = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
     return HOTEL_MUMTAZ_MENU.map((category) => {
       const filteredItems = category.items.filter((item) => {
+        if (!isOrderable('mumtaz', item.name)) return false;
         // Search text check
         if (query) {
           const matchName = item.name.toLowerCase().includes(query);
@@ -178,7 +182,7 @@ export default function HotelMumtazMenuPage() {
         items: filteredItems
       };
     }).filter((cat) => cat.items.length > 0);
-  }, [searchQuery, dietFilter]);
+  }, [searchQuery, dietFilter, isOrderable]);
 
   // Total item count across all categories
   const totalCount = useMemo(

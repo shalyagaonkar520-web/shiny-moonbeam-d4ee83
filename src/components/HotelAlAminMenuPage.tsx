@@ -16,6 +16,7 @@ import {
   Minus
 } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
+import { useDishOrderable } from '../store/dishAvailabilityStore';
 import toast from 'react-hot-toast';
 import { playSound, SOUNDS } from '../utils/audio';
 import { HOTEL_AL_AMIN_MENU, AlAminMenuItem } from '../data/hotelAlAminMenu';
@@ -112,11 +113,14 @@ export default function HotelAlAminMenuPage() {
     });
   };
 
+  // Dishes the kitchen has switched off in the panel are not shown.
+  const isOrderable = useDishOrderable();
   const filteredMenu = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
     return HOTEL_AL_AMIN_MENU.map((category) => {
       const filteredItems = category.items.filter((item) => {
+        if (!isOrderable('al_amin', item.name)) return false;
         if (query) {
           const matchName = item.name.toLowerCase().includes(query);
           const matchCat = category.title.toLowerCase().includes(query);
@@ -136,7 +140,7 @@ export default function HotelAlAminMenuPage() {
         items: filteredItems
       };
     }).filter((cat) => cat.items.length > 0);
-  }, [searchQuery, dietFilter]);
+  }, [searchQuery, dietFilter, isOrderable]);
 
   const totalCount = useMemo(
     () => HOTEL_AL_AMIN_MENU.reduce((sum, c) => sum + c.items.length, 0),

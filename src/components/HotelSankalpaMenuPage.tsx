@@ -16,6 +16,7 @@ import {
   ShoppingBag
 } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
+import { useDishOrderable } from '../store/dishAvailabilityStore';
 import toast from 'react-hot-toast';
 import { playSound, SOUNDS } from '../utils/audio';
 import { HOTEL_SANKALPA_MENU, SankalpaMenuItem } from '../data/hotelSankalpaMenu';
@@ -90,11 +91,14 @@ export default function HotelSankalpaMenuPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Dishes the kitchen has switched off in the panel are not shown.
+  const isOrderable = useDishOrderable();
   const filteredMenu = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
     return HOTEL_SANKALPA_MENU.map((category) => {
       const filteredItems = category.items.filter((item) => {
+        if (!isOrderable('sankalpa', item.name)) return false;
         if (!query) return true;
         const matchName = item.name.toLowerCase().includes(query);
         const matchCat = category.title.toLowerCase().includes(query);
@@ -103,7 +107,7 @@ export default function HotelSankalpaMenuPage() {
 
       return { ...category, items: filteredItems };
     }).filter((cat) => cat.items.length > 0);
-  }, [searchQuery]);
+  }, [searchQuery, isOrderable]);
 
   const totalItemsCount = useMemo(
     () => HOTEL_SANKALPA_MENU.reduce((sum, c) => sum + c.items.length, 0),
