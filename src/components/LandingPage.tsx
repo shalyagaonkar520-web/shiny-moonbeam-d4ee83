@@ -39,7 +39,6 @@ const PARTNER_HOTELS = [
     tagline: "All Orders",
     isOpen: true,
     badge: "Open Now",
-    deliveryTime: "30-40 mins",
     image: "/logo-sm.webp",
     hasCustomPhoto: true
   },
@@ -49,7 +48,6 @@ const PARTNER_HOTELS = [
     tagline: "Multi-Cuisine & Biryani",
     isOpen: true,
     badge: "View Menu",
-    deliveryTime: "30-40 mins",
     image: "/hotel_mumtaz.webp",
     hasCustomPhoto: true
   },
@@ -59,7 +57,6 @@ const PARTNER_HOTELS = [
     tagline: "Coastal Fish & Multi-Cuisine",
     isOpen: true,
     badge: "View Menu",
-    deliveryTime: "30-40 mins",
     image: "/hotel_malabar.webp",
     hasCustomPhoto: true
   },
@@ -69,7 +66,6 @@ const PARTNER_HOTELS = [
     tagline: "Pure Veg Heritage Feasts",
     isOpen: true,
     badge: "View Menu",
-    deliveryTime: "30-40 mins",
     image: "/hotel_sankalpa.webp",
     hasCustomPhoto: true
   },
@@ -79,7 +75,6 @@ const PARTNER_HOTELS = [
     tagline: "Seafood & Tandoor Magic",
     isOpen: true,
     badge: "View Menu",
-    deliveryTime: "30-40 mins",
     image: "/hotel_coastal_crown_dining.webp",
     hasCustomPhoto: true
   },
@@ -89,7 +84,6 @@ const PARTNER_HOTELS = [
     tagline: "Kebabs, Rolls & Shawarma",
     isOpen: true,
     badge: "View Menu",
-    deliveryTime: "30-40 mins",
     image: "/hotel_al_amin.webp",
     hasCustomPhoto: true
   }
@@ -846,10 +840,13 @@ export default function LandingPage() {
                   </div>
 
                   <div className="mt-2 pt-1.5 border-t border-gray-100 flex items-center justify-between">
-                    <span className={`text-[9px] font-bold ${
-                      !liveOpen ? 'text-gray-500' : hotel.isOpen ? 'text-emerald-600' : 'text-amber-600'
+                    {/* Status, not a delivery time: there is no real per-hotel
+                        timing data, and the old "30-40 mins" was the same
+                        made-up figure on every card. */}
+                    <span className={`text-[10px] font-bold ${
+                      !liveOpen ? 'text-gray-500' : 'text-emerald-600'
                     }`}>
-                      {hotel.deliveryTime}
+                      {!liveOpen ? 'Closed now' : 'View menu'}
                     </span>
                     <span className="text-[10px] text-gray-500" aria-hidden="true">→</span>
                   </div>

@@ -460,7 +460,7 @@ export default function AuthPage() {
             <div className="pt-3 border-t border-gray-100 grid grid-cols-2 gap-2 text-[11px] text-gray-500 font-medium">
               <div className="flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-[#e11d48]" />
-                <span>30-40 min delivery</span>
+                <span>Track every order</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <UtensilsCrossed className="w-3.5 h-3.5 text-[#e11d48]" />

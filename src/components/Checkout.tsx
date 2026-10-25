@@ -829,8 +829,6 @@ export default function Checkout() {
                   Current Location
                 </span>
                 <span className="text-[#ff4d6d] text-[10px]">▼</span>
-                <span className="text-gray-300 text-xs">•</span>
-                <span className="text-[11px] font-bold text-gray-600">30-40 mins</span>
               </div>
               <p className="text-[11px] text-gray-500 font-medium truncate max-w-[210px] sm:max-w-xs mt-0.5 group-hover:text-rose-600 transition-colors">
                 {deliveryLocation?.address || 'Set delivery location'}

@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft,
   MapPin,
-  Clock,
   Search,
   X,
   ArrowUp,
@@ -134,9 +133,6 @@ export default function HotelSankalpaMenuPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="hidden sm:inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-              <Clock className="w-3 h-3" /> 30-40 mins
-            </span>
             <button
               onClick={() => navigate('/checkout')}
               className="relative p-2.5 rounded-full bg-emerald-50 text-emerald-700 hover:bg-emerald-100 active:scale-95 transition-all"

@@ -121,29 +121,6 @@ async function fetchRoute(dest: LatLng, cacheKey: string): Promise<Route> {
   }
 }
 
-/** The point a fraction (0..1) of the way along a polyline. */
-function pointAlong(coords: Array<[number, number]>, fraction: number): LatLng {
-  if (coords.length === 1) return { lat: coords[0][0], lng: coords[0][1] };
-  const seg: number[] = [];
-  let total = 0;
-  for (let i = 1; i < coords.length; i++) {
-    const d = haversineDistance(coords[i - 1][0], coords[i - 1][1], coords[i][0], coords[i][1]);
-    seg.push(d);
-    total += d;
-  }
-  let target = total * Math.min(Math.max(fraction, 0), 1);
-  for (let i = 0; i < seg.length; i++) {
-    if (target <= seg[i] || i === seg.length - 1) {
-      const t = seg[i] ? target / seg[i] : 0;
-      const [a, b] = [coords[i], coords[i + 1]];
-      return { lat: a[0] + (b[0] - a[0]) * t, lng: a[1] + (b[1] - a[1]) * t };
-    }
-    target -= seg[i];
-  }
-  const last = coords[coords.length - 1];
-  return { lat: last[0], lng: last[1] };
-}
-
 const fmtTime = (d: Date) => d.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' });
 
 // Map markers are inline SVG (lucide shapes), not emoji: emoji fonts differ by
@@ -267,7 +244,7 @@ export default function TrackingPage() {
     return () => { cancelled = true; };
   }, [destKey]);
 
-  // Clock for the arrival time and the estimated bike position.
+  // Clock for the estimated arrival time.
   useEffect(() => {
     const t = window.setInterval(() => setNow(Date.now()), 5000);
     return () => window.clearInterval(t);
@@ -279,16 +256,13 @@ export default function TrackingPage() {
   const dispatchedAt = view?.outForDeliveryAt ? new Date(view.outForDeliveryAt).getTime() : null;
   const driveMin = route?.durationMin ?? null;
 
-  let bike: LatLng | null = null;
-  let bikeMode: 'live' | 'estimated' | null = null;
-  if (liveRider) {
-    bike = liveRider;
-    bikeMode = 'live';
-  } else if (stage === 'out_for_delivery' && route) {
-    const frac = dispatchedAt && driveMin ? Math.min(0.97, (now - dispatchedAt) / (driveMin * 60000)) : 0.05;
-    bike = pointAlong(route.coords, frac);
-    bikeMode = 'estimated';
-  }
+  // The rider is drawn only from their real GPS. When the rider app is not
+  // sending a position, the map shows the route and the two ends and nothing
+  // in between. It used to slide a bike along the route by elapsed time,
+  // labelled "Estimated position" -- honest, but still a rider who was not
+  // there, which is the one thing a tracking map must not show.
+  const bike: LatLng | null = liveRider;
+  const bikeMode: 'live' | null = liveRider ? 'live' : null;
 
   let etaMin: number | null = null;
   if (view && driveMin && stage !== 'delivered' && stage !== 'cancelled') {
@@ -454,11 +428,7 @@ export default function TrackingPage() {
 
           {bikeMode && (
             <span className="absolute top-4 right-4 z-[500] flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white shadow-md border border-rose-100 text-[10px] font-black uppercase tracking-wider text-gray-700">
-              {bikeMode === 'live' ? (
-                <><Radio className="w-3 h-3 text-emerald-600" /> Live GPS</>
-              ) : (
-                <><span className="w-2 h-2 rounded-full bg-amber-400" /> Estimated position</>
-              )}
+              <Radio className="w-3 h-3 text-emerald-600" /> Live GPS
             </span>
           )}
 
@@ -471,8 +441,10 @@ export default function TrackingPage() {
                 </p>
               ) : etaMin !== null ? (
                 <>
-                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">Arriving in</p>
-                  <p className="text-2xl font-black leading-tight">{etaMin} min{etaMin === 1 ? '' : 's'}</p>
+                  {/* An estimate from the real dispatch time and route distance,
+                      so it is labelled as one. */}
+                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">Estimated arrival</p>
+                  <p className="text-2xl font-black leading-tight">~{etaMin} min{etaMin === 1 ? '' : 's'}</p>
                   <p className="text-[10px] font-semibold opacity-80">by {fmtTime(new Date(now + etaMin * 60000))}</p>
                 </>
               ) : (
