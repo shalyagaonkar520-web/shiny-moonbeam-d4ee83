@@ -22,7 +22,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
  * give Google Play.
  */
 export default function PrivacyPage() {
-  useSEO("Privacy Policy - Mintoo", "How Mintoo collects, uses and protects your data.");
+  useSEO("Privacy Policy - Minto", "How Minto collects, uses and protects your data.");
   const navigate = useNavigate();
   const supportNumber = useSystemStore((s) => s.settings?.whatsappNumber) || '+919606001790';
 
@@ -46,7 +46,7 @@ export default function PrivacyPage() {
         <div className="bg-white rounded-[26px] p-4 sm:p-5 border border-rose-100/90 shadow-sm space-y-5">
           <Section title="Who we are">
             <p>
-              Mintoo is a food ordering and delivery service in Yellapur, Karnataka, available at momsmagic.shop
+              Minto is a food ordering and delivery service in Yellapur, Karnataka, available at momsmagic.shop
               and as an Android app. This policy explains what we collect when you use either, and why.
             </p>
           </Section>
@@ -106,7 +106,7 @@ export default function PrivacyPage() {
           </Section>
 
           <Section title="Children">
-            <p>Mintoo is not directed at children under 13, and we do not knowingly collect their data.</p>
+            <p>Minto is not directed at children under 13, and we do not knowingly collect their data.</p>
           </Section>
 
           <Section title="Changes and contact">

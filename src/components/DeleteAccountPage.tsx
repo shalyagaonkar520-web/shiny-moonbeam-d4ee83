@@ -25,7 +25,7 @@ function friendlyDeleteError(err: any): string {
  * "Delete account URL" field.
  */
 export default function DeleteAccountPage() {
-  useSEO("Delete Account - Mintoo", "Delete your Mintoo account and personal data.");
+  useSEO("Delete Account - Minto", "Delete your Minto account and personal data.");
   const navigate = useNavigate();
   const { user, profile, deleteAccount } = useAuthStore();
   const supportNumber = useSystemStore((s) => s.settings?.whatsappNumber) || '+919606001790';
@@ -59,7 +59,7 @@ export default function DeleteAccountPage() {
 
   const requestByWhatsApp = () => {
     const digits = supportNumber.replace(/\D/g, '');
-    const text = "Hi Mintoo, please delete my account and personal data. My registered phone number / email is: ";
+    const text = "Hi Minto, please delete my account and personal data. My registered phone number / email is: ";
     openExternal(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`);
   };
 
@@ -96,7 +96,7 @@ export default function DeleteAccountPage() {
               <section className="space-y-1.5">
                 <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest">What gets deleted</h2>
                 <ul className="list-disc pl-5 space-y-1 text-gray-700 font-medium text-xs leading-relaxed">
-                  <li>Your sign-in (Google or email) and your Mintoo profile</li>
+                  <li>Your sign-in (Google or email) and your Minto profile</li>
                   <li>Your name, phone number, email and saved addresses</li>
                   <li>Your wallet balance and reward points. These cannot be refunded or restored after deletion</li>
                   <li>Order history, saved location and details stored on this device</li>

@@ -105,7 +105,7 @@ export default function OperatingHoursGate({ children }: { children: React.React
               </>
             ) : (
               <>
-                Mintoo accepts food orders daily strictly from{' '}
+                Minto accepts food orders daily strictly from{' '}
                 <span className="font-bold text-[#e11d48]">{storeHours.opensAtLabel}</span> to{' '}
                 <span className="font-bold text-[#e11d48]">{storeHours.closesAtLabel}</span>.
               </>

@@ -25,9 +25,9 @@ export default defineConfig(({mode}) => {
         injectRegister: false,
         includeAssets: ['favicon.ico', 'robots.txt', 'pwa-icon-192.png', 'pwa-icon-512.png'],
         manifest: {
-          name: "Mintoo",
-          short_name: "Mintoo",
-          description: "Order fresh food online from Mintoo. Fast delivery in Yellapur, Dandeli and nearby areas.",
+          name: "Minto",
+          short_name: "Minto",
+          description: "Order fresh food online from Minto. Fast delivery in Yellapur, Dandeli and nearby areas.",
           theme_color: "#fff5f7",
           background_color: "#fff5f7",
           display: "standalone",

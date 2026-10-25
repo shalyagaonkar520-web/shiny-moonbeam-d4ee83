@@ -62,7 +62,7 @@ export default function CityGateway({ children }: { children: React.ReactNode })
                 if (city.isActive) {
                   setCity(city);
                 } else {
-                  toast.error(`Mintoo is currently only operating in Yellapur!`, { id: 'city-lock' });
+                  toast.error(`Minto is currently only operating in Yellapur!`, { id: 'city-lock' });
                 }
               }}
               className={`w-full flex items-center py-6 px-8 rounded-[40px] transition-colors ${

@@ -9,7 +9,7 @@ import SavedAddressList from './SavedAddressList';
 import SaveAddressSheet from './SaveAddressSheet';
 
 export default function AddressesPage() {
-  useSEO("Saved Addresses - Mintoo", 'Manage your saved delivery addresses.');
+  useSEO("Saved Addresses - Minto", 'Manage your saved delivery addresses.');
   const navigate = useNavigate();
   const { deliveryLocation, isLocationPickerOpen, openLocationPicker } = useLocationStore();
   const addresses = useSavedAddresses();

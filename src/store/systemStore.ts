@@ -16,7 +16,7 @@ interface SystemState {
 
 const DEFAULT_SETTINGS: AdminSettings = {
   websiteStatus: 'ON',
-  maintenanceMessage: "Mintoo is Open! Welcome ❤️",
+  maintenanceMessage: "Minto is Open! Welcome ❤️",
   openTime: '12:00',
   closeTime: '22:45',
   reopenMessage: 'Orders are accepted between 12:00 PM and 10:45 PM daily.',
@@ -113,7 +113,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
       emergencyStop: true,
       websiteStatus: 'OFF',
       deliveryPause: true,
-      maintenanceMessage: "Mintoo order lines are currently locked down due to an emergency. We'll be back shortly! 🚨"
+      maintenanceMessage: "Minto order lines are currently locked down due to an emergency. We'll be back shortly! 🚨"
     });
   },
 
@@ -122,7 +122,7 @@ export const useSystemStore = create<SystemState>((set, get) => ({
       emergencyStop: false,
       websiteStatus: 'ON',
       deliveryPause: false,
-      maintenanceMessage: "Mintoo is temporarily closed. We'll reopen soon ❤️"
+      maintenanceMessage: "Minto is temporarily closed. We'll reopen soon ❤️"
     });
   }
 }));

@@ -27,7 +27,7 @@ type AnyItem = {
   description?: string;
 } | null | undefined;
 
-/** Which partner hotel does this single cart item belong to? Null for Mintoo items. */
+/** Which partner hotel does this single cart item belong to? Null for Minto items. */
 export function getItemHotel(item: AnyItem): PartnerHotel | null {
   if (!item) return null;
   return (
@@ -40,7 +40,7 @@ export function getItemHotel(item: AnyItem): PartnerHotel | null {
   );
 }
 
-/** `" [Hotel Malabar]"` for a hotel item, or `""` for a Mintoo item. */
+/** `" [Hotel Malabar]"` for a hotel item, or `""` for a Minto item. */
 export function getItemHotelTag(item: AnyItem): string {
   const hotel = getItemHotel(item);
   return hotel ? ` [${hotel.name}]` : '';
@@ -77,7 +77,7 @@ export function getOrderHotelId(items: AnyItem[]): string | null {
 }
 
 /**
- * Mintoo's own kitchen, treated as a hotel so that every order names a
+ * Minto's own kitchen, treated as a hotel so that every order names a
  * real hotel record. JIS Kitchen dispatches these exactly like partner orders,
  * which keeps one code path instead of a special case for "our own" food.
  */
@@ -90,7 +90,7 @@ export const OWN_KITCHEN = {
   // Flip it in both repos at once, or not at all; the name below is what
   // anyone actually sees.
   id: 'moms-magic',
-  name: 'Mintoo Kitchen',
+  name: 'Minto Kitchen',
 } as const;
 
 export interface HotelOrderGroup {
@@ -107,7 +107,7 @@ export interface HotelOrderGroup {
  * A cart may legitimately mix hotels, and one order can only be dispatched to
  * one kitchen -- so checkout writes a separate order per group rather than
  * sending Mumtaz a ticket containing Sankalpa's food. Items with no partner
- * hotel fall into Mintoo's own kitchen.
+ * hotel fall into Minto's own kitchen.
  */
 export function groupItemsByHotel(items: AnyItem[]): HotelOrderGroup[] {
   const groups = new Map<string, HotelOrderGroup>();

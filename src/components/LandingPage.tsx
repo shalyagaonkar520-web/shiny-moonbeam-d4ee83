@@ -35,7 +35,7 @@ const ROTATING_SEARCH_PLACEHOLDERS = [
 const PARTNER_HOTELS = [
   {
     id: 'mintoo',
-    name: "Mintoo",
+    name: "Minto",
     tagline: "All Orders",
     isOpen: true,
     badge: "Open Now",
@@ -130,8 +130,8 @@ const WHATS_ON_YOUR_MIND = [
 
 export default function LandingPage() {
   useSEO(
-    "Mintoo - Food Order",
-    "Order Chicken Biryani, Shawarma, Noodles, Veg Meals, Fast Food and Special Combo Offers from Mintoo. Fast delivery in Yellapur, Dandeli and nearby areas."
+    "Minto - Food Order",
+    "Order Chicken Biryani, Shawarma, Noodles, Veg Meals, Fast Food and Special Combo Offers from Minto. Fast delivery in Yellapur, Dandeli and nearby areas."
   );
 
   const navigate = useNavigate();
@@ -212,7 +212,7 @@ export default function LandingPage() {
     }
     if (!hotel.isOpen) {
       playSound(SOUNDS.CLICK || SOUNDS.ADD_TO_CART);
-      toast(`${hotel.name} is coming soon to Mintoo! 🔒 We are setting up their delicious menu.`, {
+      toast(`${hotel.name} is coming soon to Minto! 🔒 We are setting up their delicious menu.`, {
         icon: '⏳',
         style: {
           background: '#1e3a8a',
@@ -225,7 +225,7 @@ export default function LandingPage() {
       });
       return;
     }
-    // Mintoo is active, scroll to menu
+    // Minto is active, scroll to menu
     bestsellersRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
@@ -260,7 +260,7 @@ export default function LandingPage() {
   // remaining hotels, each badged with the hotel that cooks it.
   const allProducts = useMemo(() => [...menuItems, ...PARTNER_HOTEL_PRODUCTS], [menuItems]);
 
-  /** Hotel name to print on a card, or null for Al Amin / Mintoo items. */
+  /** Hotel name to print on a card, or null for Al Amin / Minto items. */
   const hotelBadgeOf = (product: any): string | null =>
     product?.showHotelBadge ? product.hotelName : null;
 
@@ -450,7 +450,7 @@ export default function LandingPage() {
                   type="button"
                   onClick={() => setIsAuthModalOpen(true)}
                   className="h-9 pl-2.5 pr-3 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-xs flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
-                  title="Sign in to Mintoo"
+                  title="Sign in to Minto"
                 >
                   <User className="w-4 h-4" />
                   Sign in
@@ -548,7 +548,7 @@ export default function LandingPage() {
                     <div className="absolute inset-0 p-4 sm:p-5 flex flex-col justify-between text-left z-10">
                       <div>
                         <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
-                          Mintoo special
+                          Minto special
                         </span>
                         <h2 className="text-white text-lg sm:text-xl font-black leading-tight mt-2 max-w-[230px]">
                           Your cravings, delivered hot

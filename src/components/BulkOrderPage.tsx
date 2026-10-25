@@ -14,7 +14,7 @@ import DishImage from './DishImage';
 type Category = 'Normal' | 'Ice Cake' | 'Party Items' | 'Snacks';
 
 export default function BulkOrderPage() {
-  useSEO("Cakes & Birthday Celebrations", "Order freshly baked celebration cakes, party snacks, and birthday essentials from Mintoo.");
+  useSEO("Cakes & Birthday Celebrations", "Order freshly baked celebration cakes, party snacks, and birthday essentials from Minto.");
   const navigate = useNavigate();
   const { addItem, items, updateQuantity } = useCartStore();
   const [activeCategory, setActiveCategory] = useState<Category>('Normal');

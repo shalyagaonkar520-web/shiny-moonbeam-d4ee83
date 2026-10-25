@@ -4,8 +4,8 @@ export function useSEO(title: string, description?: string) {
   useEffect(() => {
     // Append the brand only when the page title does not already carry it.
     // An exact-match check was not enough: pages pass titles like
-    // "Mintoo - Food Order", which came out as "Mintoo - Food Order | Mintoo".
-    const BRAND = 'Mintoo';
+    // "Minto - Food Order", which came out as "Minto - Food Order | Minto".
+    const BRAND = 'Minto';
     document.title = title.includes(BRAND) ? title : `${title} | ${BRAND}`;
 
     if (description) {

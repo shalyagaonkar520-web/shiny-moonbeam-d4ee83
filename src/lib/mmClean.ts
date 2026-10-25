@@ -97,7 +97,7 @@ export const DEFAULT_BRANDING: CleanBranding = {
   cleanHeroTitle: 'Home cleaning, booked in a minute',
   cleanHeroBody: 'Trained, verified professionals. Pay after the work is done.',
   supportPhone: '',
-  appName: 'Mintoo',
+  appName: 'Minto',
 };
 
 /**

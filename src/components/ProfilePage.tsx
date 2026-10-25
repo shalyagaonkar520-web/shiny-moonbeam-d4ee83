@@ -42,7 +42,7 @@ const STAGE_CHIP: Record<Stage, string> = {
 };
 
 export default function ProfilePage() {
-  useSEO("My Account - Mintoo", "Manage your profile, delivery address, and contact customer support.");
+  useSEO("My Account - Minto", "Manage your profile, delivery address, and contact customer support.");
   const navigate = useNavigate();
   const { user, profile, logout } = useAuthStore();
   const { deliveryLocation } = useLocationStore();
@@ -192,7 +192,7 @@ export default function ProfilePage() {
               </div>
               <div>
                 <h3 className="text-xs sm:text-sm font-black text-gray-900 leading-tight">
-                  Welcome to Mintoo
+                  Welcome to Minto
                 </h3>
                 <p className="text-[10px] text-gray-500 font-medium mt-0.5">
                   Sign in to track your orders & delivery addresses

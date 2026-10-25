@@ -107,13 +107,13 @@ export default function LocationGate({ children }: { children: React.ReactNode }
     <div className="fixed inset-0 z-[600] overflow-y-auto bg-gradient-to-b from-[#fff1f4] via-[#fff8fa] to-white text-gray-900">
       <div className="min-h-full max-w-md mx-auto px-4 py-10 flex flex-col">
         <div className="flex flex-col items-center text-center mt-4">
-          <img src="/logo-sm.webp" alt="Mintoo" className="w-20 h-20 rounded-3xl object-cover shadow-md shadow-rose-500/10" />
+          <img src="/logo-sm.webp" alt="Minto" className="w-20 h-20 rounded-3xl object-cover shadow-md shadow-rose-500/10" />
           <h1 className="mt-5 text-2xl font-black text-gray-900">
             {outOfArea ? "We don't deliver there yet" : inServiceArea ? 'Deliver to this location?' : 'Where should we deliver?'}
           </h1>
           <p className="mt-2 text-sm text-gray-500 font-medium max-w-xs">
             {outOfArea
-              ? `Mintoo currently delivers only in ${SERVICE_AREA_NAME}, within ${SERVICE_RADIUS_KM} km of our kitchen.`
+              ? `Minto currently delivers only in ${SERVICE_AREA_NAME}, within ${SERVICE_RADIUS_KM} km of our kitchen.`
               : inServiceArea
               ? 'Continue with your last location, or choose a new one.'
               : `Share your location so we can show you what's available. We deliver across ${SERVICE_AREA_NAME}.`}

@@ -23,7 +23,7 @@ const HOTELS = [
 // onto every order line as `hotelId` and read by the super admin panel, and
 // every order placed so far carries 'moms-magic'. Must match
 // src/utils/orderHotels.ts. The name is the part anyone sees.
-const OWN_KITCHEN = { id: 'moms-magic', name: 'Mintoo Kitchen' };
+const OWN_KITCHEN = { id: 'moms-magic', name: 'Minto Kitchen' };
 
 function hotelOf(item) {
   return (

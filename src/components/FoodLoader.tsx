@@ -52,7 +52,7 @@ export default function FoodLoader() {
       {/* Brand & Loading Status */}
       <div className="mt-7 text-center space-y-1.5">
         <h2 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
-          Mintoo
+          Minto
         </h2>
         <p className="text-xs font-bold text-[#e11d48] flex items-center justify-center gap-1.5 animate-pulse">
           <span>Preparing delicious food...</span>

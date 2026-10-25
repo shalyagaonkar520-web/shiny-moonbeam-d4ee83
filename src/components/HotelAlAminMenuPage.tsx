@@ -180,7 +180,7 @@ export default function HotelAlAminMenuPage() {
             onClick={() => navigate('/')}
             className="flex items-center gap-1.5 bg-gradient-to-r from-[#ff2e74] to-[#e11d48] hover:from-[#ff1a66] text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm transition-all active:scale-95 shrink-0 cursor-pointer"
           >
-            <span>Mintoo Home</span>
+            <span>Minto Home</span>
           </button>
         </div>
       </header>
@@ -244,7 +244,7 @@ export default function HotelAlAminMenuPage() {
             onClick={() => navigate('/')}
             className="shrink-0 bg-white border border-rose-200 text-[#e11d48] hover:bg-rose-50 text-[11px] font-black px-3.5 py-1.5 rounded-xl transition-colors shadow-xs cursor-pointer active:scale-95"
           >
-            Mintoo Home
+            Minto Home
           </button>
         </div>
       </div>
@@ -570,7 +570,7 @@ export default function HotelAlAminMenuPage() {
               onClick={() => navigate('/')}
               className="bg-gradient-to-r from-[#ff2e74] to-[#e11d48] hover:from-[#ff1a66] text-white text-xs font-bold px-7 py-3 rounded-full shadow-sm transition-all cursor-pointer active:scale-95"
             >
-              Browse Mintoo Dishes
+              Browse Minto Dishes
             </button>
           </div>
         </div>

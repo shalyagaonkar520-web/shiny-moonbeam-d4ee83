@@ -121,7 +121,7 @@ export default function RecommendationPopup({ result, triggerId, onClose }: Prop
 
           {/* Footer */}
           <div className="flex items-center justify-between px-3 py-1.5 border-t border-white/5">
-            <p className="text-[8px] text-white/25 font-bold uppercase tracking-widest">🤖 Mintoo AI</p>
+            <p className="text-[8px] text-white/25 font-bold uppercase tracking-widest">🤖 Minto AI</p>
             <button onClick={onClose} className="text-[9px] font-black text-brand/70 hover:text-brand uppercase tracking-widest">
               Dismiss
             </button>

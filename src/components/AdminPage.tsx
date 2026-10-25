@@ -72,7 +72,7 @@ const isFinalStage = (o: any) => {
 };
 
 export default function AdminPage() {
-  useSEO("Admin Panel", "Manage operations, menu availability, and systems for Mintoo.");
+  useSEO("Admin Panel", "Manage operations, menu availability, and systems for Minto.");
   const { user, setUser, logout } = useAdminStore();
   const { settings, isLoading, loadSettings, updateSettings, triggerEmergencyStop, resetEmergencyStop } = useSystemStore();
 
@@ -647,9 +647,9 @@ export default function AdminPage() {
 
       let message = '';
       if (stage === 'out_for_delivery') {
-        message = `🚚 Your Mintoo order is on the way!\\n\\nTrack your order live:\\n${trackingLink || `https://momsmagic.shop/track/${orderId}`}\\n\\nThank you for ordering from Mintoo ❤️`;
+        message = `🚚 Your Minto order is on the way!\\n\\nTrack your order live:\\n${trackingLink || `https://momsmagic.shop/track/${orderId}`}\\n\\nThank you for ordering from Minto ❤️`;
       } else {
-        message = `*Mintoo Update* 🍲\\n\\nYour order (ID: ${orderId.slice(0,8)}) is now *${newStatus.toUpperCase()}*.\\n\\nThank you for ordering from Mintoo ❤️`;
+        message = `*Minto Update* 🍲\\n\\nYour order (ID: ${orderId.slice(0,8)}) is now *${newStatus.toUpperCase()}*.\\n\\nThank you for ordering from Minto ❤️`;
       }
       
       let cleanPhone = phone.replace(/[^0-9]/g, '');
@@ -1021,7 +1021,7 @@ export default function AdminPage() {
               <h1 className="text-2xl font-black italic tracking-tighter uppercase leading-none">
                 Control <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF4D00] to-[#FFB700]">Desk</span>
               </h1>
-              <p className="text-white/40 text-[8px] font-black uppercase tracking-[3px] mt-1">Mintoo Operator Portal</p>
+              <p className="text-white/40 text-[8px] font-black uppercase tracking-[3px] mt-1">Minto Operator Portal</p>
             </div>
           </div>
 

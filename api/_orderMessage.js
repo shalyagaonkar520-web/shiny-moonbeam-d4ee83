@@ -16,7 +16,7 @@ const rupees = (n) => `₹${Number(n || 0).toFixed(2)}`;
 export function buildTeamMessage(groupId, orders, check = null) {
   const first = orders[0];
   const hotels = orders.map((o) => o.hotelName).filter(Boolean);
-  const partner = hotels.find((h) => h !== "Mintoo Kitchen");
+  const partner = hotels.find((h) => h !== "Minto Kitchen");
   const loc = first.deliveryLocation || {};
   const sum = (k) => orders.reduce((s, o) => s + Number(o[k] || 0), 0);
   const paid = first.paymentStatus === 'completed';
@@ -25,7 +25,7 @@ export function buildTeamMessage(groupId, orders, check = null) {
   const flags = [...new Set(orders.flatMap((o) => o.priceFlags || []))];
 
   const items = orders
-    .flatMap((o) => (o.items || []).map((i) => `• ${i.quantity}x ${esc(i.name)}${o.hotelName && o.hotelName !== "Mintoo Kitchen" ? ` [${esc(o.hotelName)}]` : ''} (${rupees(i.price * i.quantity)})`))
+    .flatMap((o) => (o.items || []).map((i) => `• ${i.quantity}x ${esc(i.name)}${o.hotelName && o.hotelName !== "Minto Kitchen" ? ` [${esc(o.hotelName)}]` : ''} (${rupees(i.price * i.quantity)})`))
     .join('\n');
 
   const appTotal = sum('payableAmount');

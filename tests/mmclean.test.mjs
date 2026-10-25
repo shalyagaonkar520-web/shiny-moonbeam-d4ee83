@@ -78,11 +78,11 @@ check('120 -> 2 hr', formatDuration(120) === '2 hr');
 // 4. Branding: every field optional, {app} substituted, blanks fall back.
 const d = resolveBranding(null);
 check('branding defaults when the doc is missing',
-  d.appCleanName === 'MM Clean' && d.appName === 'Mintoo' && d.supportPhone === '');
+  d.appCleanName === 'MM Clean' && d.appName === 'Minto' && d.supportPhone === '');
 check('blank string falls back to the default',
   resolveBranding({ appCleanName: '   ' }).appCleanName === 'MM Clean');
 check('{app} replaced with appName',
-  resolveBranding({ appName: 'Mintoo', cleanHeroTitle: 'Welcome to {app}' }).cleanHeroTitle === 'Welcome to Mintoo');
+  resolveBranding({ appName: 'Minto', cleanHeroTitle: 'Welcome to {app}' }).cleanHeroTitle === 'Welcome to Minto');
 check('overrides win', resolveBranding({ appCleanName: 'Sparkle' }).appCleanName === 'Sparkle');
 check('support phone kept when set', resolveBranding({ supportPhone: '+919606001790' }).supportPhone === '+919606001790');
 

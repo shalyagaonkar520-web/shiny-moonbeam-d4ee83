@@ -4,7 +4,7 @@ import { ChevronLeft, Quote, Heart, Sparkles, MessageCircle } from 'lucide-react
 import { useSEO } from '../utils/seo';
 
 export default function AboutFounder() {
-  useSEO("Our Story", "Learn about Shalya Gaonkar, the founder, and the vision behind Mintoo Yellapur and Dandeli.");
+  useSEO("Our Story", "Learn about Shalya Gaonkar, the founder, and the vision behind Minto Yellapur and Dandeli.");
   const navigate = useNavigate();
 
   return (
@@ -63,7 +63,7 @@ export default function AboutFounder() {
                 Shalya <br />
                 <span className="text-luxury-gold drop-shadow-[0_0_20px_rgba(244,180,0,0.3)]">Gaonkar</span>
               </h1>
-              <p className="text-brand font-black uppercase tracking-[6px] text-xs">Founder, Mintoo</p>
+              <p className="text-brand font-black uppercase tracking-[6px] text-xs">Founder, Minto</p>
             </div>
 
             <div className="relative">
@@ -98,10 +98,10 @@ export default function AboutFounder() {
           <div className="relative z-10 space-y-6">
             <h2 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter text-luxury-gold">Our Vision</h2>
             <p className="text-white/80 text-lg md:text-xl leading-relaxed max-w-3xl mx-auto italic">
-              "Mintoo was started with a simple vision — to serve delicious food with great service and create happiness through every order. We believe food is not just about eating; it’s about comfort, memories, and bringing people together."
+              "Minto was started with a simple vision — to serve delicious food with great service and create happiness through every order. We believe food is not just about eating; it’s about comfort, memories, and bringing people together."
             </p>
             <p className="text-white/60 text-lg leading-relaxed max-w-3xl mx-auto pt-4">
-              With passion, creativity, and dedication, Mintoo continuously works to provide quality food, smooth service, and the best experience for every customer.
+              With passion, creativity, and dedication, Minto continuously works to provide quality food, smooth service, and the best experience for every customer.
             </p>
           </div>
         </motion.div>
@@ -133,13 +133,13 @@ export default function AboutFounder() {
                 JIS <br />
                 <span className="text-luxury-gold drop-shadow-[0_0_20px_rgba(244,180,0,0.3)]">Partner</span>
               </h1>
-              <p className="text-brand font-black uppercase tracking-[6px] text-xs text-right md:text-left">Partner, Mintoo</p>
+              <p className="text-brand font-black uppercase tracking-[6px] text-xs text-right md:text-left">Partner, Minto</p>
             </div>
 
             <div className="relative text-right md:text-left">
               <Quote className="absolute -top-6 -right-6 md:-left-6 w-12 h-12 text-white/5 rotate-180 md:rotate-0" />
               <p className="text-white/70 text-lg leading-relaxed font-medium italic relative z-10">
-                A strong support behind Mintoo, helping in growing the brand, managing operations, and ensuring customers receive the best service and experience.
+                A strong support behind Minto, helping in growing the brand, managing operations, and ensuring customers receive the best service and experience.
               </p>
             </div>
           </motion.div>

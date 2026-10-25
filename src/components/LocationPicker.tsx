@@ -340,7 +340,7 @@ export default function LocationPicker() {
         { icon: restaurantIcon }
       )
         .addTo(map)
-        .bindPopup("<b>Mintoo Kitchen</b><br/>Your restaurant");
+        .bindPopup("<b>Minto Kitchen</b><br/>Your restaurant");
 
       // Click handler to place delivery marker
       map.on('click', (e: any) => {

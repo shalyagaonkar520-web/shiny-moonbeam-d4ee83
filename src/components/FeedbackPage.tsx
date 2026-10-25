@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import { useSEO } from '../utils/seo';
 
 export default function FeedbackPage() {
-  useSEO("Feedback", "We value your opinion. Share your dining experience and feedback with the team at Mintoo.");
+  useSEO("Feedback", "We value your opinion. Share your dining experience and feedback with the team at Minto.");
   const navigate = useNavigate();
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
@@ -21,7 +21,7 @@ export default function FeedbackPage() {
       return;
     }
     const stars = '⭐'.repeat(rating);
-    const feedbackMsg = `Hi Mintoo! I would like to share my feedback:\nRating: ${stars}\nComments: ${feedback}`;
+    const feedbackMsg = `Hi Minto! I would like to share my feedback:\nRating: ${stars}\nComments: ${feedback}`;
 
     // Feedback goes to the order channel too, so nothing a customer sends
     // depends on someone remembering to check WhatsApp.
@@ -35,7 +35,7 @@ export default function FeedbackPage() {
         `💬 <b>Comments:</b> ${esc(feedback.trim()) || '(none)'}`,
         '',
         '━━━━━━━━━━━━━━━━',
-        '🌟 <b>Mintoo</b> - Feedback',
+        '🌟 <b>Minto</b> - Feedback',
       ].join('\n')
     );
     const waUrl = `https://wa.me/919606001790?text=${encodeURIComponent(feedbackMsg)}`;
