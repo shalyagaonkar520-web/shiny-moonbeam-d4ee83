@@ -1,4 +1,5 @@
 import { adminDb } from './_firebaseAdmin.js';
+import { logOpsEvent } from './_ops.js';
 import { paymentsConfigured, validCheckoutSignature, markGroupPaid } from './_payments.js';
 
 // POST /api/verify-payment
@@ -36,6 +37,7 @@ export default async function handler(req, res) {
     return res.status(result.ok ? 200 : 409).json(result);
   } catch (err) {
     console.error('verify-payment failed', err);
+    await logOpsEvent('payment_webhook', 'error', `verify-payment failed: ${err?.message || err}`);
     return res.status(502).json({ ok: false, error: 'verify_failed' });
   }
 }

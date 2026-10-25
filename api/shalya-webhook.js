@@ -1,4 +1,5 @@
 import { validShalyaWebhook, normalisePayment, isPaidStatus } from './_shalyaPay.js';
+import { logOpsEvent } from './_ops.js';
 import { markGroupPaid, usingShalya } from './_payments.js';
 
 // Shalya Pay tells us a UPI payment landed.
@@ -83,10 +84,14 @@ export default async function handler(req, res) {
     const result = await markGroupPaid(payment.orderId, payment.id, {
       amountPaise: payment.amountPaise ?? undefined,
     });
-    if (!result.ok) console.error('shalya-webhook: not marked paid (%s)', result.error);
+    if (!result.ok) {
+      console.error('shalya-webhook: not marked paid (%s)', result.error);
+      await logOpsEvent('payment_webhook', 'error', `Shalya payment not marked paid: ${result.error}`, String(payment.id || ''));
+    }
     return res.status(200).json(result);
   } catch (error) {
     console.error('shalya-webhook: failed to mark paid', error);
+    await logOpsEvent('payment_webhook', 'error', `Shalya webhook failed: ${error?.message || error}`);
     // 500 so the gateway retries — this one is our fault, not the caller's.
     return res.status(500).json({ ok: false, error: 'internal_error' });
   }

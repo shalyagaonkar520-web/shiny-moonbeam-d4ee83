@@ -1,4 +1,5 @@
 import { FieldValue } from 'firebase-admin/firestore';
+import { logOpsEvent } from './_ops.js';
 import { adminDb, adminMessaging } from './_firebaseAdmin.js';
 import { toStage } from './_orderStage.js';
 
@@ -127,6 +128,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true, sent: true, stage: claim.stage });
   } catch (error) {
     console.error('notify-order failed', error);
+    await logOpsEvent('notification', 'error', `Order push failed: ${error?.message || error}`, orderId);
     return res.status(502).json({ ok: false, error: 'notify_failed' });
   }
 }

@@ -1,4 +1,5 @@
 import { adminDb } from './_firebaseAdmin.js';
+import { logOpsEvent } from './_ops.js';
 import { announceOnce } from './_orderMessage.js';
 
 // POST /api/send-telegram  { orderId, text? }
@@ -69,10 +70,14 @@ ${raw}` : raw;
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML', disable_web_page_preview: true }),
     });
-    if (!tg.ok) return res.status(502).json({ success: false });
+    if (!tg.ok) {
+      await logOpsEvent('notification', 'error', `Telegram answered ${tg.status}`);
+      return res.status(502).json({ success: false });
+    }
     return res.status(200).json({ success: true });
   } catch (err) {
     console.error('Telegram send failed:', err);
+    await logOpsEvent('notification', 'error', `Telegram send failed: ${err?.message || err}`);
     return res.status(500).json({ success: false });
   }
 }
