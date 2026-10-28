@@ -22,7 +22,7 @@ import { getItemHotelTag, getItemHotel, getOrderHotelName, getOrderHotelId, grou
 import DishImage from './DishImage';
 import { useDishAvailabilityStore } from '../store/dishAvailabilityStore';
 import { notifyTelegram } from '../lib/notifyTelegram';
-import { couponDiscountFor, couponGivesFreeDelivery, istHour, normaliseIndianMobile, CouponRule } from '../lib/pricing';
+import { couponDiscountFor, couponGivesFreeDelivery, normaliseIndianMobile, CouponRule } from '../lib/pricing';
 import {
   placeOrderOnServer,
   verifyPaymentOnServer,
@@ -161,14 +161,10 @@ export default function Checkout() {
   // Free delivery logic (same rules as api/_pricing.js)
   const activeCoupons = (settings.coupons || []) as CouponRule[];
   const appliedCouponDetails = appliedCoupon ? activeCoupons.find(c => c.code.toUpperCase() === appliedCoupon) : null;
-  const isBeforeTwo = istHour() < 14;
-  const freeByCoupon = couponGivesFreeDelivery(appliedCouponDetails, subtotal);
-  const isFreeDelivery = freeByCoupon || isBeforeTwo;
-  const freeDeliveryReason = freeByCoupon
-    ? `${appliedCouponDetails!.code} Promo`
-    : isBeforeTwo
-    ? 'Free Before 2 PM 🎉'
-    : '';
+  // Only a free-delivery coupon waives the fee (the old "free before 2 PM"
+  // rule was removed).
+  const isFreeDelivery = couponGivesFreeDelivery(appliedCouponDetails, subtotal);
+  const freeDeliveryReason = isFreeDelivery ? `${appliedCouponDetails!.code} Promo` : '';
   const deliveryCharge = isFreeDelivery ? 0 : baseDeliveryCharge;
 
   // Re-checked on every render: dropping below the minimum or the admin
@@ -516,7 +512,7 @@ export default function Checkout() {
           subtotal: group.subtotal,
           deliveryCharge: groupDelivery,
           packagingFee: groupPackagingFee,
-          couponCode: couponDiscount > 0 || freeByCoupon ? appliedCoupon : null,
+          couponCode: couponDiscount > 0 || isFreeDelivery ? appliedCoupon : null,
           couponDiscount: groupDiscount,
           walletAmountUsed: 0,
           grandTotal: groupTotal,
@@ -996,7 +992,7 @@ export default function Checkout() {
                   onClick={() =>
                     toast(
                       isFreeDelivery
-                        ? `Delivery is free right now (${freeDeliveryReason.replace(' 🎉', '')}).`
+                        ? `Delivery is free (${freeDeliveryReason}).`
                         : `₹20 for the first 2 km, then ₹10 per km. Your address is ${distanceKm} km away.`,
                       { id: 'why-delivery' }
                     )

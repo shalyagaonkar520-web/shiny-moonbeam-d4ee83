@@ -27,13 +27,6 @@ export function couponGivesFreeDelivery(coupon: CouponRule | null | undefined, s
   return !!coupon && coupon.isActive && coupon.type === 'free_delivery' && subtotal >= Number(coupon.minOrderValue || 0);
 }
 
-/** Hour of day in India, so "free before 2 PM" means 2 PM in Yellapur on any phone clock setting. */
-export function istHour(now = new Date()): number {
-  return Number(
-    new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hourCycle: 'h23', timeZone: 'Asia/Kolkata' }).format(now)
-  );
-}
-
 /** A 10-digit Indian mobile number from whatever the customer typed, or null. */
 export function normaliseIndianMobile(raw: string): string | null {
   const digits = String(raw || '').replace(/\D/g, '').replace(/^(91|0)(?=\d{10}$)/, '');

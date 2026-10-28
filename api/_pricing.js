@@ -52,11 +52,6 @@ function deliveryChargeFor(km) {
   return 20 + (whole > 2 ? (whole - 2) * 10 : 0);
 }
 
-/** Hour of day in India, whatever timezone the server runs in. */
-function istHour(now) {
-  return Number(new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hourCycle: 'h23', timeZone: 'Asia/Kolkata' }).format(now));
-}
-
 // Admin price edits live in the Firestore `menu` collection and win over the
 // bundled catalog. Cached briefly so a burst of orders costs one read.
 let menuCache = { at: 0, byId: {} };
@@ -157,9 +152,8 @@ export async function priceOrder({ items, couponCode, location, now = new Date()
   if (code && coupon && coupon.type !== 'free_delivery' && couponDiscount === 0) flags.push(`coupon ${code} not valid for this order`);
 
   const freeByCoupon = !!coupon && coupon.isActive && coupon.type === 'free_delivery' && subtotal >= Number(coupon.minOrderValue || 0);
-  const freeBeforeTwo = istHour(now) < 14;
-  const deliveryCharge = freeByCoupon || freeBeforeTwo ? 0 : deliveryChargeFor(distanceKm);
-  const freeDeliveryReason = freeByCoupon ? `${coupon.code} Promo` : freeBeforeTwo ? 'Free Before 2 PM' : '';
+  const deliveryCharge = freeByCoupon ? 0 : deliveryChargeFor(distanceKm);
+  const freeDeliveryReason = freeByCoupon ? `${coupon.code} Promo` : '';
 
   const hasMumtaz = lines.some((l) => l.hotelId === 'mumtaz');
   const packagingFee = hasMumtaz ? MUMTAZ_PACKAGING_FEE : 0;
