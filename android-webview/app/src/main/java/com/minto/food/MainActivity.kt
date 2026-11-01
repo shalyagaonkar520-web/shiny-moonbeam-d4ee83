@@ -1,4 +1,4 @@
-package com.momsmagic.delivery
+package com.minto.food
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -45,10 +45,9 @@ import kotlinx.coroutines.launch
 import org.json.JSONObject
 import android.os.Build
 import com.google.firebase.messaging.FirebaseMessaging
-import com.minto.food.R
 
 /**
- * MainActivity - Loads the Mom's Magic web app (https://momsmagic.shop) inside a WebView.
+ * MainActivity - Loads the Minto web app (https://momsmagic.shop) inside a WebView.
  * Handles GPS permission, JavaScript bridge, external Intents (WhatsApp, tel, UPI, intent://),
  * Razorpay popups, the offline screen and renderer crashes.
  *
@@ -86,7 +85,7 @@ class MainActivity : AppCompatActivity() {
         private const val NOTIFICATION_PERMISSION_CODE = 1002
         private const val START_URL = "https://momsmagic.shop/"
         private const val OFFLINE_URL = "file:///android_asset/offline.html"
-        private const val RETRY_URL = "momsmagic://retry"
+        private const val RETRY_URL = "minto://retry"
         private const val STATE_URL = "current_url"
         private val APP_HOSTS = setOf("momsmagic.shop", "www.momsmagic.shop")
 
@@ -191,7 +190,7 @@ class MainActivity : AppCompatActivity() {
             cacheMode = WebSettings.LOAD_DEFAULT
             useWideViewPort = true
             loadWithOverviewMode = true
-            userAgentString = "$userAgentString MomsMagicApp"
+            userAgentString = "$userAgentString MintoApp"
         }
         // Razorpay's checkout iframe (api.razorpay.com inside the app page) needs its cookies.
         CookieManager.getInstance().setAcceptThirdPartyCookies(view, true)
@@ -467,7 +466,7 @@ class MainActivity : AppCompatActivity() {
         var allowed = false
         locationDialog = AlertDialog.Builder(this)
             .setTitle("Location Permission Needed")
-            .setMessage("Mom's Magic collects location data to check that your delivery address is inside our Yellapur service area, calculate the delivery charge and guide your rider. Location is used only while you use the app.")
+            .setMessage("Minto collects location data to check that your delivery address is inside our Yellapur service area, calculate the delivery charge and guide your rider. Location is used only while you use the app.")
             .setPositiveButton("Allow") { _, _ ->
                 allowed = true
                 requestLocationPermission()

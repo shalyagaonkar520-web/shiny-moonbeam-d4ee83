@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "MomsMagicDelivery"
+rootProject.name = "MintoDelivery"
 include ':app'

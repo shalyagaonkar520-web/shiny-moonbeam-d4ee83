@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Bar colours come from enableEdgeToEdge() in MainActivity; dark icons on the pink page. -->
-    <style name="Theme.MomsMagic" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="Theme.Minto" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowBackground">@color/bg_pink</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>

@@ -1,6 +1,6 @@
 rules_version = '2';
 
-// Firestore security rules for Mom's Magic.
+// Firestore security rules for Minto.
 //
 // READ THIS BEFORE DEPLOYING -- these rules are the ONLY thing protecting your
 // data. The admin flag in the browser just decides which buttons are drawn;

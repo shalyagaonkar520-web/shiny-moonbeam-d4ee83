@@ -46,7 +46,7 @@ export default function PrivacyPage() {
         <div className="bg-white rounded-[26px] p-4 sm:p-5 border border-rose-100/90 shadow-sm space-y-5">
           <Section title="Who we are">
             <p>
-              Minto is a food ordering and delivery service in Yellapur, Karnataka, available at momsmagic.shop
+              Minto is a food ordering and delivery service in Yellapur, Karnataka, available on our website
               and as an Android app. This policy explains what we collect when you use either, and why.
             </p>
           </Section>
@@ -94,7 +94,7 @@ export default function PrivacyPage() {
             </p>
             <p>
               You can delete your account at any time from <b>Account → Delete account</b> in the app, or at{' '}
-              <Link to="/delete-account" className="underline font-bold">momsmagic.shop/delete-account</Link>.
+              <Link to="/delete-account" className="underline font-bold">the Delete Account page</Link>.
             </p>
           </Section>
 

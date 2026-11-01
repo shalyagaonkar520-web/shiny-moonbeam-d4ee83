@@ -953,7 +953,7 @@ export default function AdminPage() {
                 <input 
                   required
                   type="email" 
-                  placeholder="name@momsmagic.com" 
+                  placeholder="Admin email" 
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   className="w-full px-6 py-4.5 bg-white/5 rounded-2xl border border-white/10 focus:border-[#FFB700]/30 outline-none font-bold text-sm text-white transition-all placeholder:text-white/15"

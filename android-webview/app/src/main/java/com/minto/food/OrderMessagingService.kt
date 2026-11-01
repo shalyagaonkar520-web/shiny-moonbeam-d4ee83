@@ -1,4 +1,4 @@
-package com.momsmagic.delivery
+package com.minto.food
 
 import android.Manifest
 import android.app.NotificationChannel
@@ -13,7 +13,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.minto.food.R
 
 /**
  * Order-status pushes sent by /api/notify-order.
