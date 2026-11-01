@@ -25,6 +25,7 @@ import BottomNav from './components/BottomNav';
 import BottomCartBar from './components/BottomCartBar';
 import CityGateway from './components/CityGateway';
 import LocationGate from './components/LocationGate';
+import FoodBotLauncher from './components/FoodBotLauncher';
 // Both render null until opened, so they are kept out of the app-shell chunk.
 const LocationPicker = lazy(() => import('./components/LocationPicker'));
 const InstallAppModal = lazy(() => import('./components/InstallAppModal'));
@@ -248,6 +249,7 @@ export default function App() {
 
           <BottomCartBar />
           <BottomNav />
+          <FoodBotLauncher />
         </div>
         </LocationGate>
       </OperatingHoursGate>
