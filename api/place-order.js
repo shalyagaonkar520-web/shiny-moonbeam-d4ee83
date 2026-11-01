@@ -2,7 +2,9 @@ import { getApps } from 'firebase-admin/app';
 import { loadAdminAuth } from './_adminAuth.js';
 import { unavailableDishes } from './_dishAvailability.js';
 import { adminDb } from './_firebaseAdmin.js';
-import { priceOrder, SERVICE_RADIUS_KM, COD_MAX_KM } from './_pricing.js';
+import { priceOrder } from './_pricing.js';
+import { closedReason } from './_live.js';
+import { FieldValue } from 'firebase-admin/firestore';
 import { announceOnce } from './_orderMessage.js';
 import { paymentsConfigured, createPaymentOrder, usingShalya } from './_payments.js';
 import { upiIntentLink } from './_shalyaPay.js';
@@ -94,6 +96,26 @@ export default async function handler(req, res) {
     });
   }
 
+  // The website switch in the Super Admin. Not 503: checkout treats 503 as
+  // "server unavailable" and would fall back to writing the order itself.
+  const settingsSnap = await adminDb.collection('system').doc('settings').get().catch(() => null);
+  const site = settingsSnap?.exists ? settingsSnap.data() : {};
+  if (site.websiteStatus === 'OFF' || site.emergencyStop === true) return bad(res, 409, 'store_closed');
+
+  // A signed-in customer's uid is recorded only when their ID token proves it.
+  let userId = null;
+  if (typeof body.idToken === 'string' && body.idToken && getApps().length) {
+    try {
+      const { getAuth } = await loadAdminAuth();
+      if (getAuth) userId = (await getAuth(getApps()[0]).verifyIdToken(body.idToken)).uid;
+    } catch { /* guest order */ }
+  }
+  // An account the team suspended places no orders.
+  if (userId) {
+    const u = await adminDb.collection('users').doc(userId).get().catch(() => null);
+    if (u?.exists && u.data().suspended === true) return bad(res, 403, 'account_suspended');
+  }
+
   let priced;
   try {
     priced = await priceOrder({
@@ -106,6 +128,8 @@ export default async function handler(req, res) {
       description: str(i.description, 200),
       image: str(i.image, 300),
       category: str(i.category, 60),
+      ...(typeof i.variant === 'string' && i.variant ? { variant: str(i.variant, 60) } : {}),
+      ...(Array.isArray(i.addOns) ? { addOns: i.addOns.slice(0, 20).map((a) => str(typeof a === 'string' ? a : a?.name, 60)).filter(Boolean) } : {}),
       // Optional fields are left out rather than set to undefined: the pricer
       // spreads each item into the order document, and Firestore refuses an
       // undefined value outright -- which failed every order whose dishes had
@@ -117,7 +141,8 @@ export default async function handler(req, res) {
         : {}),
     })),
     couponCode: str(body.couponCode, 40),
-    location: { lat, lng },
+    location: { lat, lng, address },
+    customer: { phone, userId },
     // Paying online for a dish that is on no menu would be "verified" at a
     // price the app chose; cash orders keep them, flagged for the team.
     allowUnknownItems: paymentMethod !== 'online',
@@ -127,9 +152,15 @@ export default async function handler(req, res) {
     throw err;
   }
 
-  if (priced.distanceKm > SERVICE_RADIUS_KM) return bad(res, 422, 'outside_service_area', { distanceKm: priced.distanceKm });
-  if (paymentMethod === 'cod' && priced.distanceKm > COD_MAX_KM && priced.grandTotal > 0) {
+  // Where and how the restaurant's city delivers, as set in the Super Admin.
+  if (priced.outsideArea || priced.distanceKm > priced.maxKm) {
+    return bad(res, 422, 'outside_service_area', { distanceKm: priced.distanceKm });
+  }
+  if (paymentMethod === 'cod' && priced.grandTotal > 0 && (!priced.codOffered || priced.distanceKm > priced.codMaxKm)) {
     return bad(res, 422, 'cod_not_available', { distanceKm: priced.distanceKm });
+  }
+  if (priced.minOrder > 0 && priced.subtotal < priced.minOrder) {
+    return bad(res, 422, 'below_minimum_order', { minOrder: priced.minOrder });
   }
   if (paymentMethod === 'online' && !paymentsConfigured()) return bad(res, 503, 'payments_not_configured');
 
@@ -140,31 +171,19 @@ export default async function handler(req, res) {
   // It runs before any Razorpay order exists, so nobody is charged for food a
   // closed kitchen will never cook. A hotel with no document is treated as
   // closed, matching the rule: such an order could never be dispatched.
-  const hotelIds = [...new Set(priced.groups.map((g) => g.hotelId))];
-  const hotelSnaps = await Promise.all(hotelIds.map((id) => adminDb.collection('hotels').doc(id).get()));
+  // Also paused, outside its hours, or in a city the team switched off.
   const closedHotels = [];
-  hotelSnaps.forEach((snap, idx) => {
-    const h = snap.exists ? snap.data() : null;
-    if (!h || h.acceptingOrders !== true || h.status === 'INACTIVE') {
-      const group = priced.groups.find((g) => g.hotelId === hotelIds[idx]);
-      closedHotels.push({ id: hotelIds[idx], name: h?.name || group?.hotelName || hotelIds[idx] });
-    }
-  });
+  for (const g of priced.groups) {
+    const h = priced.hotels[g.hotelId] || null;
+    const reason = closedReason(h, h?.cityId ? priced.cities[h.cityId] : null);
+    if (reason) closedHotels.push({ id: g.hotelId, name: h?.name || g.hotelName || g.hotelId, reason });
+  }
   if (closedHotels.length) return bad(res, 409, 'hotel_closed', { hotels: closedHotels });
 
   // Dishes the kitchen switched off (or that are outside their serving window)
   // in the panel. Also before any payment order, for the same reason.
-  const offDishes = await unavailableDishes(adminDb, priced.groups);
+  const offDishes = [...new Set([...priced.unavailable, ...(await unavailableDishes(adminDb, priced.groups))])];
   if (offDishes.length) return bad(res, 409, 'dish_unavailable', { dishes: offDishes });
-
-  // A signed-in customer's uid is recorded only when their ID token proves it.
-  let userId = null;
-  if (typeof body.idToken === 'string' && body.idToken && getApps().length) {
-    try {
-      const { getAuth } = await loadAdminAuth();
-      if (getAuth) userId = (await getAuth(getApps()[0]).verifyIdToken(body.idToken)).uid;
-    } catch { /* guest order */ }
-  }
 
   let razorpay = null;
   if (paymentMethod === 'online' && priced.grandTotal > 0) {
@@ -193,10 +212,13 @@ export default async function handler(req, res) {
     hotelId: g.hotelId,
     hotelName: g.hotelName,
     restaurantId: g.hotelId,
+    // The restaurant's city: city managers and city reports filter on it.
+    cityId: g.cityId || '',
     items: g.items,
     subtotal: g.subtotal,
     deliveryCharge: g.deliveryCharge,
     packagingFee: g.packagingFee,
+    taxAmount: g.taxAmount,
     couponCode: priced.couponCode,
     couponDiscount: g.couponDiscount,
     walletAmountUsed: 0,
@@ -225,22 +247,48 @@ export default async function handler(req, res) {
     createdAt: nowIso,
   }));
 
-  const batch = adminDb.batch();
   // create(), not set(): if two identical requests race, the second fails
   // instead of overwriting the first order's Razorpay link.
-  for (const d of docs) batch.create(adminDb.collection('orders').doc(d.id), d);
-  if (razorpay) {
-    // Server-only record of what this Razorpay order is for; verify-payment
-    // and the webhook check payments against this, not the order document.
-    batch.set(adminDb.collection('payments').doc(razorpay.id), {
-      groupId: orderId,
-      amountPaise: razorpay.amount,
-      createdAt: nowIso,
-    });
-  }
+  const writeOrders = (w) => {
+    for (const d of docs) w.create(adminDb.collection('orders').doc(d.id), d);
+    if (razorpay) {
+      // Server-only record of what this Razorpay order is for; verify-payment
+      // and the webhook check payments against this, not the order document.
+      w.set(adminDb.collection('payments').doc(razorpay.id), {
+        groupId: orderId,
+        amountPaise: razorpay.amount,
+        createdAt: nowIso,
+      });
+    }
+  };
   try {
-    await batch.commit();
+    if (priced.couponFullTerms) {
+      // A coupon with full terms is redeemed in the same transaction as the
+      // order: the usage limit is re-checked against the stored count, so two
+      // customers cannot both take the last use, and a failed order never
+      // consumes one.
+      const couponRef = adminDb.collection('coupons').doc(priced.couponCode);
+      await adminDb.runTransaction(async (tx) => {
+        const c = await tx.get(couponRef);
+        const data = c.exists ? c.data() : null;
+        if (!data || data.isActive !== true) throw Object.assign(new Error('coupon gone'), { code: 'COUPON_GONE' });
+        if (Number(data.usageLimit) > 0 && Number(data.usedCount || 0) >= Number(data.usageLimit)) {
+          throw Object.assign(new Error('coupon used up'), { code: 'COUPON_GONE' });
+        }
+        writeOrders(tx);
+        tx.set(adminDb.collection('couponRedemptions').doc(orderId), {
+          code: priced.couponCode, orderGroupId: orderId, userId: userId || null, phone,
+          discount: priced.couponDiscount, paymentMethod, at: nowIso,
+        });
+        tx.update(couponRef, { usedCount: FieldValue.increment(1) });
+      });
+    } else {
+      const batch = adminDb.batch();
+      writeOrders(batch);
+      await batch.commit();
+    }
   } catch (err) {
+    if (err?.code === 'COUPON_GONE') return bad(res, 409, 'coupon_unavailable');
     if (err?.code === 6 || /ALREADY_EXISTS/i.test(String(err?.message))) {
       const snap = await primaryRef.get();
       if (!snap.exists) return bad(res, 409, 'order_conflict');
@@ -273,6 +321,7 @@ export default async function handler(req, res) {
       subtotal: priced.subtotal,
       deliveryCharge: priced.deliveryCharge,
       packagingFee: priced.packagingFee,
+      taxAmount: priced.taxAmount,
       couponDiscount: priced.couponDiscount,
       grandTotal: priced.grandTotal,
     },

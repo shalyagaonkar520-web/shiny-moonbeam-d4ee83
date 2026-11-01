@@ -13,9 +13,10 @@
     "lint": "tsc --noEmit",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
-    "test": "node tests/server.test.mjs && node tests/mmclean.test.mjs && node tests/dishAvailability.test.mjs",
+    "test": "node tests/server.test.mjs && node tests/mmclean.test.mjs && node tests/dishAvailability.test.mjs && node tests/superadmin.test.mjs",
     "test:e2e": "node tests/checkout.e2e.cjs",
-    "test:rules": "npx -y firebase-tools@13 emulators:exec --only firestore --project demo-momsmagic \"node tests/rules.test.mjs\""
+    "test:rules": "npx -y firebase-tools@13 emulators:exec --only firestore --project demo-momsmagic \"node tests/rules.test.mjs\"",
+    "test:placeorder": "npx -y firebase-tools@13 emulators:exec --only firestore --project demo-placeorder \"node tests/placeorder.emulator.mjs\""
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
