@@ -165,6 +165,8 @@ export async function findClosedHotels(
     return snaps
       .filter((s) => {
         const h: any = s.exists() ? s.data() : null;
+        // Same rule as /api/place-order: open until its record is created.
+        if (!h && s.id === 'moms_magic_kitchen') return false;
         return !h || h.acceptingOrders !== true || h.status === 'INACTIVE';
       })
       .map((s) => String((s.data() as any)?.name || s.id));
