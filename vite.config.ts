@@ -54,6 +54,13 @@ export default defineConfig(({mode}) => {
           ]
         },
         workbox: {
+          // A new build takes over as soon as it is installed. Without these the
+          // new worker waited until every tab of the app was closed, which in the
+          // Android app is practically never, so phones kept running old builds
+          // for days (e.g. sending Moms Magic Kitchen orders to an id that no
+          // longer exists, refused as "not taking orders").
+          skipWaiting: true,
+          clientsClaim: true,
           // Precache the app shell ONLY. Previously this globbed every png/jpg in the
           // build, so a first visit downloaded ~52 MB of food photos before the app was
           // usable. Photos are now fetched on demand and cached as they are seen.

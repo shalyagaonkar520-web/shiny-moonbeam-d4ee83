@@ -171,9 +171,26 @@
       // check is on the value rather than just the key.
       (function () {
         if (!navigator.serviceWorker || typeof navigator.serviceWorker.register !== 'function') return;
+        // A page that was already controlled by a worker reloads once when a
+        // new build's worker takes over, so it runs the new code instead of the
+        // build it was opened with. Not while an online payment is in flight:
+        // that screen must stay put, and the next launch picks up the update.
+        var hadController = !!navigator.serviceWorker.controller;
+        var reloaded = false;
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          if (!hadController || reloaded) return;
+          try { if (localStorage.getItem('mintoo_pending_payment')) return; } catch (e) { /* storage blocked */ }
+          reloaded = true;
+          location.reload();
+        });
         window.addEventListener('load', function () {
           try {
             navigator.serviceWorker.register('/sw.js', { scope: '/' })
+              .then(function (reg) {
+                // A worker from an older build may already be installed and
+                // waiting (older builds never activated themselves); start it.
+                if (reg && reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+              })
               .catch(function (e) { console.warn('Service worker registration failed:', e); });
           } catch (e) {
             console.warn('Service worker registration threw:', e);
