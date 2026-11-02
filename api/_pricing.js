@@ -13,7 +13,10 @@ const MUMTAZ_PACKAGING_FEE = 10;
 
 // Same table as src/utils/orderHotels.ts PARTNER_HOTELS.
 const HOTELS = [
-  { id: 'moms_magic_kitchen', name: 'Moms Magic Kitchen', prefix: 'mmk-', match: ['Moms Magic Kitchen'] },
+  // Moms Magic Kitchen dispatches to the panel's existing "Mom's Magic Kitchen"
+  // record (moms-magic): orders must name a hotel record that exists and is
+  // accepting, or they are refused. Its dishes are still told apart by 'mmk-'.
+  { id: 'moms-magic', name: 'Moms Magic Kitchen', prefix: 'mmk-', match: ['Moms Magic Kitchen'] },
   { id: 'mumtaz', name: 'Hotel Mumtaz', prefix: 'mumtaz-', match: ['Hotel Mumtaz'] },
   { id: 'al_amin', name: 'Hotel Al Amin', prefix: 'alamin-', match: ['Hotel Al Amin'] },
   { id: 'coastal_crown', name: 'Coastal Crown', prefix: 'coastal-', match: ['Coastal Crown'] },

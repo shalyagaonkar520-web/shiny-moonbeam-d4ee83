@@ -26,6 +26,8 @@ const ID_ALIASES: Record<string, string> = {
   // That id cannot be changed from this repo, so the alias is what keeps the
   // open/closed lookup working.
   mintoo: 'moms-magic',
+  // Moms Magic Kitchen is served by the same panel record.
+  moms_magic_kitchen: 'moms-magic',
 };
 
 function panelId(storefrontId: string): string {

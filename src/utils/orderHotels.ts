@@ -14,7 +14,10 @@ export interface PartnerHotel {
 }
 
 export const PARTNER_HOTELS: PartnerHotel[] = [
-  { id: 'moms_magic_kitchen', name: 'Moms Magic Kitchen', idPrefix: 'mmk-', descriptionMatch: ['Moms Magic Kitchen'] },
+  // Moms Magic Kitchen dispatches to the panel's existing "Mom's Magic Kitchen"
+  // record (moms-magic): orders must name a hotel record that exists and is
+  // accepting, or they are refused. Its dishes are still told apart by 'mmk-'.
+  { id: 'moms-magic', name: 'Moms Magic Kitchen', idPrefix: 'mmk-', descriptionMatch: ['Moms Magic Kitchen'] },
   { id: 'mumtaz',        name: 'Hotel Mumtaz',   idPrefix: 'mumtaz-',   descriptionMatch: ['Hotel Mumtaz'] },
   { id: 'al_amin',       name: 'Hotel Al Amin',  idPrefix: 'alamin-',   descriptionMatch: ['Hotel Al Amin'] },
   { id: 'coastal_crown', name: 'Coastal Crown',  idPrefix: 'coastal-',  descriptionMatch: ['Coastal Crown'] },

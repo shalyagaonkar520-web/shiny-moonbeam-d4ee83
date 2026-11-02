@@ -23,8 +23,6 @@ import { upiIntentLink } from './_shalyaPay.js';
 
 const ORDER_ID = /^[0-9]{13}[A-Z2-9]{10}$/;
 const MAX_ITEMS = 60;
-// Kitchens that take orders while they have no hotels/{id} record yet.
-const OPEN_WITHOUT_RECORD = new Set(['moms_magic_kitchen']);
 
 // Best-effort flood control per warm instance.
 const hits = new Map();
@@ -147,9 +145,6 @@ export default async function handler(req, res) {
   const closedHotels = [];
   hotelSnaps.forEach((snap, idx) => {
     const h = snap.exists ? snap.data() : null;
-    // A kitchen added in code before its panel record exists takes orders
-    // until the record is created; from then on the record's switch decides.
-    if (!h && OPEN_WITHOUT_RECORD.has(hotelIds[idx])) return;
     if (!h || h.acceptingOrders !== true || h.status === 'INACTIVE') {
       const group = priced.groups.find((g) => g.hotelId === hotelIds[idx]);
       closedHotels.push({ id: hotelIds[idx], name: h?.name || group?.hotelName || hotelIds[idx] });
