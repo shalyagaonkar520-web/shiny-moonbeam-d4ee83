@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { X, ChevronLeft, RotateCcw, ShoppingBag, Bot } from 'lucide-react';
+import { X, ChevronLeft, RotateCcw, Bot, ArrowRight, MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useMenuStore } from '../store/menuStore';
 import { useCartStore } from '../store/cartStore';
@@ -10,6 +10,8 @@ import { useDishOrderable } from '../store/dishAvailabilityStore';
 import { PARTNER_HOTEL_PRODUCTS } from '../data/partnerHotelItems';
 import { ICE_CAKES, NORMAL_CAKES } from '../data/partyItems';
 import { playSound, SOUNDS } from '../utils/audio';
+import { useLocationStore, SERVICE_RADIUS_KM } from '../store/locationStore';
+import { normaliseIndianMobile } from '../lib/pricing';
 import {
   STRINGS, LANG_LABEL, INTRO, FOOD_CATEGORIES, CAKE_CATEGORIES,
   dishesFor, type Lang, type Kind, type Diet, type CategoryId, type Dish, type Offer,
@@ -25,16 +27,34 @@ interface State {
   dish?: string; // dish key
 }
 
+// Cash on delivery is allowed up to this distance (same rule as Checkout).
+const COD_MAX_KM = 5;
+
+type Stage = 'browse' | 'details' | 'location' | 'review';
+
+const readSaved = (key: string) => {
+  try { return localStorage.getItem(key) || ''; } catch { return ''; }
+};
+
 /**
- * Guided "Help me choose" bot: language -> food or cake -> veg / non-veg /
- * both -> category -> dish -> every place that makes it, cheapest first.
- * Taps only, no typing, no server calls.
+ * Quick Order: language -> food or cake -> veg / non-veg / both -> category ->
+ * dish -> every place that makes it, cheapest first; then Next -> name and
+ * phone (only if not saved) -> delivery location -> review -> Place order.
+ * Placing hands the cart to Checkout, which submits it through the normal
+ * path (server pricing, kitchen checks, Telegram, WhatsApp) as cash on
+ * delivery. Only taps, apart from typing a name and number once.
  */
 export default function FoodBot({ onClose }: { onClose: () => void }) {
   const navigate = useNavigate();
   const [state, setState] = useState<State>({});
   const [shown, setShown] = useState(PAGE);
   const [added, setAdded] = useState<Record<string, boolean>>({});
+  const [stage, setStage] = useState<Stage>('browse');
+  const [name, setName] = useState(() => readSaved('mintoo_user_name'));
+  const [phone, setPhone] = useState(() => readSaved('mintoo_user_phone'));
+  const [formError, setFormError] = useState('');
+  const { deliveryLocation, openLocationPicker } = useLocationStore();
+  const cartItems = useCartStore((s) => s.items);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const menuItems = useMenuStore((s) => s.menuItems);
@@ -83,7 +103,35 @@ export default function FoodBot({ onClose }: { onClose: () => void }) {
 
   const set = (next: State) => { setState(next); setShown(PAGE); };
 
+  const detailsSaved = !!name.trim() && !!normaliseIndianMobile(phone);
+
+  const goNext = () => {
+    setFormError('');
+    setStage(detailsSaved ? 'location' : 'details');
+  };
+
+  const saveDetails = () => {
+    const cleanPhone = normaliseIndianMobile(phone);
+    if (!name.trim()) return setFormError(t.needName);
+    if (!cleanPhone) return setFormError(t.badPhone);
+    try {
+      localStorage.setItem('mintoo_user_name', name.trim());
+      localStorage.setItem('mintoo_user_phone', cleanPhone);
+    } catch { /* storage full: Checkout still validates the details */ }
+    setPhone(cleanPhone);
+    setFormError('');
+    setStage('location');
+  };
+
+  const placeOrder = () => {
+    onClose();
+    navigate('/checkout', { state: { quickOrder: true } });
+  };
+
   const back = () => {
+    if (stage === 'review') return setStage('location');
+    if (stage === 'location') return setStage('browse');
+    if (stage === 'details') return setStage('browse');
     if (state.dish) return set({ ...state, dish: undefined });
     if (state.category) return set({ ...state, category: undefined });
     if (state.diet) return set({ ...state, diet: undefined });
@@ -138,7 +186,7 @@ export default function FoodBot({ onClose }: { onClose: () => void }) {
   const visibleTurns = state.kind === 'cake' ? turns.filter((x) => x.q !== t.askDiet) : turns;
 
   return createPortal(
-    <div className="fixed inset-0 z-[10000] bg-black/40 flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="foodbot-title" onClick={onClose}>
+    <div className="fixed inset-0 z-[9000] bg-black/40 flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="foodbot-title" onClick={onClose}>
       <div
         className="w-full max-w-md h-[88vh] sm:h-[80vh] bg-gradient-to-b from-[#fff1f4] via-[#fff8fa] to-white rounded-t-[26px] sm:rounded-[26px] shadow-2xl flex flex-col overflow-hidden text-gray-900"
         onClick={(e) => e.stopPropagation()}
@@ -149,7 +197,7 @@ export default function FoodBot({ onClose }: { onClose: () => void }) {
             <Bot className="w-5 h-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 id="foodbot-title" className="text-sm font-black">Minto Helper</h2>
+            <h2 id="foodbot-title" className="text-sm font-black">Quick Order</h2>
             <p className="text-[10px] font-semibold text-gray-500">Kannada · English · Hindi</p>
           </div>
           {state.lang && (
@@ -173,7 +221,24 @@ export default function FoodBot({ onClose }: { onClose: () => void }) {
             </div>
           ))}
 
-          {dish ? (
+          {stage !== 'browse' ? (
+            <CheckoutSteps
+              stage={stage}
+              t={t}
+              name={name}
+              phone={phone}
+              setName={setName}
+              setPhone={setPhone}
+              formError={formError}
+              saveDetails={saveDetails}
+              deliveryLocation={deliveryLocation}
+              openLocationPicker={openLocationPicker}
+              toReview={() => setStage('review')}
+              toCheckout={() => { onClose(); navigate('/checkout'); }}
+              cartItems={cartItems}
+              placeOrder={placeOrder}
+            />
+          ) : dish ? (
             <>
               <BotBubble text={t.results(dish.name, dish.offers.length)} />
               <ul className="space-y-2">
@@ -237,12 +302,12 @@ export default function FoodBot({ onClose }: { onClose: () => void }) {
             <button onClick={back} className="flex-1 h-11 rounded-xl border border-rose-200 text-sm font-black flex items-center justify-center gap-1">
               <ChevronLeft className="w-4 h-4" /> {t.back}
             </button>
-            {cartCount > 0 && (
+            {stage === 'browse' && cartCount > 0 && (
               <button
-                onClick={() => { onClose(); navigate('/checkout'); }}
+                onClick={goNext}
                 className="flex-1 h-11 rounded-xl bg-[#e11d48] text-white text-sm font-black flex items-center justify-center gap-1.5"
               >
-                <ShoppingBag className="w-4 h-4" /> {t.viewCart} ({cartCount})
+                {t.next} ({cartCount}) <ArrowRight className="w-4 h-4" />
               </button>
             )}
           </div>
@@ -269,4 +334,102 @@ function cakeDishes(products: Offer['product'][]): Dish[] {
     minPrice: p.price,
     offers: [{ product: p, hotelId: 'moms-magic', hotelName: 'Minto' }],
   }));
+}
+
+type Strings = (typeof STRINGS)['en'];
+
+interface StepsProps {
+  stage: Exclude<Stage, 'browse'>;
+  t: Strings;
+  name: string;
+  phone: string;
+  setName: (v: string) => void;
+  setPhone: (v: string) => void;
+  formError: string;
+  saveDetails: () => void;
+  deliveryLocation: { address: string; distance: number } | null;
+  openLocationPicker: () => void;
+  toReview: () => void;
+  toCheckout: () => void;
+  cartItems: Array<{ id?: string; name: string; price: number; quantity: number }>;
+  placeOrder: () => void;
+}
+
+/** The ordering steps after Next: details, location, review. */
+function CheckoutSteps(p: StepsProps) {
+  const { t } = p;
+  const primary = 'w-full h-12 rounded-2xl bg-[#e11d48] text-white text-sm font-black flex items-center justify-center gap-2 active:scale-[0.98] transition-transform';
+  const secondary = 'w-full h-11 rounded-2xl bg-white border border-rose-200 text-sm font-black text-gray-900';
+  const input = 'w-full h-12 px-3 rounded-xl bg-white border border-rose-200 text-sm font-semibold outline-none focus:border-[#e11d48]';
+
+  if (p.stage === 'details') {
+    return (
+      <div className="space-y-3">
+        <BotBubble text={t.askDetails} />
+        <input className={input} value={p.name} onChange={(e) => p.setName(e.target.value)} placeholder={t.name} autoComplete="name" aria-label={t.name} />
+        <input
+          className={input}
+          value={p.phone}
+          onChange={(e) => p.setPhone(e.target.value.replace(/[^\d+ ]/g, ''))}
+          placeholder={t.phone}
+          inputMode="numeric"
+          type="tel"
+          maxLength={16}
+          autoComplete="tel"
+          aria-label={t.phone}
+        />
+        {p.formError && <p role="alert" className="text-xs font-bold text-[#e11d48]">{p.formError}</p>}
+        <button className={primary} onClick={p.saveDetails}>{t.next} <ArrowRight className="w-4 h-4" /></button>
+      </div>
+    );
+  }
+
+  if (p.stage === 'location') {
+    const loc = p.deliveryLocation;
+    const outside = !!loc && loc.distance > SERVICE_RADIUS_KM;
+    const tooFarForCash = !!loc && !outside && loc.distance > COD_MAX_KM;
+    return (
+      <div className="space-y-3">
+        <BotBubble text={loc ? t.askLocation : t.noLocation} />
+        {loc && (
+          <div className="bg-white rounded-2xl border border-rose-100 p-3 flex items-start gap-2.5 shadow-sm">
+            <MapPin className="w-4 h-4 text-[#e11d48] shrink-0 mt-0.5" />
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-gray-900">{loc.address}</p>
+              <p className="text-xs font-semibold text-gray-500">{loc.distance} km</p>
+            </div>
+          </div>
+        )}
+        {outside && <BotBubble text={t.outsideArea} />}
+        {tooFarForCash && <BotBubble text={t.codTooFar} />}
+        {loc && !outside && !tooFarForCash && (
+          <button className={primary} onClick={p.toReview}>{t.deliverHere} <ArrowRight className="w-4 h-4" /></button>
+        )}
+        {tooFarForCash && <button className={primary} onClick={p.toCheckout}>{t.payOnline}</button>}
+        <button className={secondary} onClick={p.openLocationPicker}>{loc ? t.change : t.chooseLocation}</button>
+      </div>
+    );
+  }
+
+  const total = p.cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  return (
+    <div className="space-y-3">
+      <BotBubble text={t.review} />
+      <ul className="bg-white rounded-2xl border border-rose-100 divide-y divide-rose-50 shadow-sm">
+        {p.cartItems.map((i) => (
+          <li key={i.id || i.name} className="flex items-center justify-between gap-3 px-3 py-2.5 text-sm">
+            <span className="font-semibold text-gray-800 min-w-0 truncate">{i.quantity}× {i.name}</span>
+            <span className="font-black shrink-0">₹{i.price * i.quantity}</span>
+          </li>
+        ))}
+        <li className="flex items-center justify-between px-3 py-2.5 text-sm">
+          <span className="font-black">{t.itemTotal}</span>
+          <span className="font-black text-[#e11d48]">₹{total}</span>
+        </li>
+      </ul>
+      <p className="text-xs font-semibold text-gray-500">{t.feesNote}</p>
+      <p className="text-xs font-semibold text-gray-600">{p.name} · {p.phone}</p>
+      <button className={primary} onClick={p.placeOrder}>{t.placeOrder} <ArrowRight className="w-4 h-4" /></button>
+    </div>
+  );
 }

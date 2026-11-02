@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { openExternal } from '../lib/openExternal';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import { useBulkOrderStore } from '../store/bulkOrderStore';
 import { useLocationStore, SERVICE_RADIUS_KM } from '../store/locationStore';
@@ -726,6 +726,25 @@ export default function Checkout() {
     finish(orders, clientTotals);
   };
 
+  // Quick Order (the chat in FoodBot.tsx) collects name, phone and location,
+  // then sends the customer here to place the order through this same submit
+  // path, so pricing, kitchen checks, Telegram and WhatsApp behave exactly as
+  // for a normal checkout. It fires once, when the saved details have loaded.
+  const routerLocation = useLocation();
+  const quickOrder = !!(routerLocation.state as { quickOrder?: boolean } | null)?.quickOrder;
+  const quickFired = React.useRef(false);
+  const [quickActive, setQuickActive] = useState(false);
+  React.useEffect(() => {
+    if (!quickOrder || quickFired.current) return;
+    if (!formData.name.trim() || !formData.phone.trim() || !deliveryLocation || activeItems.length === 0) return;
+    quickFired.current = true;
+    setQuickActive(true);
+    // Drop the flag so Back or a reload can never place the order twice.
+    navigate('/checkout', { replace: true, state: null });
+    handleSubmit({ preventDefault() {} } as React.FormEvent);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quickOrder, formData.name, formData.phone, deliveryLocation, activeItems.length]);
+
   // Empty Cart State
   if (activeItems.length === 0) {
     return (
@@ -751,6 +770,18 @@ export default function Checkout() {
 
   // Waiting for a UPI payment. Shown instead of the form so the customer
   // cannot edit the order or pay a second time while money is in flight.
+  // While a Quick Order is being placed, show that instead of the full form.
+  // If it fails, isSubmitting drops and the form is there to fix and retry.
+  if (quickActive && isSubmitting && !upiPayment) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#fff1f4] via-[#fff8fa] to-white flex flex-col items-center justify-center gap-4 p-8 text-center">
+        <Loader2 className="w-10 h-10 text-[#e11d48] animate-spin" />
+        <p className="text-lg font-black text-gray-900">Placing your order…</p>
+        <p className="text-sm text-gray-500 max-w-xs">WhatsApp will open in a moment so the kitchen gets your order.</p>
+      </div>
+    );
+  }
+
   if (upiPayment) {
     const waitedLong = upiElapsed > 90;
     // Rendered into document.body rather than in place.
@@ -1125,7 +1156,7 @@ export default function Checkout() {
                 required
                 inputMode="numeric"
                 autoComplete="tel"
-                maxLength={14}
+                maxLength={16}
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/[^\d+ ]/g, '') })}
                 placeholder="10-digit mobile number"

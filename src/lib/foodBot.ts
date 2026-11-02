@@ -33,6 +33,24 @@ interface Strings {
   restart: string;
   viewCart: string;
   none: string;
+  next: string;
+  askDetails: string;
+  name: string;
+  phone: string;
+  needName: string;
+  badPhone: string;
+  askLocation: string;
+  noLocation: string;
+  chooseLocation: string;
+  deliverHere: string;
+  change: string;
+  outsideArea: string;
+  codTooFar: string;
+  payOnline: string;
+  review: string;
+  itemTotal: string;
+  feesNote: string;
+  placeOrder: string;
   categories: Record<CategoryId, string>;
 }
 
@@ -60,6 +78,24 @@ export const STRINGS: Record<Lang, Strings> = {
     restart: 'Start over',
     viewCart: 'Go to cart',
     none: 'Nothing here right now. Try another option.',
+    next: 'Next',
+    askDetails: 'Your name and mobile number, so the rider can reach you:',
+    name: 'Your name',
+    phone: '10-digit mobile number',
+    needName: 'Please enter your name.',
+    badPhone: 'Please enter a valid 10-digit mobile number.',
+    askLocation: 'Where should we deliver?',
+    noLocation: 'Choose your delivery location to continue.',
+    chooseLocation: 'Choose location',
+    deliverHere: 'Deliver here',
+    change: 'Change',
+    outsideArea: 'This address is outside our delivery area. Please choose another.',
+    codTooFar: 'This address is more than 5 km away, so cash on delivery is not available. Pay online at checkout.',
+    payOnline: 'Pay online at checkout',
+    review: 'Your order (cash on delivery):',
+    itemTotal: 'Item total',
+    feesNote: 'Delivery and packing charges, if any, are added and shown in your WhatsApp order message.',
+    placeOrder: 'Place order',
     categories: {
       biryani: 'Biryani', rice: 'Rice & Noodles', starters: 'Starters', curries: 'Curries & Gravy',
       breads: 'Roti & Naan', southindian: 'South Indian', fastfood: 'Fast food & Snacks', soups: 'Soups', drinks: 'Drinks & Desserts',
@@ -85,6 +121,24 @@ export const STRINGS: Record<Lang, Strings> = {
     restart: 'ಮತ್ತೆ ಪ್ರಾರಂಭಿಸಿ',
     viewCart: 'ಕಾರ್ಟ್‌ಗೆ ಹೋಗಿ',
     none: 'ಇಲ್ಲಿ ಈಗ ಏನೂ ಇಲ್ಲ. ಬೇರೆ ಆಯ್ಕೆ ಪ್ರಯತ್ನಿಸಿ.',
+    next: 'ಮುಂದೆ',
+    askDetails: 'ನಿಮ್ಮ ಹೆಸರು ಮತ್ತು ಮೊಬೈಲ್ ಸಂಖ್ಯೆ, ರೈಡರ್ ನಿಮ್ಮನ್ನು ಸಂಪರ್ಕಿಸಲು:',
+    name: 'ನಿಮ್ಮ ಹೆಸರು',
+    phone: '10 ಅಂಕಿಯ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ',
+    needName: 'ದಯವಿಟ್ಟು ನಿಮ್ಮ ಹೆಸರನ್ನು ನಮೂದಿಸಿ.',
+    badPhone: 'ದಯವಿಟ್ಟು ಸರಿಯಾದ 10 ಅಂಕಿಯ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ.',
+    askLocation: 'ಎಲ್ಲಿಗೆ ತಲುಪಿಸಬೇಕು?',
+    noLocation: 'ಮುಂದುವರಿಯಲು ತಲುಪಿಸುವ ಸ್ಥಳವನ್ನು ಆಯ್ಕೆಮಾಡಿ.',
+    chooseLocation: 'ಸ್ಥಳ ಆಯ್ಕೆಮಾಡಿ',
+    deliverHere: 'ಇಲ್ಲಿಗೆ ತಲುಪಿಸಿ',
+    change: 'ಬದಲಿಸಿ',
+    outsideArea: 'ಈ ವಿಳಾಸ ನಮ್ಮ ವಿತರಣಾ ಪ್ರದೇಶದ ಹೊರಗಿದೆ. ಬೇರೆ ವಿಳಾಸ ಆಯ್ಕೆಮಾಡಿ.',
+    codTooFar: 'ಈ ವಿಳಾಸ 5 ಕಿ.ಮೀ.ಗಿಂತ ದೂರವಿದೆ, ಆದ್ದರಿಂದ ಕ್ಯಾಶ್ ಆನ್ ಡೆಲಿವರಿ ಲಭ್ಯವಿಲ್ಲ. ಚೆಕ್‌ಔಟ್‌ನಲ್ಲಿ ಆನ್‌ಲೈನ್‌ನಲ್ಲಿ ಪಾವತಿಸಿ.',
+    payOnline: 'ಚೆಕ್‌ಔಟ್‌ನಲ್ಲಿ ಆನ್‌ಲೈನ್ ಪಾವತಿ',
+    review: 'ನಿಮ್ಮ ಆರ್ಡರ್ (ಕ್ಯಾಶ್ ಆನ್ ಡೆಲಿವರಿ):',
+    itemTotal: 'ಐಟಂ ಮೊತ್ತ',
+    feesNote: 'ಡೆಲಿವರಿ ಅಥವಾ ಪ್ಯಾಕಿಂಗ್ ಶುಲ್ಕ ಇದ್ದರೆ, ಅದನ್ನು ಸೇರಿಸಿ ನಿಮ್ಮ ವಾಟ್ಸಾಪ್ ಆರ್ಡರ್ ಸಂದೇಶದಲ್ಲಿ ತೋರಿಸಲಾಗುತ್ತದೆ.',
+    placeOrder: 'ಆರ್ಡರ್ ಮಾಡಿ',
     categories: {
       biryani: 'ಬಿರಿಯಾನಿ', rice: 'ರೈಸ್ ಮತ್ತು ನೂಡಲ್ಸ್', starters: 'ಸ್ಟಾರ್ಟರ್ಸ್', curries: 'ಕರಿ ಮತ್ತು ಗ್ರೇವಿ',
       breads: 'ರೊಟ್ಟಿ ಮತ್ತು ನಾನ್', southindian: 'ದಕ್ಷಿಣ ಭಾರತೀಯ', fastfood: 'ಫಾಸ್ಟ್ ಫುಡ್ ಮತ್ತು ತಿಂಡಿ', soups: 'ಸೂಪ್', drinks: 'ಪಾನೀಯ ಮತ್ತು ಸಿಹಿ',
@@ -110,6 +164,24 @@ export const STRINGS: Record<Lang, Strings> = {
     restart: 'फिर से शुरू करें',
     viewCart: 'कार्ट पर जाएँ',
     none: 'अभी यहाँ कुछ नहीं है। कोई और विकल्प चुनें।',
+    next: 'आगे',
+    askDetails: 'आपका नाम और मोबाइल नंबर, ताकि राइडर आपसे संपर्क कर सके:',
+    name: 'आपका नाम',
+    phone: '10 अंकों का मोबाइल नंबर',
+    needName: 'कृपया अपना नाम लिखें।',
+    badPhone: 'कृपया सही 10 अंकों का मोबाइल नंबर लिखें।',
+    askLocation: 'कहाँ डिलीवर करें?',
+    noLocation: 'आगे बढ़ने के लिए डिलीवरी की जगह चुनें।',
+    chooseLocation: 'जगह चुनें',
+    deliverHere: 'यहाँ डिलीवर करें',
+    change: 'बदलें',
+    outsideArea: 'यह पता हमारे डिलीवरी क्षेत्र से बाहर है। कोई और पता चुनें।',
+    codTooFar: 'यह पता 5 किमी से ज़्यादा दूर है, इसलिए कैश ऑन डिलीवरी उपलब्ध नहीं है। चेकआउट पर ऑनलाइन भुगतान करें।',
+    payOnline: 'चेकआउट पर ऑनलाइन भुगतान',
+    review: 'आपका ऑर्डर (कैश ऑन डिलीवरी):',
+    itemTotal: 'आइटम कुल',
+    feesNote: 'डिलीवरी या पैकिंग शुल्क, अगर कोई हो, जोड़कर आपके व्हाट्सऐप ऑर्डर मैसेज में दिखाया जाएगा।',
+    placeOrder: 'ऑर्डर करें',
     categories: {
       biryani: 'बिरयानी', rice: 'राइस और नूडल्स', starters: 'स्टार्टर्स', curries: 'करी और ग्रेवी',
       breads: 'रोटी और नान', southindian: 'साउथ इंडियन', fastfood: 'फास्ट फूड और स्नैक्स', soups: 'सूप', drinks: 'ड्रिंक्स और मिठाई',
