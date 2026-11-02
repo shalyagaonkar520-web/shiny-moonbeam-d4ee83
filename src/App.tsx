@@ -20,6 +20,7 @@ const HotelMumtazMenuPage = lazy(() => import('./components/HotelMumtazMenuPage'
 const HotelAlAminMenuPage = lazy(() => import('./components/HotelAlAminMenuPage'));
 const HotelCoastalCrownMenuPage = lazy(() => import('./components/HotelCoastalCrownMenuPage'));
 const HotelMalabarMenuPage = lazy(() => import('./components/HotelMalabarMenuPage'));
+const MomsMagicKitchenMenuPage = lazy(() => import('./components/MomsMagicKitchenMenuPage'));
 const HotelSankalpaMenuPage = lazy(() => import('./components/HotelSankalpaMenuPage'));
 import BottomNav from './components/BottomNav';
 import BottomCartBar from './components/BottomCartBar';
@@ -226,6 +227,7 @@ export default function App() {
                   <Route path="/hotel-al-amin" element={<HotelAlAminMenuPage />} />
                   <Route path="/hotel-coastal-crown" element={<HotelCoastalCrownMenuPage />} />
                   <Route path="/hotel-malabar" element={<HotelMalabarMenuPage />} />
+                  <Route path="/hotel-moms-magic-kitchen" element={<MomsMagicKitchenMenuPage />} />
                   <Route path="/hotel-sankalpa" element={<HotelSankalpaMenuPage />} />
                   <Route path="/clean" element={<MMCleanPage />} />
                   <Route path="/celebration" element={<CelebrationHub />} />

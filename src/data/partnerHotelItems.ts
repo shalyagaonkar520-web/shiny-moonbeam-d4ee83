@@ -16,6 +16,7 @@ import { HOTEL_MUMTAZ_MENU } from './hotelMumtazMenu';
 import { resolveMumtazDishImage, isNonVegItem } from './hotelMumtazMenuImages';
 import { HOTEL_COASTAL_CROWN_MENU } from './hotelCoastalCrownMenu';
 import { HOTEL_MALABAR_MENU } from './hotelMalabarMenu';
+import { MOMS_MAGIC_KITCHEN_MENU, MOMS_MAGIC_KITCHEN_IMAGE } from './momsMagicKitchenMenu';
 
 export interface PartnerHotelProduct extends Product {
   id: string;
@@ -94,6 +95,25 @@ function coastalCrownItems(): PartnerHotelProduct[] {
   );
 }
 
+function momsMagicKitchenItems(): PartnerHotelProduct[] {
+  return MOMS_MAGIC_KITCHEN_MENU.flatMap((category) =>
+    category.items.map((item) => ({
+      id: `mmk-${slug(item.name)}`,
+      hotelId: 'moms_magic_kitchen',
+      hotelName: 'Moms Magic Kitchen',
+      hotelPath: '/hotel-moms-magic-kitchen',
+      showHotelBadge: true,
+      name: item.name,
+      price: item.price,
+      image: item.image || MOMS_MAGIC_KITCHEN_IMAGE,
+      category: category.title,
+      type: 'food' as const,
+      isVeg: item.isVeg,
+      description: `Moms Magic Kitchen ${item.name}`,
+    }))
+  );
+}
+
 function malabarItems(): PartnerHotelProduct[] {
   return HOTEL_MALABAR_MENU.flatMap((category) =>
     category.items.map((item) => ({
@@ -119,6 +139,8 @@ function malabarItems(): PartnerHotelProduct[] {
  * order. Built once at module load; these menus are static.
  */
 export const PARTNER_HOTEL_PRODUCTS: PartnerHotelProduct[] = [
+  // Featured (gold) kitchen, listed first everywhere.
+  ...momsMagicKitchenItems(),
   ...sankalpaItems(),
   ...mumtazItems(),
   ...coastalCrownItems(),

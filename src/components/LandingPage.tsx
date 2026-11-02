@@ -33,7 +33,22 @@ const ROTATING_SEARCH_PLACEHOLDERS = [
 
 // Partner Hotels (Requested: Mumtaz, Mulbar, Sankalpa, Coastal Crown, Al Amin)
 // Photo is empty placeholder until user provides reference photo!
+/** The featured kitchen that carries the gold mark across the home screen. */
+const GOLD_HOTEL_ID = 'moms_magic_kitchen';
+const GOLD_BADGE = 'bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 text-amber-950';
+const isGold = (product: any) => product?.hotelId === GOLD_HOTEL_ID;
+
 const PARTNER_HOTELS = [
+  {
+    // Featured kitchen: always first, drawn with the gold mark.
+    id: 'moms_magic_kitchen',
+    name: "Moms Magic Kitchen",
+    tagline: "Fried Rice, Noodles & Chinese",
+    isOpen: true,
+    badge: "Gold",
+    image: "/triple_schezwan_rice.webp",
+    hasCustomPhoto: true
+  },
   {
     id: 'mintoo',
     name: "Minto",
@@ -191,6 +206,10 @@ export default function LandingPage() {
       return;
     }
 
+    if (hotel.id === 'moms_magic_kitchen') {
+      navigate('/hotel-moms-magic-kitchen');
+      return;
+    }
     if (hotel.id === 'mumtaz') {
       navigate('/hotel-mumtaz');
       return;
@@ -262,16 +281,20 @@ export default function LandingPage() {
   // Dishes switched off in the panel are left out everywhere on this screen.
   const isOrderable = useDishOrderable();
   const allProducts = useMemo(
-    () => [
-      ...menuItems.filter((item) => isOrderable('al_amin', item.name)),
-      ...PARTNER_HOTEL_PRODUCTS.filter((item) => isOrderable(item.hotelId, item.name)),
-    ],
+    () => {
+      const partner = PARTNER_HOTEL_PRODUCTS.filter((item) => isOrderable(item.hotelId, item.name));
+      return [
+        ...partner.filter((item) => item.hotelId === GOLD_HOTEL_ID),
+        ...menuItems.filter((item) => isOrderable('al_amin', item.name)),
+        ...partner.filter((item) => item.hotelId !== GOLD_HOTEL_ID),
+      ];
+    },
     [menuItems, isOrderable]
   );
 
   /** Hotel name to print on a card, or null for Al Amin / Minto items. */
   const hotelBadgeOf = (product: any): string | null =>
-    product?.showHotelBadge ? product.hotelName : null;
+    product?.showHotelBadge ? (isGold(product) ? '★ ' + product.hotelName : product.hotelName) : null;
 
   /**
    * Card blurb. Hotel menus that ship no real description fall back to
@@ -663,7 +686,7 @@ export default function LandingPage() {
                         />
 
                         {hotelBadgeOf(product) && (
-                          <span className="absolute top-1.5 left-1.5 z-10 max-w-[62%] truncate bg-black/70 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs">
+                          <span className={`absolute top-1.5 left-1.5 z-10 max-w-[62%] truncate text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs ${isGold(product) ? GOLD_BADGE : 'bg-black/70 text-white'}`}>
                             {hotelBadgeOf(product)}
                           </span>
                         )}
@@ -798,6 +821,8 @@ export default function LandingPage() {
                 className={`w-[130px] sm:w-[145px] rounded-2xl p-2.5 flex flex-col justify-between shrink-0 transition-all bg-white border ${
                   !liveOpen
                     ? 'border-gray-200 opacity-60 cursor-not-allowed grayscale'
+                    : hotel.id === GOLD_HOTEL_ID
+                    ? 'border-2 border-amber-400 bg-gradient-to-b from-amber-50 to-white shadow-md shadow-amber-300/40 hover:shadow-lg cursor-pointer'
                     : hotel.isOpen
                     ? 'border-gray-200 shadow-sm hover:shadow-md cursor-pointer'
                     : 'border-gray-200 hover:border-gray-300 shadow-sm cursor-pointer'
@@ -823,6 +848,12 @@ export default function LandingPage() {
                     </div>
                   )}
 
+                  {hotel.id === GOLD_HOTEL_ID && (
+                    <span className="absolute top-1.5 left-1.5 text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shadow-xs bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 text-amber-950">
+                      ★ Gold
+                    </span>
+                  )}
+
                   {/* CLOSED overrides anything the hardcoded card claims. */}
                   <span className={`absolute top-1.5 right-1.5 text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shadow-xs ${
                     !liveOpen
@@ -840,7 +871,7 @@ export default function LandingPage() {
                 {/* Hotel Info */}
                 <div className="text-left flex-1 flex flex-col justify-between">
                   <div>
-                    <h3 className="text-xs font-black text-gray-900 truncate leading-snug">
+                    <h3 className={`text-xs font-black truncate leading-snug ${hotel.id === GOLD_HOTEL_ID ? 'text-amber-700' : 'text-gray-900'}`}>
                       {hotel.name}
                     </h3>
                     <p className="text-[10px] text-gray-500 line-clamp-1 leading-tight mt-0.5">
@@ -982,7 +1013,7 @@ export default function LandingPage() {
                       />
 
                       {hotelBadgeOf(product) && (
-                        <span className="absolute top-1.5 left-1.5 z-10 max-w-[62%] truncate bg-black/70 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs">
+                        <span className={`absolute top-1.5 left-1.5 z-10 max-w-[62%] truncate text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs ${isGold(product) ? GOLD_BADGE : 'bg-black/70 text-white'}`}>
                           {hotelBadgeOf(product)}
                         </span>
                       )}
@@ -1196,7 +1227,7 @@ export default function LandingPage() {
                       />
 
                       {hotelBadgeOf(product) && (
-                        <span className="absolute top-1.5 left-1.5 z-10 max-w-[62%] truncate bg-black/70 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs">
+                        <span className={`absolute top-1.5 left-1.5 z-10 max-w-[62%] truncate text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded shadow-xs ${isGold(product) ? GOLD_BADGE : 'bg-black/70 text-white'}`}>
                           {hotelBadgeOf(product)}
                         </span>
                       )}
