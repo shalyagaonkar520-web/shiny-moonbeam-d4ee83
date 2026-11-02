@@ -117,7 +117,7 @@ service cloud.firestore {
                     && changes(['status', 'orderStatus', 'riderStatus', 'riderId', 'outForDeliveryAt', 'deliveredAt'])
                     && request.resource.data.riderId in [request.auth.uid, '']
                     && request.resource.data.status in ['pending', 'Confirmed', 'Preparing', 'Out For Delivery', 'delivered']
-                    && request.resource.data.orderStatus in ['NEW', 'ACCEPTED', 'OUT_FOR_DELIVERY', 'DELIVERED'];
+                    && request.resource.data.orderStatus in ['NEW', 'ACCEPTED', 'READY', 'OUT_FOR_DELIVERY', 'DELIVERED'];
     }
 
     // ---- delivery riders ----------------------------------------------------
