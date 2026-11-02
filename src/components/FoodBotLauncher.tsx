@@ -23,7 +23,7 @@ export default function FoodBotLauncher() {
           onClick={() => setOpen(true)}
           aria-label="Quick Order"
           // Just above the bottom nav (64px); lifted over the cart bar (~68px) only while it shows.
-          className={`fixed right-4 ${cartHasItems ? 'bottom-[calc(140px+env(safe-area-inset-bottom,0px))] md:bottom-24' : 'bottom-[calc(76px+env(safe-area-inset-bottom,0px))] md:bottom-6'} z-[96] flex items-center gap-2 pl-3 pr-4 h-12 rounded-full bg-[#e11d48] text-white font-black text-sm shadow-lg shadow-rose-500/30 active:scale-95 transition-all`}
+          className={`fixed right-4 ${cartHasItems ? 'bottom-[calc(140px+env(safe-area-inset-bottom,0px))] md:bottom-28' : 'bottom-[calc(76px+env(safe-area-inset-bottom,0px))] md:bottom-24'} z-[96] flex items-center gap-2 pl-3 pr-4 h-12 rounded-full bg-[#e11d48] text-white font-black text-sm shadow-lg shadow-rose-500/30 active:scale-95 transition-all`}
         >
           <Bot className="w-5 h-5" />
           Quick Order

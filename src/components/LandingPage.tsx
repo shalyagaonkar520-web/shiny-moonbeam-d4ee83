@@ -444,7 +444,7 @@ export default function LandingPage() {
           royal-blue block with a yellow Sign In pill and a red "?", which put
           three accent colours on screen before a single dish. */}
       <header className="safe-top bg-white border-b border-gray-100">
-        <div className="max-w-xl mx-auto px-4 pt-3 pb-3">
+        <div className="max-w-xl lg:max-w-5xl mx-auto px-4 pt-3 pb-3">
           <div className="flex items-center justify-between gap-3">
             <button
               type="button"
@@ -529,7 +529,7 @@ export default function LandingPage() {
           under the search box. Sentence case: a page of all-caps headings
           reads as shouting rather than as a menu. */}
       {!searchQuery.trim() && (
-        <div className="max-w-xl mx-auto px-4 mt-3">
+        <div className="max-w-xl lg:max-w-5xl mx-auto px-4 mt-3">
           <div className="relative rounded-2xl overflow-hidden shadow-sm bg-gray-900">
             <div className="relative h-40 sm:h-48 w-full overflow-hidden">
               <AnimatePresence mode="wait">
@@ -619,7 +619,7 @@ export default function LandingPage() {
         </div>
       )}
 
-      <main className="max-w-xl mx-auto px-4 mt-5 space-y-6">
+      <main className="max-w-xl lg:max-w-5xl mx-auto px-4 mt-5 space-y-6">
         
         {searchQuery.trim() ? (
           /* SEARCH RESULTS DIRECTLY AT THE VERY TOP */
@@ -668,7 +668,7 @@ export default function LandingPage() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                 {visibleProducts.map((product) => {
                   const inCart = cartItems.find(i => i.id === product.id);
 
@@ -1209,7 +1209,7 @@ export default function LandingPage() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 mt-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mt-3">
               {visibleProducts.map((product) => {
                 const inCart = cartItems.find(i => i.id === product.id);
 
