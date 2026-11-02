@@ -50,8 +50,15 @@ function whatsAppIntent(url: string): string | null {
 
   // S.browser_fallback_url sends anyone without WhatsApp to the normal web link
   // instead of showing an error page.
-  const fallback = encodeURIComponent(url);
-  const query = `send?phone=${encodeURIComponent(phone)}&text=${encodeURIComponent(text)}`;
+  //
+  // Every '.' is percent-encoded too. The 2.0 Play Store app (versionCode 202)
+  // keeps any URL that merely *contains* "momsmagic.shop" inside the WebView;
+  // the order message carries a momsmagic.shop/track link, so the intent was
+  // loaded as a page and the customer got ERR_UNKNOWN_URL_SCHEME instead of
+  // WhatsApp. %2E decodes back to '.' in both the intent extras and WhatsApp.
+  const hideDots = (s: string) => s.replace(/\./g, '%2E');
+  const fallback = hideDots(encodeURIComponent(url));
+  const query = `send?phone=${encodeURIComponent(phone)}&text=${hideDots(encodeURIComponent(text))}`;
   return (
     `intent://${query}#Intent;scheme=whatsapp;package=com.whatsapp;` +
     `S.browser_fallback_url=${fallback};end`
