@@ -503,6 +503,12 @@ export default function ProfilePage() {
           </button>
         </div>
 
+        <p className="text-center text-[10px] text-gray-400 pt-1">
+          App version{' '}
+          {new Date(__BUILD_TIME__).toLocaleString('en-IN', {
+            timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+          })}
+        </p>
       </div>
 
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />

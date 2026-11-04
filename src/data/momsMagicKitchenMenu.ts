@@ -2,12 +2,9 @@
 // From the "Sai Fastfood" printed menu card; every price here is the card price
 // plus Rs 10 (the card price is kept alongside so the margin stays visible).
 //
-// Photos: the veg rice dishes and Veg Noodles use crops of the kitchen's own
-// poster (public/menu/mmk/, one per dish). The rest were each opened and
-// checked by eye before being used (file names in public/ are not reliable).
-// Veg dishes only use photos with no meat in them; where no matching photo
-// exists the dish uses the closest vegetarian rice/noodle photo or the
-// kitchen's fallback image.
+// Photos: every dish uses its own crop of the kitchen's two posters
+// (public/menu/mmk/, one per dish), each checked by eye against its name.
+// The poster's Mushroom Schezwan Noodles bowl shows paneer, not mushroom.
 
 export interface MomsMagicKitchenItem {
   name: string;
@@ -24,13 +21,6 @@ export interface MomsMagicKitchenCategory {
 
 export const MOMS_MAGIC_KITCHEN_MARKUP = 10;
 export const MOMS_MAGIC_KITCHEN_IMAGE = '/triple_schezwan_rice.webp';
-
-const VEG_RICE = '/veg_fried_rice.webp';
-const VEG_SCHEZWAN = '/veg_schezwan_rice.webp';
-const EGG_RICE = '/egg_fried_rice.webp';
-const EGG_SCHEZWAN = '/schezwan_egg_rice.webp';
-const CHICKEN_RICE = '/chicken_fried_rice.webp';
-const NOODLES = '/veg_noodles_real.webp';
 
 const CARD: MomsMagicKitchenCategory[] = [
   {
@@ -54,49 +44,49 @@ const CARD: MomsMagicKitchenCategory[] = [
     title: 'Veg Noodles',
     items: [
       { name: 'Veg Noodles', cardPrice: 100, isVeg: true, image: '/menu/mmk/veg-noodles.webp' },
-      { name: 'Veg Schezwan Noodles', cardPrice: 100, isVeg: true, image: NOODLES },
-      { name: 'Paneer Noodles', cardPrice: 140, isVeg: true, image: NOODLES },
-      { name: 'Paneer Schezwan Noodles', cardPrice: 120, isVeg: true, image: NOODLES },
-      { name: 'Mushroom Noodles', cardPrice: 130, isVeg: true, image: NOODLES },
-      { name: 'Mushroom Schezwan Noodles', cardPrice: 140, isVeg: true, image: NOODLES },
+      { name: 'Veg Schezwan Noodles', cardPrice: 100, isVeg: true, image: '/menu/mmk/veg-schezwan-noodles.webp' },
+      { name: 'Paneer Noodles', cardPrice: 140, isVeg: true, image: '/menu/mmk/paneer-noodles.webp' },
+      { name: 'Paneer Schezwan Noodles', cardPrice: 120, isVeg: true, image: '/menu/mmk/paneer-schezwan-noodles.webp' },
+      { name: 'Mushroom Noodles', cardPrice: 130, isVeg: true, image: '/menu/mmk/mushroom-noodles.webp' },
+      { name: 'Mushroom Schezwan Noodles', cardPrice: 140, isVeg: true, image: '/menu/mmk/mushroom-schezwan-noodles.webp' },
     ],
   },
   {
     title: 'Non Veg Fried Rice',
     items: [
-      { name: 'Egg Fried Rice', cardPrice: 80, isVeg: false, image: EGG_RICE },
-      { name: 'Chicken Fried Rice', cardPrice: 100, isVeg: false, image: CHICKEN_RICE },
-      { name: 'Chicken Schezwan Fried Rice', cardPrice: 120, isVeg: false, image: CHICKEN_RICE },
-      { name: 'Egg Schezwan Fried Rice', cardPrice: 100, isVeg: false, image: EGG_SCHEZWAN },
-      { name: 'Egg Fried Rice with Noodles', cardPrice: 120, isVeg: false, image: EGG_RICE },
-      { name: 'Non Veg Mix Fried Rice', cardPrice: 150, isVeg: false, image: CHICKEN_RICE },
+      { name: 'Egg Fried Rice', cardPrice: 80, isVeg: false, image: '/menu/mmk/egg-fried-rice.webp' },
+      { name: 'Chicken Fried Rice', cardPrice: 100, isVeg: false, image: '/menu/mmk/chicken-fried-rice.webp' },
+      { name: 'Chicken Schezwan Fried Rice', cardPrice: 120, isVeg: false, image: '/menu/mmk/chicken-schezwan-fried-rice.webp' },
+      { name: 'Egg Schezwan Fried Rice', cardPrice: 100, isVeg: false, image: '/menu/mmk/egg-schezwan-fried-rice.webp' },
+      { name: 'Egg Fried Rice with Noodles', cardPrice: 120, isVeg: false, image: '/menu/mmk/egg-fried-rice-with-noodles.webp' },
+      { name: 'Non Veg Mix Fried Rice', cardPrice: 150, isVeg: false, image: '/menu/mmk/non-veg-mix-fried-rice.webp' },
     ],
   },
   {
     title: 'Non Veg Noodles',
     items: [
-      { name: 'Egg Noodles', cardPrice: 80, isVeg: false, image: NOODLES },
-      { name: 'Egg Schezwan Noodles', cardPrice: 100, isVeg: false, image: NOODLES },
-      { name: 'Chicken Noodles', cardPrice: 120, isVeg: false, image: NOODLES },
-      { name: 'Chicken Schezwan Noodles', cardPrice: 120, isVeg: false, image: NOODLES },
-      { name: 'Chicken Garlic Noodles', cardPrice: 100, isVeg: false, image: NOODLES },
+      { name: 'Egg Noodles', cardPrice: 80, isVeg: false, image: '/menu/mmk/egg-noodles.webp' },
+      { name: 'Egg Schezwan Noodles', cardPrice: 100, isVeg: false, image: '/menu/mmk/egg-schezwan-noodles.webp' },
+      { name: 'Chicken Noodles', cardPrice: 120, isVeg: false, image: '/menu/mmk/chicken-noodles.webp' },
+      { name: 'Chicken Schezwan Noodles', cardPrice: 120, isVeg: false, image: '/menu/mmk/chicken-schezwan-noodles.webp' },
+      { name: 'Chicken Garlic Noodles', cardPrice: 100, isVeg: false, image: '/menu/mmk/chicken-garlic-noodles.webp' },
     ],
   },
   {
     title: 'Chinese Special',
     items: [
-      { name: 'Paneer Crispy', cardPrice: 120, isVeg: true },
-      { name: 'Veg Crispy', cardPrice: 100, isVeg: true, image: '/gobi_chilli.webp' },
-      { name: 'Chicken Chilli', cardPrice: 120, isVeg: false, image: '/chicken_chilli.webp' },
-      { name: 'Gobi Manchurian', cardPrice: 100, isVeg: true, image: '/gobi_manchurian.webp' },
-      { name: 'Veg Manchurian', cardPrice: 100, isVeg: true, image: '/gobi_manchurian.webp' },
+      { name: 'Paneer Crispy', cardPrice: 120, isVeg: true, image: '/menu/mmk/paneer-crispy.webp' },
+      { name: 'Veg Crispy', cardPrice: 100, isVeg: true, image: '/menu/mmk/veg-crispy.webp' },
+      { name: 'Chicken Chilli', cardPrice: 120, isVeg: false, image: '/menu/mmk/chicken-chilli.webp' },
+      { name: 'Gobi Manchurian', cardPrice: 100, isVeg: true, image: '/menu/mmk/gobi-manchurian.webp' },
+      { name: 'Veg Manchurian', cardPrice: 100, isVeg: true, image: '/menu/mmk/veg-manchurian.webp' },
     ],
   },
   {
     title: 'Rice Special',
     items: [
-      { name: 'Veg Tripura Rice', cardPrice: 150, isVeg: true, image: VEG_SCHEZWAN },
-      { name: 'Chicken Tripura Rice', cardPrice: 180, isVeg: false, image: CHICKEN_RICE },
+      { name: 'Veg Tripura Rice', cardPrice: 150, isVeg: true, image: '/menu/mmk/veg-tripura-rice.webp' },
+      { name: 'Chicken Tripura Rice', cardPrice: 180, isVeg: false, image: '/menu/mmk/chicken-tripura-rice.webp' },
     ],
   },
 ];

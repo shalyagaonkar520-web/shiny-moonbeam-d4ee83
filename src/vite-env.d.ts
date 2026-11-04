@@ -13,6 +13,9 @@ interface ImportMetaEnv {
   readonly VITE_FIREBASE_MEASUREMENT_ID: string;
 }
 
+/** When this bundle was built (ISO), set in vite.config.ts. */
+declare const __BUILD_TIME__: string;
+
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
