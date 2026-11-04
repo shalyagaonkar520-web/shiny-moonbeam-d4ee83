@@ -43,6 +43,7 @@ const AdminPage = lazy(() => import('./components/AdminPage'));
 const LuckyWheelPage = lazy(() => import('./components/LuckyWheelPage'));
 const AuthPage = lazy(() => import('./components/AuthPage'));
 const TrackOrderPage = lazy(() => import('./components/TrackOrderPage'));
+const TrackComingSoon = lazy(() => import('./components/TrackComingSoon'));
 const PrivacyPage = lazy(() => import('./components/PrivacyPage'));
 const DeleteAccountPage = lazy(() => import('./components/DeleteAccountPage'));
 const AddressesPage = lazy(() => import('./components/AddressesPage'));
@@ -216,8 +217,10 @@ export default function App() {
                   <Route path="/cart" element={<Navigate to="/checkout" replace />} />
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/profile" element={<ProfilePage />} />
-                  <Route path="/track" element={<TrackOrderPage />} />
-                  <Route path="/track/:orderId" element={<TrackingPage />} />
+                  {/* Tracking is locked for now: both routes show "coming soon".
+                      Put back <TrackOrderPage /> and <TrackingPage /> to reopen it. */}
+                  <Route path="/track" element={<TrackComingSoon />} />
+                  <Route path="/track/:orderId" element={<TrackComingSoon />} />
                   <Route path="/privacy" element={<PrivacyPage />} />
                   <Route path="/delete-account" element={<DeleteAccountPage />} />
                   <Route path="/addresses" element={<AddressesPage />} />
