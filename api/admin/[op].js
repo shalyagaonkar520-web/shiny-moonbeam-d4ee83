@@ -1,4 +1,5 @@
-// /api/admin/refund and /api/admin/health, served by one function.
+// /api/admin/refund, /api/admin/health and /api/admin/set-password, served
+// by one function.
 //
 // Vercel's Hobby plan allows 12 functions and the site already had 11, so
 // the Super Admin's two endpoints share this one. The handlers themselves
@@ -6,9 +7,10 @@
 
 import refund from '../_admin/refund.js';
 import health from '../_admin/health.js';
+import setPassword from '../_admin/set-password.js';
 import { panelCors } from '../_staffAuth.js';
 
-const HANDLERS = { refund, health };
+const HANDLERS = { refund, health, 'set-password': setPassword };
 
 export default async function handler(req, res) {
   const op = HANDLERS[String(req.query?.op || '')];
