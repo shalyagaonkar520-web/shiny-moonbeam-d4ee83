@@ -39,7 +39,7 @@ const CARD: MomsMagicKitchenCategory[] = [
       { name: 'Veg Fried Rice', cardPrice: 80, isVeg: true, image: '/menu/mmk/veg-fried-rice.webp' },
       { name: 'Veg Schezwan Fried Rice', cardPrice: 100, isVeg: true, image: '/menu/mmk/veg-schezwan-fried-rice.webp' },
       { name: 'Veg Garlic Rice', cardPrice: 100, isVeg: true, image: '/menu/mmk/veg-garlic-rice.webp' },
-      { name: 'Veg Singapore Rice', cardPrice: 120, isVeg: true, image: '/menu/mmk/singapore-rice.webp' },
+      { name: 'Veg Singapore Rice', cardPrice: 120, isVeg: true, image: '/menu/mmk/veg-singapore.webp' },
       { name: 'Paneer Fried Rice', cardPrice: 120, isVeg: true, image: '/menu/mmk/paneer-fried-rice.webp' },
       { name: 'Paneer Schezwan Rice', cardPrice: 140, isVeg: true, image: '/menu/mmk/paneer-schezwan-rice.webp' },
       { name: 'Mushroom Fried Rice', cardPrice: 120, isVeg: true, image: '/menu/mmk/mushroom-fried-rice.webp' },
