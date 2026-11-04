@@ -2,10 +2,12 @@
 // From the "Sai Fastfood" printed menu card; every price here is the card price
 // plus Rs 10 (the card price is kept alongside so the margin stays visible).
 //
-// Photos: each one was opened and checked by eye before being used (file names
-// in public/ are not reliable). Veg dishes only use photos with no meat in
-// them; where no matching photo exists the dish uses the closest vegetarian
-// rice/noodle photo or the kitchen's fallback image.
+// Photos: the veg rice dishes and Veg Noodles use crops of the kitchen's own
+// poster (public/menu/mmk/, one per dish). The rest were each opened and
+// checked by eye before being used (file names in public/ are not reliable).
+// Veg dishes only use photos with no meat in them; where no matching photo
+// exists the dish uses the closest vegetarian rice/noodle photo or the
+// kitchen's fallback image.
 
 export interface MomsMagicKitchenItem {
   name: string;
@@ -34,24 +36,24 @@ const CARD: MomsMagicKitchenCategory[] = [
   {
     title: 'Veg Chinese Rice',
     items: [
-      { name: 'Veg Fried Rice', cardPrice: 80, isVeg: true, image: VEG_RICE },
-      { name: 'Veg Schezwan Fried Rice', cardPrice: 100, isVeg: true, image: VEG_SCHEZWAN },
-      { name: 'Veg Garlic Rice', cardPrice: 100, isVeg: true, image: VEG_RICE },
-      { name: 'Veg Singapore Rice', cardPrice: 120, isVeg: true, image: VEG_SCHEZWAN },
-      { name: 'Paneer Fried Rice', cardPrice: 120, isVeg: true, image: VEG_RICE },
-      { name: 'Paneer Schezwan Rice', cardPrice: 140, isVeg: true, image: VEG_SCHEZWAN },
-      { name: 'Mushroom Fried Rice', cardPrice: 120, isVeg: true, image: VEG_RICE },
-      { name: 'Mushroom Schezwan Rice', cardPrice: 140, isVeg: true, image: VEG_SCHEZWAN },
-      { name: 'Mushroom Garlic Rice', cardPrice: 140, isVeg: true, image: VEG_RICE },
-      { name: 'Baby Corn Fried Rice', cardPrice: 120, isVeg: true, image: VEG_RICE },
-      { name: 'Mixed Veg Fried Rice', cardPrice: 120, isVeg: true, image: VEG_RICE },
-      { name: 'Triple Schezwan Rice', cardPrice: 150, isVeg: true, image: '/triple_schezwan_rice.webp' },
+      { name: 'Veg Fried Rice', cardPrice: 80, isVeg: true, image: '/menu/mmk/veg-fried-rice.webp' },
+      { name: 'Veg Schezwan Fried Rice', cardPrice: 100, isVeg: true, image: '/menu/mmk/veg-schezwan-fried-rice.webp' },
+      { name: 'Veg Garlic Rice', cardPrice: 100, isVeg: true, image: '/menu/mmk/veg-garlic-rice.webp' },
+      { name: 'Veg Singapore Rice', cardPrice: 120, isVeg: true, image: '/menu/mmk/veg-singapore-rice.webp' },
+      { name: 'Paneer Fried Rice', cardPrice: 120, isVeg: true, image: '/menu/mmk/paneer-fried-rice.webp' },
+      { name: 'Paneer Schezwan Rice', cardPrice: 140, isVeg: true, image: '/menu/mmk/paneer-schezwan-rice.webp' },
+      { name: 'Mushroom Fried Rice', cardPrice: 120, isVeg: true, image: '/menu/mmk/mushroom-fried-rice.webp' },
+      { name: 'Mushroom Schezwan Rice', cardPrice: 140, isVeg: true, image: '/menu/mmk/mushroom-schezwan-rice.webp' },
+      { name: 'Mushroom Garlic Rice', cardPrice: 140, isVeg: true, image: '/menu/mmk/mushroom-garlic-rice.webp' },
+      { name: 'Baby Corn Fried Rice', cardPrice: 120, isVeg: true, image: '/menu/mmk/baby-corn-fried-rice.webp' },
+      { name: 'Mixed Veg Fried Rice', cardPrice: 120, isVeg: true, image: '/menu/mmk/mixed-veg-fried-rice.webp' },
+      { name: 'Triple Schezwan Rice', cardPrice: 150, isVeg: true, image: '/menu/mmk/triple-schezwan-rice.webp' },
     ],
   },
   {
     title: 'Veg Noodles',
     items: [
-      { name: 'Veg Noodles', cardPrice: 100, isVeg: true, image: NOODLES },
+      { name: 'Veg Noodles', cardPrice: 100, isVeg: true, image: '/menu/mmk/veg-noodles.webp' },
       { name: 'Veg Schezwan Noodles', cardPrice: 100, isVeg: true, image: NOODLES },
       { name: 'Paneer Noodles', cardPrice: 140, isVeg: true, image: NOODLES },
       { name: 'Paneer Schezwan Noodles', cardPrice: 120, isVeg: true, image: NOODLES },
