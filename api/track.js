@@ -80,7 +80,38 @@ function firstName(name) {
   return typeof name === 'string' ? name.trim().split(/\s+/)[0] || null : null;
 }
 
-function shapeOrder(id, order, rider) {
+// A position older than this is not shown: a rider whose phone went quiet
+// is not where the map would say.
+const FRESH_MS = 10 * 60 * 1000;
+
+/**
+ * The rider, from the moment one accepts the order. Their position is the
+ * freshest of the two the rider app sends: the order's tracking card (every
+ * 10 s while they hold the order) and their own record (every 30 s online).
+ */
+function riderView(order, rider, tracking, now = Date.now()) {
+  if (!order.riderId) return null;
+  const fixes = [];
+  const t = tracking && tracking.riderLocation;
+  if (t && t.riderId === order.riderId && typeof t.lat === 'number' && typeof t.lng === 'number') {
+    fixes.push({ lat: t.lat, lng: t.lng, at: Number(t.at) || 0 });
+  }
+  const c = rider && rider.currentLocation;
+  if (c && typeof c.lat === 'number' && typeof c.lng === 'number') {
+    fixes.push({ lat: c.lat, lng: c.lng, at: new Date(c.lastUpdated || 0).getTime() || 0 });
+  }
+  const best = fixes.filter((f) => now - f.at <= FRESH_MS).sort((a, b) => b.at - a.at)[0] || null;
+  return {
+    name: (rider && rider.name) || order.riderName || 'Delivery partner',
+    phone: (rider && rider.phone) || null,
+    location: best ? { lat: best.lat, lng: best.lng } : null,
+    locationAt: best ? new Date(best.at).toISOString() : null,
+  };
+}
+
+export { riderView };
+
+function shapeOrder(id, order, rider, tracking) {
   const stage = toStage(order);
   const loc = order.deliveryLocation || {};
   return {
@@ -110,16 +141,7 @@ function shapeOrder(id, order, rider) {
     },
     trackingLink: order.trackingLink || null,
     rated: !!order.customerRating,
-    rider: rider
-      ? {
-          name: rider.name || null,
-          phone: rider.phone || null,
-          location:
-            rider.currentLocation && typeof rider.currentLocation.lat === 'number'
-              ? { lat: rider.currentLocation.lat, lng: rider.currentLocation.lng }
-              : null,
-        }
-      : null,
+    rider: riderView(order, rider, tracking),
   };
 }
 
@@ -143,11 +165,17 @@ export default async function handler(req, res) {
     if (!order) return res.status(404).json({ ok: false, error: 'order_not_found' });
 
     let rider = null;
+    let tracking = null;
     if (order.riderId) {
-      rider = await getDocData('riders', String(order.riderId)).catch(() => null);
+      [rider, tracking] = await Promise.all([
+        getDocData('riders', String(order.riderId)).catch(() => null),
+        typeof order.trackingId === 'string' && /^[A-Za-z0-9_-]{10,64}$/.test(order.trackingId)
+          ? getDocData('tracking', order.trackingId).catch(() => null)
+          : null,
+      ]);
     }
 
-    return res.status(200).json({ ok: true, order: shapeOrder(id, order, rider) });
+    return res.status(200).json({ ok: true, order: shapeOrder(id, order, rider, tracking) });
   } catch (error) {
     if (error.code === 'NOT_CONFIGURED') {
       console.error(

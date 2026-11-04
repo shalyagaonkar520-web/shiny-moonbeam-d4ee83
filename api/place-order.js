@@ -4,6 +4,7 @@ import { unavailableDishes } from './_dishAvailability.js';
 import { adminDb } from './_firebaseAdmin.js';
 import { priceOrder, SERVICE_RADIUS_KM, COD_MAX_KM } from './_pricing.js';
 import { announceOnce } from './_orderMessage.js';
+import { autoDispatchOn, sentFields, afterSent } from './_autoDispatch.js';
 import { paymentsConfigured, createPaymentOrder, usingShalya } from './_payments.js';
 import { upiIntentLink } from './_shalyaPay.js';
 
@@ -225,10 +226,23 @@ export default async function handler(req, res) {
     createdAt: nowIso,
   }));
 
+  // A cash order is a kitchen order now, so it goes straight to its
+  // restaurant (unless the Super Admin has switched that off). Online orders
+  // follow once their payment is verified, in markGroupPaid.
+  const autoSend = cash && (await autoDispatchOn(adminDb));
+  const hotelById = Object.fromEntries(hotelSnaps.map((snap, idx) => [hotelIds[idx], snap.exists ? snap.data() : null]));
+  const writes = docs.map((d) => {
+    if (!autoSend) return d;
+    const sent = sentFields(d, hotelById[d.hotelId]);
+    // The copy returned to the browser carries plain values only.
+    Object.assign(d, { dispatchStatus: 'SENT', sentBy: sent.sentBy, trackingId: sent.trackingId, ...(sent.cityId ? { cityId: sent.cityId } : {}) });
+    return { ...d, ...sent };
+  });
+
   const batch = adminDb.batch();
   // create(), not set(): if two identical requests race, the second fails
   // instead of overwriting the first order's Razorpay link.
-  for (const d of docs) batch.create(adminDb.collection('orders').doc(d.id), d);
+  for (const d of writes) batch.create(adminDb.collection('orders').doc(d.id), d);
   if (razorpay) {
     // Server-only record of what this Razorpay order is for; verify-payment
     // and the webhook check payments against this, not the order document.
@@ -260,7 +274,10 @@ export default async function handler(req, res) {
   // Awaited (with a cap): Vercel may freeze the function once the response is sent.
   if (cash) {
     await Promise.race([
-      announceOnce(orderId).catch((err) => console.error('place-order: announce failed', err)),
+      Promise.all([
+        announceOnce(orderId).catch((err) => console.error('place-order: announce failed', err)),
+        autoSend ? afterSent(adminDb, docs.map((d) => d.id)) : null,
+      ]),
       new Promise((r) => setTimeout(r, 4000)),
     ]);
   }

@@ -10,6 +10,7 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { adminDb } from './_firebaseAdmin.js';
 import { loadGroup, announceOnce, sendTelegram } from './_orderMessage.js';
+import { autoDispatchOn, sentFields, afterSent } from './_autoDispatch.js';
 import {
   shalyaConfigured,
   createShalyaOrder,
@@ -163,14 +164,28 @@ export async function markGroupPaid(razorpayOrderId, paymentId, expect = {}) {
   // Only an order still waiting for its payment becomes a kitchen order. A
   // payment that lands after the order was cancelled is recorded and flagged
   // for a refund instead of silently re-opening it.
+  // A paid order goes straight to its restaurant, as a cash order does at
+  // checkout, unless the Super Admin has switched that off.
+  const autoSend = await autoDispatchOn(adminDb);
+  const sentIds = [];
   const outcome = await adminDb.runTransaction(async (tx) => {
     const snaps = await Promise.all(group.map((g) => tx.get(g.ref)));
     const primary = snaps[0].data();
     if (primary.paymentStatus === 'completed') return 'already';
     const waiting = primary.status === 'awaiting_payment';
+    const hotels = {};
+    if (waiting && autoSend) {
+      const ids = [...new Set(snaps.map((s) => s.data().hotelId).filter(Boolean))];
+      const hs = await Promise.all(ids.map((id) => tx.get(adminDb.collection('hotels').doc(id))));
+      hs.forEach((h, i) => { hotels[ids[i]] = h.exists ? h.data() : null; });
+    }
+    sentIds.length = 0;
     snaps.forEach((snap) => {
+      const o = snap.data();
+      const send = waiting && autoSend && o.dispatchStatus === 'PENDING_DISPATCH';
+      if (send) sentIds.push(snap.id);
       tx.update(snap.ref, waiting
-        ? { paymentStatus: 'completed', paymentId, paidAt, status: 'pending', orderStatus: 'NEW' }
+        ? { paymentStatus: 'completed', paymentId, paidAt, status: 'pending', orderStatus: 'NEW', ...(send ? sentFields(o, hotels[o.hotelId]) : {}) }
         : { paymentStatus: 'completed', paymentId, paidAt, refundNeeded: true });
     });
     // Keeping the UTR and the provider on the payment record is what makes a
@@ -190,6 +205,7 @@ export async function markGroupPaid(razorpayOrderId, paymentId, expect = {}) {
 Payment ${paymentId}. Refund it or restore the order.`);
   } else {
     await announceOnce(groupId);
+    if (outcome === 'paid' && sentIds.length) await afterSent(adminDb, sentIds);
   }
   return { ok: true, groupId, outcome };
 }
