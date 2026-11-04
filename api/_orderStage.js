@@ -9,7 +9,7 @@ export function toStage(order) {
   if (s === 'cancelled' || os === 'CANCELLED' || os === 'REJECTED') return 'cancelled';
   if (s === 'delivered' || s === 'completed' || os === 'DELIVERED') return 'delivered';
   if (s === 'out for delivery' || os === 'OUT_FOR_DELIVERY' || os === 'PICKED_UP') return 'out_for_delivery';
-  if (s === 'preparing' || os === 'ACCEPTED' || os === 'PREPARING' || os === 'READY') return 'preparing';
+  if (s === 'preparing' || os === 'ACCEPTED' || os === 'RECEIVED' || os === 'PREPARING' || os === 'READY') return 'preparing';
   return 'placed';
 }
 

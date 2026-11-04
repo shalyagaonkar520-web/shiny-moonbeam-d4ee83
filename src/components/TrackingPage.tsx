@@ -252,7 +252,9 @@ export default function TrackingPage() {
 
   // ---- where the bike is, and when the food arrives
   const stage = view?.stage || 'placed';
-  const liveRider = stage === 'out_for_delivery' && view?.rider?.location ? view.rider.location : null;
+  // Shown from the moment a rider accepts: first riding to the restaurant,
+  // then to the customer. The server drops positions that have gone stale.
+  const liveRider = stage !== 'delivered' && stage !== 'cancelled' && view?.rider?.location ? view.rider.location : null;
   const dispatchedAt = view?.outForDeliveryAt ? new Date(view.outForDeliveryAt).getTime() : null;
   const driveMin = route?.durationMin ?? null;
 
@@ -496,7 +498,9 @@ export default function TrackingPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-black text-gray-900 truncate">{view.rider.name}</p>
-                    <p className="text-[11px] font-semibold text-gray-500">Your delivery partner 🛵</p>
+                    <p className="text-[11px] font-semibold text-gray-500">
+                      {stage === 'out_for_delivery' ? 'On the way to you 🛵' : `Your delivery partner · ${view.rider.location ? 'heading to the restaurant' : 'assigned'}`}
+                    </p>
                   </div>
                   {view.rider.phone && (
                     <a
