@@ -18,7 +18,8 @@ import { useCartStore } from '../store/cartStore';
 import { useDishOrderable } from '../store/dishAvailabilityStore';
 import toast from 'react-hot-toast';
 import { playSound, SOUNDS } from '../utils/audio';
-import { MOMS_MAGIC_KITCHEN_MENU, MOMS_MAGIC_KITCHEN_IMAGE, MomsMagicKitchenMenuItem } from '../data/momsMagicKitchenMenu';
+import { MOMS_MAGIC_KITCHEN_MENU, MOMS_MAGIC_KITCHEN_MENU_WITH_HALVES, MOMS_MAGIC_KITCHEN_IMAGE, MomsMagicKitchenMenuItem } from '../data/momsMagicKitchenMenu';
+import { useSystemStore } from '../store/systemStore';
 import { useSEO } from '../utils/seo';
 import DishImage from './DishImage';
 import { useMmkOpen, MMK_CLOSED_MESSAGE, MMK_OPENS_AT_LABEL } from '../lib/mmkHours';
@@ -48,6 +49,9 @@ export default function MomsMagicKitchenMenuPage() {
   const { items: cartItems, addItem, updateQuantity } = useCartStore();
   // Opens at 2:30 PM IST; flips by itself at that moment.
   const mmkOpen = useMmkOpen();
+  // Half portions appear only while the admin switch is on (off by default).
+  const halvesOn = useSystemStore((s) => s.settings.mmkHalfPortions === true);
+  const MENU = halvesOn ? MOMS_MAGIC_KITCHEN_MENU_WITH_HALVES : MOMS_MAGIC_KITCHEN_MENU;
   const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const cartTotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
@@ -119,7 +123,7 @@ export default function MomsMagicKitchenMenuPage() {
   const filteredMenu = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
-    return MOMS_MAGIC_KITCHEN_MENU.map((category) => {
+    return MENU.map((category) => {
       const filteredItems = category.items.filter((item) => {
         if (!isOrderable('moms_magic_kitchen', item.name)) return false;
         if (query) {
@@ -140,11 +144,11 @@ export default function MomsMagicKitchenMenuPage() {
         items: filteredItems
       };
     }).filter((cat) => cat.items.length > 0);
-  }, [searchQuery, dietFilter, isOrderable]);
+  }, [MENU, searchQuery, dietFilter, isOrderable]);
 
   const totalItemsCount = useMemo(
-    () => MOMS_MAGIC_KITCHEN_MENU.reduce((sum, c) => sum + c.items.length, 0),
-    []
+    () => MENU.reduce((sum, c) => sum + c.items.length, 0),
+    [MENU]
   );
 
   return (
@@ -288,7 +292,7 @@ export default function MomsMagicKitchenMenuPage() {
       {/* 4. HORIZONTAL STICKY CATEGORY NAV */}
       <div className="sticky top-[57px] z-30 bg-[#f8fafc]/95 backdrop-blur-md py-2 border-b border-amber-100/60 mt-3">
         <div className="max-w-4xl mx-auto px-4 flex items-center gap-2 overflow-x-auto no-scrollbar">
-          {MOMS_MAGIC_KITCHEN_MENU.map((cat) => {
+          {MENU.map((cat) => {
             const isActive = activeCategory === cat.title;
             const icon = CATEGORY_ICONS[cat.title] || '🍽️';
             return (
@@ -378,7 +382,7 @@ export default function MomsMagicKitchenMenuPage() {
                                 />
                               </span>
                               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                                {item.isVeg ? 'Veg' : 'Non-Veg'} · {item.portion} Portion
+                                {item.isVeg ? 'Veg' : 'Non-Veg'}{halvesOn && ` · ${item.portion} Portion`}
                               </span>
                             </div>
 

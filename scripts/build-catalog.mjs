@@ -21,16 +21,22 @@ import { MENU_ITEMS } from './src/data/menuItems';
 import { PARTNER_HOTEL_PRODUCTS } from './src/data/partnerHotelItems';
 import { HOTEL_AL_AMIN_MENU } from './src/data/hotelAlAminMenu';
 import { ICE_CAKES, NORMAL_CAKES, PARTY_ITEMS, SNACKS } from './src/data/partyItems';
+import { MOMS_MAGIC_KITCHEN_MENU_WITH_HALVES, mmkItemId } from './src/data/momsMagicKitchenMenu';
 
 const out = {};
-const add = (id, name, price, hotelId) => {
+const add = (id, name, price, hotelId, half) => {
   if (!id || typeof price !== 'number') return;
-  out[id] = { name, price, hotelId: hotelId || null };
+  out[id] = { name, price, hotelId: hotelId || null, ...(half ? { half: true } : {}) };
 };
 MENU_ITEMS.forEach((p) => add(p.id, p.name, p.price, p.hotelId));
 PARTNER_HOTEL_PRODUCTS.forEach((p) => add(p.id, p.name, p.price, p.hotelId));
 HOTEL_AL_AMIN_MENU.forEach((c) => c.items.forEach((i) => add(i.id, i.name, i.price, 'al_amin')));
 [...ICE_CAKES, ...NORMAL_CAKES, ...PARTY_ITEMS, ...SNACKS].forEach((p) => add(p.id, p.name, p.price, p.hotelId));
+// Moms Magic Kitchen half portions are priced here even while they are off;
+// /api/place-order refuses them unless system/settings.mmkHalfPortions is on.
+MOMS_MAGIC_KITCHEN_MENU_WITH_HALVES.forEach((c) => c.items.forEach((i) => {
+  if (i.portion === 'Half') add(mmkItemId(i.name), i.name, i.price, 'moms_magic_kitchen', true);
+}));
 export default out;
 `;
 

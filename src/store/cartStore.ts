@@ -5,6 +5,8 @@ import { useDishAvailabilityStore } from './dishAvailabilityStore';
 import { getItemHotel } from '../utils/orderHotels';
 import toast from 'react-hot-toast';
 import { isMmkOpenNow, isMmkItem, MMK_CLOSED_MESSAGE } from '../lib/mmkHours';
+import { isMmkHalfItem } from '../data/momsMagicKitchenMenu';
+import { useSystemStore } from './systemStore';
 
 interface CartStore {
   items: CartItem[];
@@ -62,6 +64,12 @@ export const useCartStore = create<CartStore>()(persist((set, get) => {
       // search, the food bot and reorder.
       if (isMmkItem(product) && !isMmkOpenNow()) {
         toast.error(`Moms Magic Kitchen: ${MMK_CLOSED_MESSAGE}`, { id: 'mmk-closed' });
+        return;
+      }
+      // Half portions only while the admin switch is on (e.g. a reorder of an
+      // old half-portion order).
+      if (isMmkHalfItem(product) && useSystemStore.getState().settings.mmkHalfPortions !== true) {
+        toast.error(`${product.name} is not available right now.`, { id: 'mmk-half-off' });
         return;
       }
       const items = get().items;

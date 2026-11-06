@@ -3,7 +3,7 @@ import { loadAdminAuth } from './_adminAuth.js';
 import { unavailableDishes } from './_dishAvailability.js';
 import { isMmkOpenNow, isMmkLine } from './_mmkHours.js';
 import { adminDb } from './_firebaseAdmin.js';
-import { priceOrder, SERVICE_RADIUS_KM, COD_MAX_KM } from './_pricing.js';
+import { priceOrder, liveSettings, isHalfPortionLine, SERVICE_RADIUS_KM, COD_MAX_KM } from './_pricing.js';
 import { announceOnce } from './_orderMessage.js';
 import { paymentsConfigured, createPaymentOrder, usingShalya } from './_payments.js';
 import { upiIntentLink } from './_shalyaPay.js';
@@ -139,6 +139,13 @@ export default async function handler(req, res) {
   // dishes rather than by hotel. Before any payment order, like the checks below.
   const hasMmk = priced.lines.some(isMmkLine) || items.some((i) => i?.hotelId === 'moms_magic_kitchen');
   if (hasMmk && !isMmkOpenNow()) return bad(res, 409, 'mmk_not_open_yet');
+
+  // Moms Magic Kitchen half portions are sold only while the admin switch
+  // system/settings.mmkHalfPortions is on (off by default).
+  const halfLines = priced.lines.filter(isHalfPortionLine);
+  if (halfLines.length && (await liveSettings()).mmkHalfPortions !== true) {
+    return bad(res, 409, 'dish_unavailable', { dishes: halfLines.map((l) => l.name) });
+  }
 
   // Every kitchen in the cart must be open. This endpoint writes with the
   // Admin SDK, so the Firestore rule that refuses orders for a closed hotel

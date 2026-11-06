@@ -22,6 +22,7 @@ import { getItemHotelTag, getItemHotel, getOrderHotelName, getOrderHotelId, grou
 import DishImage from './DishImage';
 import { useDishAvailabilityStore } from '../store/dishAvailabilityStore';
 import { isMmkOpenNow, isMmkItem } from '../lib/mmkHours';
+import { isMmkHalfItem } from '../data/momsMagicKitchenMenu';
 import { notifyTelegram } from '../lib/notifyTelegram';
 import { couponDiscountFor, couponGivesFreeDelivery, normaliseIndianMobile, CouponRule } from '../lib/pricing';
 import {
@@ -589,9 +590,11 @@ export default function Checkout() {
       return;
     }
 
-    // A dish the kitchen switched off in the panel after it went into the cart.
+    // A dish the kitchen switched off in the panel after it went into the cart,
+    // or a Moms Magic Kitchen half portion while half portions are off.
     const isOrderable = useDishAvailabilityStore.getState().isOrderable;
-    const offDishes = activeItems.filter((i: any) => !isOrderable(getItemHotel(i)?.id, i.name));
+    const halvesOn = useSystemStore.getState().settings.mmkHalfPortions === true;
+    const offDishes = activeItems.filter((i: any) => !isOrderable(getItemHotel(i)?.id, i.name) || (!halvesOn && isMmkHalfItem(i)));
     if (offDishes.length) {
       const names = offDishes.map((i: any) => i.name).join(', ');
       toast.error(`${names} ${offDishes.length > 1 ? 'are' : 'is'} not available right now. Remove ${offDishes.length > 1 ? 'them' : 'it'} from your cart and try again.`);

@@ -18,6 +18,8 @@ export interface AdminSettings {
   taxRate: number;
   deliveryFee: number;
   minOrderValue: number;
+  /** Moms Magic Kitchen half portions on the menu. Off unless set to true. */
+  mmkHalfPortions?: boolean;
 }
 
 const DEFAULT_SETTINGS: AdminSettings = {

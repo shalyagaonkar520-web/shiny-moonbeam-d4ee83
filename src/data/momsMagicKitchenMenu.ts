@@ -13,9 +13,9 @@ export interface MomsMagicKitchenItem {
   isVeg: boolean;
   image?: string;
   /**
-   * Every dish is also sold as a half portion, listed right after it. By
-   * default it is "<name> (Half)" at HALF_PRICE(full selling price); set this
-   * only for a half with its own agreed name, price or photo.
+   * Special terms for this dish's half portion, used only while half portions
+   * are switched on (see buildMomsMagicKitchenMenu). Without it the half is
+   * "<name> (Half)" at HALF_PRICE(full selling price).
    */
   half?: { name?: string; price?: number; image?: string };
 }
@@ -108,27 +108,59 @@ export interface MomsMagicKitchenMenuItem {
   portion: 'Full' | 'Half';
 }
 
+export type MomsMagicKitchenMenu = Array<{ title: string; items: MomsMagicKitchenMenuItem[] }>;
+
 /** Half portion price: half the full selling price, plus Rs 20. */
 export const MOMS_MAGIC_KITCHEN_HALF_PRICE = (fullPrice: number) => Math.round(fullPrice / 2) + 20;
 
+/** Cart / catalog id of a dish, e.g. "Veg Noodles (Half)" -> "mmk-veg-noodles-half-". */
+export const mmkItemId = (name: string) => `mmk-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+
 /**
- * The menu at selling prices (card price + Rs 10), each dish followed by its
- * half portion. Full portions keep their original names, so their cart ids
- * and the kitchen panel's availability records are unchanged.
+ * The menu at selling prices (card price + Rs 10).
+ *
+ * Half portions: with `withHalves`, every full dish is followed by its half,
+ * priced by HALF_PRICE unless the dish sets its own `half` terms. They are
+ * derived from the full dishes every time rather than stored, so switching
+ * them on again (or building twice) can never create duplicates, and a half
+ * whose id would clash with a dish already listed is skipped.
+ *
+ * Whether customers get halves is the admin switch `mmkHalfPortions` in
+ * system/settings (off by default); the server refuses half portions while
+ * it is off. Full dishes keep their names, ids and prices either way.
  */
-export const MOMS_MAGIC_KITCHEN_MENU: Array<{ title: string; items: MomsMagicKitchenMenuItem[] }> = CARD.map((c) => ({
-  title: c.title,
-  items: c.items.flatMap((i): MomsMagicKitchenMenuItem[] => {
-    const price = i.cardPrice + MOMS_MAGIC_KITCHEN_MARKUP;
-    return [
-      { name: i.name, price, isVeg: i.isVeg, image: i.image, portion: 'Full' },
-      {
+export function buildMomsMagicKitchenMenu(withHalves: boolean): MomsMagicKitchenMenu {
+  const taken = new Set(CARD.flatMap((c) => c.items.map((i) => mmkItemId(i.name))));
+  return CARD.map((c) => ({
+    title: c.title,
+    items: c.items.flatMap((i): MomsMagicKitchenMenuItem[] => {
+      const price = i.cardPrice + MOMS_MAGIC_KITCHEN_MARKUP;
+      const full: MomsMagicKitchenMenuItem = { name: i.name, price, isVeg: i.isVeg, image: i.image, portion: 'Full' };
+      if (!withHalves) return [full];
+      const half: MomsMagicKitchenMenuItem = {
         name: i.half?.name ?? `${i.name} (Half)`,
         price: i.half?.price ?? MOMS_MAGIC_KITCHEN_HALF_PRICE(price),
         isVeg: i.isVeg,
         image: i.half?.image ?? i.image,
         portion: 'Half',
-      },
-    ];
-  }),
-}));
+      };
+      const id = mmkItemId(half.name);
+      if (taken.has(id)) return [full];
+      taken.add(id);
+      return [full, half];
+    }),
+  }));
+}
+
+/** Full portions only: what customers see while half portions are off. */
+export const MOMS_MAGIC_KITCHEN_MENU = buildMomsMagicKitchenMenu(false);
+
+/** Full portions each followed by its half: shown while half portions are on. */
+export const MOMS_MAGIC_KITCHEN_MENU_WITH_HALVES = buildMomsMagicKitchenMenu(true);
+
+const HALF_IDS = new Set(
+  MOMS_MAGIC_KITCHEN_MENU_WITH_HALVES.flatMap((c) => c.items.filter((i) => i.portion === 'Half').map((i) => mmkItemId(i.name)))
+);
+
+/** A cart line that is a Moms Magic Kitchen half portion. */
+export const isMmkHalfItem = (item: { id?: string | null } | null | undefined) => !!item?.id && HALF_IDS.has(item.id);

@@ -7,7 +7,7 @@ import {
   Power, ShieldAlert, Clock, Save, Phone, Bell, Loader2, 
   Lock, AlertCircle, Calendar, TrendingUp, LogOut, Sliders, 
   Sparkles, CheckCircle2, ChevronRight, Activity, Moon, Sun, Laptop, Flame,
-  Search, PackageSearch, Users, Wallet, Map, Ticket
+  Search, PackageSearch, Users, Wallet, Map, Ticket, Utensils
 } from 'lucide-react';
 import { useAdminStore } from '../store/adminStore';
 import { playSound, SOUNDS } from '../utils/audio';
@@ -2036,6 +2036,38 @@ export default function AdminPage() {
                       layout
                       className="w-7 h-7 rounded-full bg-matte-black shadow-lg"
                       animate={{ x: settings.whatsappAlertsEnabled ? 28 : 0 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                    />
+                  </button>
+                </div>
+              </div>
+
+              {/* TOGGLE 5: Moms Magic Kitchen half portions (off by default) */}
+              <div className="bg-white/[0.02] border border-white/5 p-6 rounded-3xl flex flex-col justify-between gap-6 transition-all hover:bg-white/[0.04]">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <h4 className="text-base font-bold text-white tracking-tight">MMK Half Portions</h4>
+                    <p className="text-white/40 text-[10px] font-semibold max-w-[200px]">Add a half portion of every Moms Magic Kitchen dish (half price + Rs 20).</p>
+                  </div>
+                  <div className={`p-3 rounded-2xl bg-white/5 ${settings.mmkHalfPortions ? 'text-[#FFB700] bg-[#FFB700]/10' : 'text-white/30'}`}>
+                    <Utensils className="w-6 h-6" />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-4 pt-4 border-t border-white/5">
+                  <span className={`text-[10px] font-black uppercase tracking-wider ${settings.mmkHalfPortions ? 'text-[#FFB700]' : 'text-white/30'}`}>
+                    Status: {settings.mmkHalfPortions ? 'Half items ON' : 'Half items OFF'}
+                  </span>
+
+                  {/* Toggle */}
+                  <button
+                    onClick={() => handleToggleState('mmkHalfPortions', !settings.mmkHalfPortions)}
+                    aria-label="Moms Magic Kitchen half portions"
+                    className={`w-16 h-9 rounded-full p-1 transition-colors duration-300 outline-none shrink-0 ${settings.mmkHalfPortions ? 'bg-[#FFB700]' : 'bg-white/10'}`}
+                  >
+                    <motion.div
+                      layout
+                      className="w-7 h-7 rounded-full bg-matte-black shadow-lg"
+                      animate={{ x: settings.mmkHalfPortions ? 28 : 0 }}
                       transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                     />
                   </button>

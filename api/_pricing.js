@@ -74,7 +74,7 @@ async function liveMenu() {
 }
 
 let settingsCache = { at: 0, data: {} };
-async function liveSettings() {
+export async function liveSettings() {
   if (!adminDb) return {};
   if (Date.now() - settingsCache.at < 60 * 1000) return settingsCache.data;
   try {
@@ -91,6 +91,11 @@ async function liveSettings() {
  * Checkout: the coupon must be active and the subtotal must still meet its
  * minimum, and a discount never exceeds the food subtotal.
  */
+/** A Moms Magic Kitchen half portion (only orderable while the admin switch is on). */
+export function isHalfPortionLine(line) {
+  return !!line && CATALOG[line.id]?.half === true;
+}
+
 export function couponDiscountFor(coupon, subtotal) {
   if (!coupon || !coupon.isActive || subtotal < Number(coupon.minOrderValue || 0)) return 0;
   if (coupon.type === 'fixed_discount') return Math.min(Number(coupon.value) || 0, subtotal);
