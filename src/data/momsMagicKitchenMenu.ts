@@ -27,6 +27,7 @@ const CARD: MomsMagicKitchenCategory[] = [
     title: 'Veg Chinese Rice',
     items: [
       { name: 'Veg Fried Rice', cardPrice: 80, isVeg: true, image: '/menu/mmk/veg-fried-rice.webp' },
+      { name: 'Half Fried Rice', cardPrice: 49, isVeg: true, image: '/menu/mmk/veg-fried-rice.webp' },
       { name: 'Veg Schezwan Fried Rice', cardPrice: 100, isVeg: true, image: '/menu/mmk/veg-schezwan-fried-rice.webp' },
       { name: 'Veg Garlic Rice', cardPrice: 100, isVeg: true, image: '/menu/mmk/veg-garlic-rice.webp' },
       { name: 'Veg Singapore Rice', cardPrice: 120, isVeg: true, image: '/menu/mmk/veg-singapore.webp' },
