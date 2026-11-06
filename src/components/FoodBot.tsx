@@ -12,6 +12,7 @@ import { ICE_CAKES, NORMAL_CAKES } from '../data/partyItems';
 import { playSound, SOUNDS } from '../utils/audio';
 import { useLocationStore, SERVICE_RADIUS_KM } from '../store/locationStore';
 import { normaliseIndianMobile } from '../lib/pricing';
+import { isMmkOpenNow, isMmkItem } from '../lib/mmkHours';
 import {
   STRINGS, LANG_LABEL, INTRO, FOOD_CATEGORIES, CAKE_CATEGORIES,
   dishesFor, type Lang, type Kind, type Diet, type CategoryId, type Dish, type Offer,
@@ -142,6 +143,8 @@ export default function FoodBot({ onClose }: { onClose: () => void }) {
   const add = (o: Offer) => {
     // Presentation-only fields on partner hotel items must not reach the cart.
     const { hotelName, hotelPath, showHotelBadge, ...cartProduct } = o.product as any;
+    // Moms Magic Kitchen before 2:30 PM IST: the cart refuses it and says why.
+    if (isMmkItem(cartProduct) && !isMmkOpenNow()) { addItem(cartProduct); return; }
     addItem(cartProduct);
     playSound(SOUNDS.ADD_TO_CART);
     setAdded((a) => ({ ...a, [`${o.hotelId}:${o.product.id}`]: true }));

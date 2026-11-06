@@ -21,6 +21,7 @@ import { useSEO } from '../utils/seo';
 import DishImage from './DishImage';
 import { PARTNER_HOTEL_PRODUCTS } from '../data/partnerHotelItems';
 import { useDishOrderable } from '../store/dishAvailabilityStore';
+import { useMmkOpen, isMmkOpenNow, isMmkItem, MMK_CLOSED_MESSAGE, MMK_OPENS_AT_LABEL } from '../lib/mmkHours';
 
 const ROTATING_SEARCH_PLACEHOLDERS = [
   'Search "Chicken Dum Biryani"',
@@ -199,6 +200,8 @@ export default function LandingPage() {
   // whose kitchen switched itself off, must close here too.
   const isHotelOpen = useLiveHotelStore((s) => s.isOpen);
   useEffect(() => useLiveHotelStore.getState().subscribe(), []);
+  // Moms Magic Kitchen opens at 2:30 PM IST; its card shows closed until then.
+  const mmkOpen = useMmkOpen();
 
   const handleHotelClick = (hotel: typeof PARTNER_HOTELS[0]) => {
     if (!isHotelOpen(hotel.id)) {
@@ -207,6 +210,8 @@ export default function LandingPage() {
     }
 
     if (hotel.id === 'moms_magic_kitchen') {
+      // Before 2:30 PM the menu can still be browsed; ordering is off there.
+      if (!mmkOpen) toast(`${hotel.name}: ${MMK_CLOSED_MESSAGE}`, { id: 'mmk-closed' });
       navigate('/hotel-moms-magic-kitchen');
       return;
     }
@@ -256,9 +261,11 @@ export default function LandingPage() {
       });
       return;
     }
-    playSound(SOUNDS.ADD_TO_CART);
     // Presentation-only fields on partner hotel items must not reach the cart.
     const { hotelName, hotelPath, showHotelBadge, ...cartProduct } = product;
+    // Moms Magic Kitchen before 2:30 PM IST: the cart refuses it and says why.
+    if (isMmkItem(cartProduct) && !isMmkOpenNow()) { addItem(cartProduct); return; }
+    playSound(SOUNDS.ADD_TO_CART);
     addItem(cartProduct);
     toast.success(`${product.name} added! 🍽️`, {
       style: {
@@ -808,7 +815,8 @@ export default function LandingPage() {
           {/* Horizontal Scroll of Rounded Hotel Boxes */}
           <div className="flex items-stretch gap-3 overflow-x-auto no-scrollbar py-1">
             {PARTNER_HOTELS.map((hotel) => {
-              const liveOpen = isHotelOpen(hotel.id);
+              const mmkBeforeOpening = hotel.id === 'moms_magic_kitchen' && !mmkOpen;
+              const liveOpen = isHotelOpen(hotel.id) && !mmkBeforeOpening;
               return (
               <motion.div
                 key={hotel.id}
@@ -886,7 +894,7 @@ export default function LandingPage() {
                     <span className={`text-[10px] font-bold ${
                       !liveOpen ? 'text-gray-500' : 'text-emerald-600'
                     }`}>
-                      {!liveOpen ? 'Closed now' : 'View menu'}
+                      {mmkBeforeOpening && isHotelOpen(hotel.id) ? `Opens ${MMK_OPENS_AT_LABEL}` : !liveOpen ? 'Closed now' : 'View menu'}
                     </span>
                     <span className="text-[10px] text-gray-500" aria-hidden="true">→</span>
                   </div>

@@ -21,6 +21,7 @@ import { doc, setDoc } from 'firebase/firestore';
 import { getItemHotelTag, getItemHotel, getOrderHotelName, getOrderHotelId, groupItemsByHotel } from '../utils/orderHotels';
 import DishImage from './DishImage';
 import { useDishAvailabilityStore } from '../store/dishAvailabilityStore';
+import { isMmkOpenNow, isMmkItem } from '../lib/mmkHours';
 import { notifyTelegram } from '../lib/notifyTelegram';
 import { couponDiscountFor, couponGivesFreeDelivery, normaliseIndianMobile, CouponRule } from '../lib/pricing';
 import {
@@ -580,6 +581,13 @@ export default function Checkout() {
       rzp.on('payment.failed', (r: any) => toast.error('Payment failed: ' + (r?.error?.description || 'please try again')));
       rzp.open();
     };
+
+    // Moms Magic Kitchen takes orders only from 2:30 PM IST (the server checks
+    // too; this also covers the fallback path that writes without it).
+    if (!isMmkOpenNow() && activeItems.some((i: any) => isMmkItem(i))) {
+      toast.error(orderErrorMessage('mmk_not_open_yet'));
+      return;
+    }
 
     // A dish the kitchen switched off in the panel after it went into the cart.
     const isOrderable = useDishAvailabilityStore.getState().isOrderable;

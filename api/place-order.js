@@ -1,6 +1,7 @@
 import { getApps } from 'firebase-admin/app';
 import { loadAdminAuth } from './_adminAuth.js';
 import { unavailableDishes } from './_dishAvailability.js';
+import { isMmkOpenNow, isMmkLine } from './_mmkHours.js';
 import { adminDb } from './_firebaseAdmin.js';
 import { priceOrder, SERVICE_RADIUS_KM, COD_MAX_KM } from './_pricing.js';
 import { announceOnce } from './_orderMessage.js';
@@ -132,6 +133,12 @@ export default async function handler(req, res) {
     return bad(res, 422, 'cod_not_available', { distanceKm: priced.distanceKm });
   }
   if (paymentMethod === 'online' && !paymentsConfigured()) return bad(res, 503, 'payments_not_configured');
+
+  // Moms Magic Kitchen only takes orders from 2:30 PM IST. It shares the
+  // moms-magic panel record with the own kitchen, so it is told apart by its
+  // dishes rather than by hotel. Before any payment order, like the checks below.
+  const hasMmk = priced.lines.some(isMmkLine) || items.some((i) => i?.hotelId === 'moms_magic_kitchen');
+  if (hasMmk && !isMmkOpenNow()) return bad(res, 409, 'mmk_not_open_yet');
 
   // Every kitchen in the cart must be open. This endpoint writes with the
   // Admin SDK, so the Firestore rule that refuses orders for a closed hotel
