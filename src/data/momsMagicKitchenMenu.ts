@@ -12,6 +12,12 @@ export interface MomsMagicKitchenItem {
   cardPrice: number;
   isVeg: boolean;
   image?: string;
+  /**
+   * Every dish is also sold as a half portion, listed right after it. By
+   * default it is "<name> (Half)" at HALF_PRICE(full selling price); set this
+   * only for a half with its own agreed name, price or photo.
+   */
+  half?: { name?: string; price?: number; image?: string };
 }
 
 export interface MomsMagicKitchenCategory {
@@ -26,8 +32,8 @@ const CARD: MomsMagicKitchenCategory[] = [
   {
     title: 'Veg Chinese Rice',
     items: [
-      { name: 'Veg Fried Rice', cardPrice: 80, isVeg: true, image: '/menu/mmk/veg-fried-rice.webp' },
-      { name: 'Half Fried Rice', cardPrice: 49, isVeg: true, image: '/menu/mmk/veg-fried-rice.webp' },
+      // Its half keeps the name and Rs 59 price it was first launched with.
+      { name: 'Veg Fried Rice', cardPrice: 80, isVeg: true, image: '/menu/mmk/veg-fried-rice.webp', half: { name: 'Half Fried Rice', price: 59 } },
       { name: 'Veg Schezwan Fried Rice', cardPrice: 100, isVeg: true, image: '/menu/mmk/veg-schezwan-fried-rice.webp' },
       { name: 'Veg Garlic Rice', cardPrice: 100, isVeg: true, image: '/menu/mmk/veg-garlic-rice.webp' },
       { name: 'Veg Singapore Rice', cardPrice: 120, isVeg: true, image: '/menu/mmk/veg-singapore.webp' },
@@ -81,6 +87,8 @@ const CARD: MomsMagicKitchenCategory[] = [
       { name: 'Chicken Chilli', cardPrice: 120, isVeg: false, image: '/menu/mmk/chicken-chilli.webp' },
       { name: 'Gobi Manchurian', cardPrice: 100, isVeg: true, image: '/menu/mmk/gobi-manchurian.webp' },
       { name: 'Veg Manchurian', cardPrice: 100, isVeg: true, image: '/menu/mmk/veg-manchurian.webp' },
+      // Rs 130 full / Rs 80 half, agreed separately from the half-price formula.
+      { name: 'Chicken Kebab', cardPrice: 120, isVeg: false, image: '/chicken_kabab.webp', half: { price: 80, image: '/chicken_kabab_half.webp' } },
     ],
   },
   {
@@ -95,13 +103,32 @@ const CARD: MomsMagicKitchenCategory[] = [
 export interface MomsMagicKitchenMenuItem {
   name: string;
   price: number;
-  cardPrice: number;
   isVeg: boolean;
   image?: string;
+  portion: 'Full' | 'Half';
 }
 
-/** The menu at selling prices (card price + Rs 10). */
+/** Half portion price: half the full selling price, plus Rs 20. */
+export const MOMS_MAGIC_KITCHEN_HALF_PRICE = (fullPrice: number) => Math.round(fullPrice / 2) + 20;
+
+/**
+ * The menu at selling prices (card price + Rs 10), each dish followed by its
+ * half portion. Full portions keep their original names, so their cart ids
+ * and the kitchen panel's availability records are unchanged.
+ */
 export const MOMS_MAGIC_KITCHEN_MENU: Array<{ title: string; items: MomsMagicKitchenMenuItem[] }> = CARD.map((c) => ({
   title: c.title,
-  items: c.items.map((i) => ({ ...i, price: i.cardPrice + MOMS_MAGIC_KITCHEN_MARKUP })),
+  items: c.items.flatMap((i): MomsMagicKitchenMenuItem[] => {
+    const price = i.cardPrice + MOMS_MAGIC_KITCHEN_MARKUP;
+    return [
+      { name: i.name, price, isVeg: i.isVeg, image: i.image, portion: 'Full' },
+      {
+        name: i.half?.name ?? `${i.name} (Half)`,
+        price: i.half?.price ?? MOMS_MAGIC_KITCHEN_HALF_PRICE(price),
+        isVeg: i.isVeg,
+        image: i.half?.image ?? i.image,
+        portion: 'Half',
+      },
+    ];
+  }),
 }));
