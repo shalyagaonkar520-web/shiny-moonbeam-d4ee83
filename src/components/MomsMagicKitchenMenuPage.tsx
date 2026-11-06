@@ -21,6 +21,7 @@ import { playSound, SOUNDS } from '../utils/audio';
 import { MOMS_MAGIC_KITCHEN_MENU, MOMS_MAGIC_KITCHEN_IMAGE, MomsMagicKitchenMenuItem } from '../data/momsMagicKitchenMenu';
 import { useSEO } from '../utils/seo';
 import DishImage from './DishImage';
+import { useMmkOpen, MMK_CLOSED_MESSAGE, MMK_OPENS_AT_LABEL } from '../lib/mmkHours';
 
 const CATEGORY_ICONS: Record<string, string> = {
   'Fish Main Course': '🐟',
@@ -45,6 +46,8 @@ export default function MomsMagicKitchenMenuPage() {
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   const { items: cartItems, addItem, updateQuantity } = useCartStore();
+  // Opens at 2:30 PM IST; flips by itself at that moment.
+  const mmkOpen = useMmkOpen();
   const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const cartTotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
@@ -52,6 +55,10 @@ export default function MomsMagicKitchenMenuPage() {
     item: MomsMagicKitchenMenuItem,
     categoryTitle: string
   ) => {
+    if (!mmkOpen) {
+      toast.error(MMK_CLOSED_MESSAGE, { id: 'mmk-closed' });
+      return;
+    }
     playSound(SOUNDS.ADD_TO_CART);
     const itemId = `mmk-${item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
     addItem({
@@ -212,6 +219,14 @@ export default function MomsMagicKitchenMenuPage() {
         </div>
       </div>
 
+      {!mmkOpen && (
+        <div className="max-w-4xl mx-auto px-4 mt-4">
+          <div role="status" className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-center text-sm font-black text-rose-700">
+            {MMK_CLOSED_MESSAGE}
+          </div>
+        </div>
+      )}
+
       {/* 3. SEARCH & DIET FILTERS */}
       <div className="max-w-4xl mx-auto px-4 mt-4 space-y-3">
         {/* Search Bar */}
@@ -363,7 +378,7 @@ export default function MomsMagicKitchenMenuPage() {
                                 />
                               </span>
                               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                                {item.isVeg ? 'Veg' : 'Non-Veg'}
+                                {item.isVeg ? 'Veg' : 'Non-Veg'} · {item.portion} Portion
                               </span>
                             </div>
 
@@ -381,7 +396,7 @@ export default function MomsMagicKitchenMenuPage() {
                         </div>
 
                         {/* Dish Image + Add Button */}
-                        <div className="relative w-28 h-28 shrink-0 rounded-2xl overflow-hidden bg-gray-100 border border-gray-100">
+                        <div className="relative w-40 h-28 shrink-0 rounded-2xl overflow-hidden bg-gray-100 border border-gray-100">
                           <DishImage
                             src={item.image}
                             alt={item.name}
@@ -390,7 +405,14 @@ export default function MomsMagicKitchenMenuPage() {
 
                           {/* Add to Cart Overlay Button */}
                           <div className="absolute bottom-1.5 left-2 right-2">
-                            {qty === 0 ? (
+                            {qty === 0 && !mmkOpen ? (
+                              <button
+                                disabled
+                                className="w-full min-h-[36px] py-1.5 bg-white/95 text-gray-500 border border-gray-300 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-md cursor-not-allowed"
+                              >
+                                Opens {MMK_OPENS_AT_LABEL}
+                              </button>
+                            ) : qty === 0 ? (
                               <button
                                 onClick={() => handleAddToCart(item, category.title)}
                                 className="w-full min-h-[36px] py-1.5 bg-white/95 backdrop-blur-xs text-amber-700 border border-amber-600/40 rounded-xl text-xs font-black uppercase tracking-wider shadow-md hover:bg-amber-600 hover:text-white transition-all active:scale-95 flex items-center justify-center gap-1"
@@ -412,6 +434,10 @@ export default function MomsMagicKitchenMenuPage() {
                                 <span className="text-xs font-black">{qty}</span>
                                 <button
                                   onClick={() => {
+                                    if (!mmkOpen) {
+                                      toast.error(MMK_CLOSED_MESSAGE, { id: 'mmk-closed' });
+                                      return;
+                                    }
                                     playSound(SOUNDS.CLICK);
                                     updateQuantity(itemId, qty + 1);
                                   }}
