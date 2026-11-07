@@ -12,7 +12,7 @@ import { ICE_CAKES, NORMAL_CAKES } from '../data/partyItems';
 import { playSound, SOUNDS } from '../utils/audio';
 import { useLocationStore, SERVICE_RADIUS_KM } from '../store/locationStore';
 import { normaliseIndianMobile } from '../lib/pricing';
-import { isMmkOpenNow, isMmkItem } from '../lib/mmkHours';
+import { isMmkOpenNow, isMmkItem, useMmkOpen } from '../lib/mmkHours';
 import {
   STRINGS, LANG_LABEL, INTRO, FOOD_CATEGORIES, CAKE_CATEGORIES,
   dishesFor, type Lang, type Kind, type Diet, type CategoryId, type Dish, type Offer,
@@ -65,13 +65,19 @@ export default function FoodBot({ onClose }: { onClose: () => void }) {
   const isOrderable = useDishOrderable();
   useEffect(() => useLiveHotelStore.getState().subscribe(), []);
 
+  // Moms Magic Kitchen is suggested only while live (after 2:30 PM IST and
+  // switched on in the panel), as on the home page.
+  const mmkOpen = useMmkOpen();
+  const mmkPanelOpen = useLiveHotelStore((s) => s.isOpen('moms_magic_kitchen'));
+  const mmkLive = mmkOpen && mmkPanelOpen;
+
   // The same dishes the home page lists, minus anything the kitchen switched off.
   const foodProducts = useMemo(
     () => [
       ...menuItems.filter((p) => isOrderable('al_amin', p.name)),
-      ...PARTNER_HOTEL_PRODUCTS.filter((p) => isOrderable(p.hotelId, p.name)),
+      ...PARTNER_HOTEL_PRODUCTS.filter((p) => isOrderable(p.hotelId, p.name) && (mmkLive || p.hotelId !== 'moms_magic_kitchen')),
     ] as Offer['product'][],
-    [menuItems, isOrderable]
+    [menuItems, isOrderable, mmkLive]
   );
 
   const t = STRINGS[state.lang || 'en'];

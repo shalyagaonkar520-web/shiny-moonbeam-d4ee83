@@ -202,6 +202,10 @@ export default function LandingPage() {
   useEffect(() => useLiveHotelStore.getState().subscribe(), []);
   // Moms Magic Kitchen opens at 2:30 PM IST; its card shows closed until then.
   const mmkOpen = useMmkOpen();
+  // "Live" = after 2:30 PM IST and switched on in the panel. Until then its
+  // dishes are not suggested anywhere on this screen; other hotels' are.
+  const mmkPanelOpen = useLiveHotelStore((s) => s.isOpen(GOLD_HOTEL_ID));
+  const mmkLive = mmkOpen && mmkPanelOpen;
 
   const handleHotelClick = (hotel: typeof PARTNER_HOTELS[0]) => {
     if (!isHotelOpen(hotel.id)) {
@@ -289,14 +293,16 @@ export default function LandingPage() {
   const isOrderable = useDishOrderable();
   const allProducts = useMemo(
     () => {
-      const partner = PARTNER_HOTEL_PRODUCTS.filter((item) => isOrderable(item.hotelId, item.name));
+      const partner = PARTNER_HOTEL_PRODUCTS.filter(
+        (item) => isOrderable(item.hotelId, item.name) && (mmkLive || item.hotelId !== GOLD_HOTEL_ID)
+      );
       return [
         ...partner.filter((item) => item.hotelId === GOLD_HOTEL_ID),
         ...menuItems.filter((item) => isOrderable('al_amin', item.name)),
         ...partner.filter((item) => item.hotelId !== GOLD_HOTEL_ID),
       ];
     },
-    [menuItems, isOrderable]
+    [menuItems, isOrderable, mmkLive]
   );
 
   /** Hotel name to print on a card, or null for Al Amin / Minto items. */
