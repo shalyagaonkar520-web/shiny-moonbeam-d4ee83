@@ -9,6 +9,7 @@ import { useAddMenswear } from '../lib/useAddMenswear';
 import { MENSWEAR_SHOP_NAME } from '../data/mensWear';
 import { useMenswearCatalog } from '../store/menswearStore';
 import MenswearPrice from './MenswearPrice';
+import SizeScratch from './SizeScratch';
 
 /**
  * One product: photo gallery, size, and add to the same cart as food.
@@ -141,7 +142,7 @@ export default function MenswearProductPage() {
                       onClick={() => setSize(s)}
                       className={`min-w-[52px] h-11 px-3 rounded-xl border text-sm font-bold ${
                         out
-                          ? 'border-gray-200 text-gray-300 line-through cursor-not-allowed'
+                          ? 'relative overflow-hidden border-gray-300 bg-gray-50 text-gray-400 cursor-not-allowed'
                           : size === s
                             ? 'border-[#e11d48] bg-rose-50 text-[#e11d48] cursor-pointer'
                             : 'border-gray-300 text-gray-800 hover:border-gray-500 cursor-pointer'
@@ -149,11 +150,16 @@ export default function MenswearProductPage() {
                       aria-label={out ? `Size ${s}, sold out` : `Size ${s}`}
                     >
                       {s}
+                      {out && <SizeScratch />}
                     </button>
                   );
                 })}
               </div>
-              {allSoldOut(product) && <p className="text-xs font-bold text-rose-600 mt-2">All sizes are sold out right now.</p>}
+              {allSoldOut(product) ? (
+                <p className="text-xs font-bold text-rose-600 mt-2">All sizes are sold out right now.</p>
+              ) : product.sizes.some((s) => isSoldOut(product, s)) ? (
+                <p className="text-[11px] font-semibold text-gray-500 mt-2">Crossed-out sizes are sold out</p>
+              ) : null}
               <div className="hidden md:grid grid-cols-2 gap-3 mt-5">{buttons}</div>
             </section>
 

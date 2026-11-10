@@ -26,17 +26,18 @@ export type MenswearCategory = (typeof MENSWEAR_CATEGORIES)[number];
 
 /**
  * Selling price per category. Jeans, jackets, hoodies and formal pants are
- * the owner's price plus Rs 100, then set to end in 49/99 (10 Nov 2026).
+ * the owner's price plus Rs 100, set to end in 49/99 (10 Nov 2026), then Rs 40
+ * off every item (10 Nov 2026). The admin page can override any one item.
  */
 export const CATEGORY_PRICE: Record<MenswearCategory, number> = {
-  'Jerseys': 199,
-  'T-Shirts & Polos': 399,
-  'Casual Shirts': 449,
-  'Formal Shirts': 499,
-  'Hoodies & Sweatshirts': 449,
-  'Trousers': 449,
-  'Jeans & Cargos': 599,
-  'Jackets': 549,
+  'Jerseys': 159,
+  'T-Shirts & Polos': 359,
+  'Casual Shirts': 409,
+  'Formal Shirts': 459,
+  'Hoodies & Sweatshirts': 409,
+  'Trousers': 409,
+  'Jeans & Cargos': 559,
+  'Jackets': 509,
 };
 
 export const LETTER_SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
@@ -143,14 +144,14 @@ export function menswearItemId(slug: string, size: MenswearSize): string {
 
 /**
  * The struck-through "MRP" shown next to each price: the selling price
- * marked up so it reads as about 80% off, rounded to end in 99. The selling
- * price never changes; only this label does. Set SHOW_MRP false to drop it.
+ * marked up so it reads as 40% off, to the nearest rupee (rounding to a
+ * 99 ending pushed the shown discount off 40%). The selling price never
+ * changes; only this label does. Set SHOW_MRP false to drop it.
  */
 export const MENSWEAR_SHOW_MRP = true;
-const MRP_DISCOUNT = 0.8;
+const MRP_DISCOUNT = 0.4;
 export function menswearMrp(price: number): number {
-  // Rounded first: 500 / (1 - 0.8) is 2500.0000000000005 in floating point.
-  return Math.ceil(Math.round(price / (1 - MRP_DISCOUNT)) / 100) * 100 - 1;
+  return Math.round(price / (1 - MRP_DISCOUNT));
 }
 /** Percent off, worked out from the two numbers actually shown. */
 export function menswearOffPct(price: number): number {
