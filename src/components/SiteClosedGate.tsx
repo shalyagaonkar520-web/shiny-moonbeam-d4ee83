@@ -32,6 +32,20 @@ export default function SiteClosedGate({ children }: { children: React.ReactNode
 
   if (!closed) return <>{children}</>;
 
+  // Local preview (npm run dev) keeps working while the live site is shut, so
+  // new screens can be checked on a closed day. Production builds never take
+  // this branch.
+  if (import.meta.env.DEV) {
+    return (
+      <>
+        <div className="fixed top-0 inset-x-0 z-[200] bg-amber-400 text-amber-950 text-[11px] font-bold text-center py-1">
+          Preview: the live site is closed right now
+        </div>
+        {children}
+      </>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#fff1f4] via-[#fff8fa] to-white px-5 text-center">
       <div className="max-w-sm space-y-4">
