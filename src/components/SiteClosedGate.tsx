@@ -38,8 +38,8 @@ export default function SiteClosedGate({ children }: { children: React.ReactNode
   if (import.meta.env.DEV) {
     return (
       <>
-        <div className="fixed top-0 inset-x-0 z-[200] bg-amber-400 text-amber-950 text-[11px] font-bold text-center py-1">
-          Preview: the live site is closed right now
+        <div className="fixed bottom-[76px] left-2 z-[200] pointer-events-none bg-amber-400/90 text-amber-950 text-[10px] font-bold rounded-full px-3 py-0.5 shadow">
+          Preview · live site closed
         </div>
         {children}
       </>

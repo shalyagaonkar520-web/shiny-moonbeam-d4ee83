@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Banknote, ChevronLeft, RotateCcw, ShoppingBag, Zap } from 'lucide-react';
+import { Banknote, ChevronLeft, RotateCcw, Shirt, ShoppingBag, Zap } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useCartStore } from '../store/cartStore';
 import { useLocationStore } from '../store/locationStore';
@@ -10,7 +10,6 @@ import {
   MENSWEAR_PRODUCTS,
   MENSWEAR_SHOP_ID,
   MENSWEAR_SHOP_NAME,
-  MENSWEAR_SIZES,
   MenswearSize,
   findMenswearProduct,
   menswearItemId,
@@ -96,7 +95,10 @@ export default function MenswearProductPage() {
         <div className="bg-white">
           <div ref={gallery} onScroll={onScroll} className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar">
             {product.images.map((src, i) => (
-              <img key={src} src={src} alt={`${product.name}, photo ${i + 1}`} className="w-full shrink-0 snap-center aspect-[3/4] object-cover" />
+              <div key={src} className="relative w-full shrink-0 snap-center aspect-[3/4] bg-rose-50/60">
+                <Shirt className="absolute inset-0 m-auto w-14 h-14 text-rose-200 animate-pulse" />
+                <img src={src} alt={`${product.name}, photo ${i + 1}`} className="relative w-full h-full object-cover" />
+              </div>
             ))}
           </div>
           {product.images.length > 1 && (
@@ -116,9 +118,9 @@ export default function MenswearProductPage() {
         </section>
 
         <section className="bg-white mt-2 px-4 py-4">
-          <p className="text-sm font-black text-gray-900 mb-2.5">Select size</p>
+          <p className="text-sm font-black text-gray-900 mb-2.5">{/^\d/.test(product.sizes[0]) ? 'Select waist size' : 'Select size'}</p>
           <div className="flex gap-2 flex-wrap">
-            {MENSWEAR_SIZES.map((s) => (
+            {product.sizes.map((s) => (
               <button
                 key={s}
                 onClick={() => setSize(s)}
@@ -166,7 +168,10 @@ export default function MenswearProductPage() {
                   onClick={() => { setSize(null); setPhoto(0); gallery.current?.scrollTo({ left: 0 }); navigate(`/menswear/${p.slug}`); window.scrollTo({ top: 0 }); }}
                   className="w-32 shrink-0 text-left cursor-pointer"
                 >
-                  <img src={p.images[0]} alt={p.name} loading="lazy" className="w-32 aspect-[3/4] object-cover rounded-xl bg-gray-100" />
+                  <div className="relative w-32 aspect-[3/4] rounded-xl overflow-hidden bg-rose-50/60">
+                    <Shirt className="absolute inset-0 m-auto w-8 h-8 text-rose-200 animate-pulse" />
+                    <img src={p.images[0]} alt={p.name} loading="lazy" className="relative w-full h-full object-cover" />
+                  </div>
                   <p className="text-[11px] font-bold text-gray-900 line-clamp-2 mt-1">{p.name}</p>
                   <p className="text-xs font-black text-gray-900">₹{p.price}</p>
                 </button>

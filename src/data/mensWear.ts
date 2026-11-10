@@ -3,13 +3,13 @@
 // Photos are the shop's own (public/menswear/, cover first). Each product is
 // one colour; its other photos are the back or a close-up of the same piece.
 //
-// PRICES ARE PROVISIONAL. The shop's banner says "starts from Rs 199" but no
-// per-item prices were given, so each category has one price below. Change a
-// category here, or give a product its own `price`, and rebuild.
+// PRICES: the owner's prices (5 Nov 2026) plus Rs 100 on each: baggy jeans
+// 500, jackets 450, hoodies 400, formal pants 400. Shirts, T-shirts and
+// jerseys had no price given and are still provisional. Change a category
+// here, or give a product its own `price`, and rebuild.
 
 export const MENSWEAR_SHOP_ID = 'mintoo_menswear';
 export const MENSWEAR_SHOP_NAME = "Mintoo Men's Wear";
-export const MENSWEAR_BANNER = '/menswear/banner-opening-soon.webp';
 /** Item ids start with this, which is how an order line is traced to the shop. */
 export const MENSWEAR_ID_PREFIX = 'mw-';
 
@@ -25,19 +25,40 @@ export const MENSWEAR_CATEGORIES = [
 ] as const;
 export type MenswearCategory = (typeof MENSWEAR_CATEGORIES)[number];
 
-export const CATEGORY_PRICE: Record<MenswearCategory, number> = {
-  'Jerseys': 199,
-  'T-Shirts & Polos': 399,
-  'Casual Shirts': 449,
-  'Formal Shirts': 499,
-  'Hoodies & Sweatshirts': 599,
-  'Trousers': 599,
-  'Jeans & Cargos': 699,
-  'Jackets': 999,
+/** What the owner charges per category, before MARKUP. */
+const BASE_PRICE: Record<MenswearCategory, number> = {
+  'Jerseys': 99,
+  'T-Shirts & Polos': 299,
+  'Casual Shirts': 349,
+  'Formal Shirts': 399,
+  'Hoodies & Sweatshirts': 400,
+  'Trousers': 400,
+  'Jeans & Cargos': 500,
+  'Jackets': 450,
+};
+/** Added to every price, like the food menus' markup. */
+export const MENSWEAR_MARKUP = 100;
+
+export const CATEGORY_PRICE = Object.fromEntries(
+  Object.entries(BASE_PRICE).map(([c, p]) => [c, p + MENSWEAR_MARKUP])
+) as Record<MenswearCategory, number>;
+
+const LETTER_SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
+const WAIST_SIZES = ['28', '30', '32', '34', '36'];
+
+/** Sizes stocked per category: pants by waist, jackets only L to XXL. */
+export const CATEGORY_SIZES: Record<MenswearCategory, readonly string[]> = {
+  'Jerseys': LETTER_SIZES,
+  'T-Shirts & Polos': LETTER_SIZES,
+  'Casual Shirts': LETTER_SIZES,
+  'Formal Shirts': LETTER_SIZES,
+  'Hoodies & Sweatshirts': LETTER_SIZES,
+  'Trousers': WAIST_SIZES,
+  'Jeans & Cargos': WAIST_SIZES,
+  'Jackets': ['L', 'XL', 'XXL'],
 };
 
-export const MENSWEAR_SIZES = ['S', 'M', 'L', 'XL', 'XXL'] as const;
-export type MenswearSize = (typeof MENSWEAR_SIZES)[number];
+export type MenswearSize = string;
 
 interface ProductRow {
   slug: string;
@@ -50,6 +71,7 @@ interface ProductRow {
 
 export interface MenswearProduct extends ProductRow {
   price: number;
+  sizes: readonly string[];
 }
 
 const ROWS: ProductRow[] = [
@@ -108,12 +130,19 @@ const ROWS: ProductRow[] = [
   { slug: 'red-number-19-football-jersey', name: "Red No. 19 Football Jersey", category: 'Jerseys', images: ['/menswear/red-number-19-football-jersey-1.webp'] },
 ];
 
-export const MENSWEAR_PRODUCTS: MenswearProduct[] = ROWS.map((r) => ({ ...r, price: r.price ?? CATEGORY_PRICE[r.category] }));
+export const MENSWEAR_PRODUCTS: MenswearProduct[] = ROWS.map((r) => ({
+  ...r,
+  price: r.price ?? CATEGORY_PRICE[r.category],
+  sizes: CATEGORY_SIZES[r.category],
+}));
 
 /** Cart id for one product in one size, e.g. `mw-blue-jeans-l`. */
 export function menswearItemId(slug: string, size: MenswearSize): string {
   return `${MENSWEAR_ID_PREFIX}${slug}-${size.toLowerCase()}`;
 }
+
+/** Cheapest item, for "from Rs X" labels. */
+export const MENSWEAR_MIN_PRICE = Math.min(...MENSWEAR_PRODUCTS.map((p) => p.price));
 
 export function findMenswearProduct(slug: string | undefined): MenswearProduct | undefined {
   return MENSWEAR_PRODUCTS.find((p) => p.slug === slug);

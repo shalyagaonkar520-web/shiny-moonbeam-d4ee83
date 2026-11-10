@@ -31,6 +31,7 @@ import FoodBotLauncher from './components/FoodBotLauncher';
 const LocationPicker = lazy(() => import('./components/LocationPicker'));
 const InstallAppModal = lazy(() => import('./components/InstallAppModal'));
 import FoodLoader from './components/FoodLoader';
+import ShirtLoader from './components/ShirtLoader';
 import OperatingHoursGate from './components/OperatingHoursGate';
 import { useInstallModalStore } from './store/installModalStore';
 const FeedbackPage = lazy(() => import('./components/FeedbackPage'));
@@ -221,8 +222,8 @@ export default function App() {
                   <Route path="/profile" element={<ProfilePage />} />
                   {/* Tracking is locked for now: both routes show "coming soon".
                       Put back <TrackOrderPage /> and <TrackingPage /> to reopen it. */}
-                  <Route path="/menswear" element={<MenswearPage />} />
-                  <Route path="/menswear/:slug" element={<MenswearProductPage />} />
+                  <Route path="/menswear" element={<Suspense fallback={<ShirtLoader />}><MenswearPage /></Suspense>} />
+                  <Route path="/menswear/:slug" element={<Suspense fallback={<ShirtLoader />}><MenswearProductPage /></Suspense>} />
                   <Route path="/track" element={<TrackComingSoon />} />
                   <Route path="/track/:orderId" element={<TrackComingSoon />} />
                   <Route path="/privacy" element={<PrivacyPage />} />

@@ -22,7 +22,7 @@ import { PARTNER_HOTEL_PRODUCTS } from './src/data/partnerHotelItems';
 import { HOTEL_AL_AMIN_MENU } from './src/data/hotelAlAminMenu';
 import { ICE_CAKES, NORMAL_CAKES, PARTY_ITEMS, SNACKS } from './src/data/partyItems';
 import { MOMS_MAGIC_KITCHEN_MENU_WITH_HALVES, mmkItemId } from './src/data/momsMagicKitchenMenu';
-import { MENSWEAR_PRODUCTS, MENSWEAR_SIZES, MENSWEAR_SHOP_ID, menswearItemId } from './src/data/mensWear';
+import { MENSWEAR_PRODUCTS, MENSWEAR_SHOP_ID, menswearItemId } from './src/data/mensWear';
 
 const out = {};
 const add = (id, name, price, hotelId, half) => {
@@ -39,7 +39,7 @@ MOMS_MAGIC_KITCHEN_MENU_WITH_HALVES.forEach((c) => c.items.forEach((i) => {
   if (i.portion === 'Half') add(mmkItemId(i.name), i.name, i.price, 'moms_magic_kitchen', true);
 }));
 // Men's wear: one line per product per size, as the cart stores them.
-MENSWEAR_PRODUCTS.forEach((p) => MENSWEAR_SIZES.forEach((s) => add(menswearItemId(p.slug, s), p.name + ' (Size ' + s + ')', p.price, MENSWEAR_SHOP_ID)));
+MENSWEAR_PRODUCTS.forEach((p) => p.sizes.forEach((s) => add(menswearItemId(p.slug, s), p.name + ' (Size ' + s + ')', p.price, MENSWEAR_SHOP_ID)));
 export default out;
 `;
 

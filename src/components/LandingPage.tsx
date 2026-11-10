@@ -23,6 +23,7 @@ import { PARTNER_HOTEL_PRODUCTS } from '../data/partnerHotelItems';
 import { useDishOrderable } from '../store/dishAvailabilityStore';
 import { useMmkOpen, isMmkOpenNow, isMmkItem, MMK_CLOSED_MESSAGE, MMK_OPENS_AT_LABEL } from '../lib/mmkHours';
 import { isInYellapur } from '../lib/yellapur';
+import { MENSWEAR_MIN_PRICE } from '../data/mensWear';
 
 const ROTATING_SEARCH_PLACEHOLDERS = [
   'Search "Chicken Dum Biryani"',
@@ -930,7 +931,7 @@ export default function LandingPage() {
                   </span>
                 </div>
                 <p className="text-xs text-gray-600 font-medium leading-snug mt-0.5">
-                  From ₹199 · 10-min delivery · 2-day returns
+                  From ₹{MENSWEAR_MIN_PRICE} · 10-min delivery · 2-day returns
                 </p>
               </div>
               <ChevronRight className="w-5 h-5 text-indigo-600 shrink-0" />

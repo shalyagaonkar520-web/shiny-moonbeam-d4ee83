@@ -947,6 +947,7 @@ export default function Checkout() {
                     <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 border border-gray-100 shrink-0">
                       <DishImage src={(item as any).image} alt={item.name} />
                     </div>
+                    {(item as any).type !== 'fashion' && (
                     <span
                       className={`w-3.5 h-3.5 rounded-[4px] border flex items-center justify-center shrink-0 mt-0.5 ${
                         item.isVeg ? 'border-emerald-600' : 'border-rose-600'
@@ -958,6 +959,7 @@ export default function Checkout() {
                         }`}
                       />
                     </span>
+                    )}
 
                     <div className="flex-1 min-w-0">
                       <h4 className="text-xs sm:text-[13px] font-bold text-gray-900 leading-snug truncate">
@@ -1129,7 +1131,7 @@ export default function Checkout() {
                 className="w-4 h-4 rounded accent-[#e11d48] cursor-pointer"
               />
               <span className="text-xs font-bold text-gray-800">
-                Cooking request (e.g. less spicy, extra gravy)
+                {onlyClothing ? 'Note for the shop (e.g. colour or fit)' : 'Cooking request (e.g. less spicy, extra gravy)'}
               </span>
             </label>
 
@@ -1138,7 +1140,7 @@ export default function Checkout() {
                 rows={2}
                 value={formData.additionalMessage}
                 onChange={(e) => setFormData({ ...formData, additionalMessage: e.target.value })}
-                placeholder="Write instructions for the chef..."
+                placeholder={onlyClothing ? "Anything the shop should know..." : "Write instructions for the chef..."}
                 className="mt-2.5 w-full p-3 rounded-xl border border-gray-200 text-xs text-gray-800 focus:outline-none focus:ring-2 focus:ring-rose-400 bg-gray-50 resize-none font-medium"
               />
             )}

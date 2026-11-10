@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, MapPin, RotateCcw, Search, ShoppingBag, Zap, X } from 'lucide-react';
+import { ChevronLeft, MapPin, RotateCcw, Search, Shirt, ShoppingBag, Zap, X } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useLocationStore } from '../store/locationStore';
 import { useSEO } from '../utils/seo';
 import { isInYellapur } from '../lib/yellapur';
 import {
-  MENSWEAR_BANNER,
   MENSWEAR_CATEGORIES,
+  MENSWEAR_MIN_PRICE,
   MENSWEAR_PRODUCTS,
   MENSWEAR_SHOP_NAME,
   MenswearCategory,
@@ -41,7 +41,7 @@ export default function MenswearPage() {
   }, [category, sort, query]);
 
   const inYellapur = isInYellapur(deliveryLocation);
-  const minPrice = Math.min(...MENSWEAR_PRODUCTS.map((p) => p.price));
+  const minPrice = MENSWEAR_MIN_PRICE;
 
   return (
     <div className="min-h-screen bg-[#f6f6f7] pb-36">
@@ -69,24 +69,19 @@ export default function MenswearPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-3 pt-3 space-y-3">
-        <img src={MENSWEAR_BANNER} alt="Mintoo Men's Wear: starts from Rs 199, 10 minute delivery, 2 day returns" className="w-full rounded-2xl" />
-
-        <div className="grid grid-cols-2 gap-2">
-          <div className="bg-white rounded-2xl border border-gray-100 p-3 flex items-center gap-2">
-            <Zap className="w-5 h-5 text-amber-500 shrink-0" />
-            <div>
-              <p className="text-xs font-black text-gray-900">10-min delivery</p>
-              <p className="text-[10px] text-gray-500">Anywhere in Yellapur</p>
-            </div>
+        <section className="rounded-3xl bg-gradient-to-br from-gray-900 via-gray-800 to-indigo-900 text-white p-4">
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-200">New in Yellapur</p>
+          <h2 className="text-xl font-black leading-tight mt-1">Fresh styles at your door in 10 minutes</h2>
+          <p className="text-xs text-gray-300 mt-1">Shirts, jeans, hoodies and jackets from ₹{minPrice}</p>
+          <div className="flex flex-wrap gap-2 mt-3">
+            <span className="inline-flex items-center gap-1.5 bg-white/10 rounded-full px-3 py-1.5 text-[11px] font-bold">
+              <Zap className="w-3.5 h-3.5 text-amber-300" /> 10-min delivery
+            </span>
+            <span className="inline-flex items-center gap-1.5 bg-white/10 rounded-full px-3 py-1.5 text-[11px] font-bold">
+              <RotateCcw className="w-3.5 h-3.5 text-emerald-300" /> 2-day returns
+            </span>
           </div>
-          <div className="bg-white rounded-2xl border border-gray-100 p-3 flex items-center gap-2">
-            <RotateCcw className="w-5 h-5 text-emerald-600 shrink-0" />
-            <div>
-              <p className="text-xs font-black text-gray-900">2-day returns</p>
-              <p className="text-[10px] text-gray-500">Unworn, tags on</p>
-            </div>
-          </div>
-        </div>
+        </section>
 
         {!inYellapur ? (
           <div className="bg-white rounded-3xl border border-gray-100 p-6 text-center space-y-3">
@@ -156,8 +151,9 @@ export default function MenswearPage() {
                     onClick={() => navigate(`/menswear/${p.slug}`)}
                     className="bg-white rounded-2xl overflow-hidden border border-gray-100 text-left active:scale-[0.98] transition-transform cursor-pointer"
                   >
-                    <div className="aspect-[3/4] bg-gray-100">
-                      <img src={p.images[0]} alt={p.name} loading="lazy" className="w-full h-full object-cover" />
+                    <div className="relative aspect-[3/4] bg-rose-50/60">
+                      <Shirt className="absolute inset-0 m-auto w-10 h-10 text-rose-200 animate-pulse" />
+                      <img src={p.images[0]} alt={p.name} loading="lazy" className="relative w-full h-full object-cover" />
                     </div>
                     <div className="p-2.5">
                       <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">{p.category}</p>
