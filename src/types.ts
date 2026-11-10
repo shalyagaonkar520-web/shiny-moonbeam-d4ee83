@@ -30,7 +30,7 @@ export interface Product {
   image: string;
   category: string;
   subcategory?: string;
-  type: 'food' | 'grocery' | 'milk';
+  type: 'food' | 'grocery' | 'milk' | 'fashion';
   description?: string;
   rating?: number;
   originalPrice?: number;
@@ -73,7 +73,7 @@ export interface Order {
   address: string;
   items: CartItem[];
   total: number;
-  type: 'food' | 'grocery' | 'milk';
+  type: 'food' | 'grocery' | 'milk' | 'fashion';
   status: 'pending' | 'preparing' | 'ready' | 'picked_up' | 'delivered' | 'completed' | 'cancelled';
   prepTime?: string; // e.g. "20 mins"
   createdAt: any;

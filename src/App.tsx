@@ -44,6 +44,8 @@ const LuckyWheelPage = lazy(() => import('./components/LuckyWheelPage'));
 const AuthPage = lazy(() => import('./components/AuthPage'));
 const TrackOrderPage = lazy(() => import('./components/TrackOrderPage'));
 const TrackComingSoon = lazy(() => import('./components/TrackComingSoon'));
+const MenswearPage = lazy(() => import('./components/MenswearPage'));
+const MenswearProductPage = lazy(() => import('./components/MenswearProductPage'));
 const PrivacyPage = lazy(() => import('./components/PrivacyPage'));
 const DeleteAccountPage = lazy(() => import('./components/DeleteAccountPage'));
 const AddressesPage = lazy(() => import('./components/AddressesPage'));
@@ -219,6 +221,8 @@ export default function App() {
                   <Route path="/profile" element={<ProfilePage />} />
                   {/* Tracking is locked for now: both routes show "coming soon".
                       Put back <TrackOrderPage /> and <TrackingPage /> to reopen it. */}
+                  <Route path="/menswear" element={<MenswearPage />} />
+                  <Route path="/menswear/:slug" element={<MenswearProductPage />} />
                   <Route path="/track" element={<TrackComingSoon />} />
                   <Route path="/track/:orderId" element={<TrackComingSoon />} />
                   <Route path="/privacy" element={<PrivacyPage />} />

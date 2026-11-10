@@ -156,6 +156,8 @@ export default function Checkout() {
     ? [...bulkItems, ...cartItems.map((item) => ({ ...item, finalQuantity: item.quantity } as any))]
     : cartItems;
   const subtotal = isBulkOrder ? getBulkTotal() + cartTotal : cartTotal;
+  // Cutlery makes no sense for a cart of only men's wear.
+  const onlyClothing = activeItems.length > 0 && activeItems.every((i: any) => i.type === 'fashion');
 
   const distanceKm = deliveryLocation?.distance ?? 0;
   const baseDeliveryCharge = calculateDeliveryCharge(distanceKm);
@@ -1104,6 +1106,7 @@ export default function Checkout() {
 
         {/* 5. CHECKBOXES (NEED CUTLERY & COOKING REQUEST) */}
         <div className="bg-white rounded-[24px] p-4 border border-rose-100/90 shadow-sm space-y-3 text-left">
+          {!onlyClothing && (
           <label className="flex items-center gap-3 cursor-pointer select-none">
             <input
               type="checkbox"
@@ -1115,6 +1118,7 @@ export default function Checkout() {
               Need cutlery (Help keep our planet green)
             </span>
           </label>
+          )}
 
           <div>
             <label className="flex items-center gap-3 cursor-pointer select-none">

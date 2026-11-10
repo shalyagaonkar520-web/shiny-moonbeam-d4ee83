@@ -22,6 +22,7 @@ import DishImage from './DishImage';
 import { PARTNER_HOTEL_PRODUCTS } from '../data/partnerHotelItems';
 import { useDishOrderable } from '../store/dishAvailabilityStore';
 import { useMmkOpen, isMmkOpenNow, isMmkItem, MMK_CLOSED_MESSAGE, MMK_OPENS_AT_LABEL } from '../lib/mmkHours';
+import { isInYellapur } from '../lib/yellapur';
 
 const ROTATING_SEARCH_PLACEHOLDERS = [
   'Search "Chicken Dum Biryani"',
@@ -910,6 +911,32 @@ export default function LandingPage() {
             })}
           </div>
         </section>
+
+        {/* 2a. MINTOO MEN'S WEAR ENTRY. Yellapur only, like the shop itself. */}
+        {isInYellapur(deliveryLocation) && (
+          <section>
+            <button
+              onClick={() => navigate('/menswear')}
+              className="w-full flex items-center gap-3 text-left bg-gradient-to-r from-indigo-50 to-violet-50/60 border border-indigo-100 rounded-3xl p-3.5 active:scale-[0.99] transition-transform cursor-pointer"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-white border border-indigo-100 flex items-center justify-center text-2xl shrink-0">
+                👕
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-gray-900 font-black text-base tracking-tight">Mintoo Men's Wear</h2>
+                  <span className="text-[9px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full">
+                    New
+                  </span>
+                </div>
+                <p className="text-xs text-gray-600 font-medium leading-snug mt-0.5">
+                  From ₹199 · 10-min delivery · 2-day returns
+                </p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-indigo-600 shrink-0" />
+            </button>
+          </section>
+        )}
 
         {/* 2b. MM CLEAN ENTRY. Deliberately drawn, not photographed: the home
             page should not pay for a cross-origin image for a section most
