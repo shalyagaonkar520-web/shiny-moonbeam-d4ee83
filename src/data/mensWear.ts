@@ -25,19 +25,19 @@ export const MENSWEAR_CATEGORIES = [
 export type MenswearCategory = (typeof MENSWEAR_CATEGORIES)[number];
 
 /**
- * Selling price per category. Jeans, jackets, hoodies and formal pants are
- * the owner's price plus Rs 100, set to end in 49/99 (10 Nov 2026), then Rs 40
- * off every item except jerseys, which stay at Rs 199 (10 Nov 2026). The admin page can override any one item.
+ * Selling price per category, history on 10 Nov 2026: owner's price + Rs 100
+ * (ending 49/99), then Rs 40 off everything but jerseys, then Rs 100 added to
+ * every item. The admin page can override any one item.
  */
 export const CATEGORY_PRICE: Record<MenswearCategory, number> = {
-  'Jerseys': 199,
-  'T-Shirts & Polos': 359,
-  'Casual Shirts': 409,
-  'Formal Shirts': 459,
-  'Hoodies & Sweatshirts': 409,
-  'Trousers': 409,
-  'Jeans & Cargos': 559,
-  'Jackets': 509,
+  'Jerseys': 299,
+  'T-Shirts & Polos': 459,
+  'Casual Shirts': 509,
+  'Formal Shirts': 559,
+  'Hoodies & Sweatshirts': 509,
+  'Trousers': 509,
+  'Jeans & Cargos': 659,
+  'Jackets': 609,
 };
 
 export const LETTER_SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
