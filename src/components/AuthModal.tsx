@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mail, Lock, User, Phone, Eye, EyeOff, Sparkles, LogIn, CheckCircle2, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
+import { friendlyAuthError } from '../lib/authErrors';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -10,36 +11,7 @@ interface AuthModalProps {
   defaultMode?: 'signin' | 'signup';
 }
 
-function getFriendlyErrorMessage(err: any): string {
-  const code = err?.code || '';
-  const msg = err?.message || '';
-
-  if (code.includes('invalid-credential') || code.includes('wrong-password') || code.includes('user-not-found')) {
-    return 'Incorrect email or password. Please try again or sign in with Google.';
-  }
-  if (code.includes('email-already-in-use')) {
-    return 'An account already exists with this email. Please switch to Sign In above!';
-  }
-  if (code.includes('weak-password')) {
-    return 'Password must be at least 6 characters long.';
-  }
-  if (code.includes('invalid-email')) {
-    return 'Please enter a valid email address.';
-  }
-  if (code.includes('popup-closed-by-user')) {
-    return 'Google Sign-In was cancelled.';
-  }
-  if (code.includes('unauthorized-domain')) {
-    return 'Google Sign-In is unavailable on this domain. Please sign in with your email below.';
-  }
-  if (code.includes('network-request-failed')) {
-    return 'Network connection issue. Please check your internet connection.';
-  }
-  if (code.includes('too-many-requests')) {
-    return 'Too many attempts. Please wait a moment and try again.';
-  }
-  return msg || 'Authentication failed. Please check your credentials.';
-}
+const getFriendlyErrorMessage = friendlyAuthError;
 
 export default function AuthModal({ isOpen, onClose, defaultMode = 'signin' }: AuthModalProps) {
   const [mode, setMode] = useState<'signin' | 'signup'>(defaultMode);

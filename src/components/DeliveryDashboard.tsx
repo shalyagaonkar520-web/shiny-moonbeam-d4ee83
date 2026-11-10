@@ -34,6 +34,7 @@ import {
 import { auth, db } from '../firebase';
 import toast from 'react-hot-toast';
 import { useSEO } from '../utils/seo';
+import { friendlyAuthError } from '../lib/authErrors';
 
 const GPS_MIN_INTERVAL_MS = 15000;
 const GPS_MIN_DISTANCE_M = 50;
@@ -196,7 +197,7 @@ export default function DeliveryDashboard() {
       await signInWithEmailAndPassword(auth, email.trim(), password.trim());
       toast.success("Rider session initialized! 🛵");
     } catch (error: any) {
-      toast.error(error.message || "Invalid credentials.");
+      toast.error(friendlyAuthError(error));
     } finally {
       setLoginLoading(false);
     }

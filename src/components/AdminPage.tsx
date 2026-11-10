@@ -40,6 +40,7 @@ import { signInWithEmailAndPassword, signInWithCustomToken, signOut } from 'fire
 import AdminMenuManager from './AdminMenuManager';
 import AdminCouponManager from './AdminCouponManager';
 import { getItemHotel } from '../utils/orderHotels';
+import { friendlyAuthError } from '../lib/authErrors';
 
 // Live order window: everything from the last few days plus any order that is
 // still open, capped so a busy year cannot turn every admin open into tens of
@@ -816,7 +817,7 @@ export default function AdminPage() {
       localStorage.setItem('mintoo_admin_token', await firebaseUser.getIdToken());
       toast.success(`Welcome back, ${adminUser.name}!`);
     } catch (err: any) {
-      toast.error(err.message || 'Invalid admin credentials');
+      toast.error(friendlyAuthError(err));
     } finally {
       setIsLoggingIn(false);
     }
