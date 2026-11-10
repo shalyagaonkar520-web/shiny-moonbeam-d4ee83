@@ -27,10 +27,10 @@ export type MenswearCategory = (typeof MENSWEAR_CATEGORIES)[number];
 /**
  * Selling price per category. Jeans, jackets, hoodies and formal pants are
  * the owner's price plus Rs 100, set to end in 49/99 (10 Nov 2026), then Rs 40
- * off every item (10 Nov 2026). The admin page can override any one item.
+ * off every item except jerseys, which stay at Rs 199 (10 Nov 2026). The admin page can override any one item.
  */
 export const CATEGORY_PRICE: Record<MenswearCategory, number> = {
-  'Jerseys': 159,
+  'Jerseys': 199,
   'T-Shirts & Polos': 359,
   'Casual Shirts': 409,
   'Formal Shirts': 459,
