@@ -4,13 +4,12 @@ import { ChevronLeft, MapPin, Plus, RotateCcw, Search, Shirt, ShoppingBag, Zap, 
 import MenswearPrice from './MenswearPrice';
 import MenswearSizeSheet from './MenswearSizeSheet';
 import { useCartStore } from '../store/cartStore';
+import { useMenswearCatalog } from '../store/menswearStore';
 import { useLocationStore } from '../store/locationStore';
 import { useSEO } from '../utils/seo';
 import { isInYellapur } from '../lib/yellapur';
 import {
   MENSWEAR_CATEGORIES,
-  MENSWEAR_MIN_PRICE,
-  MENSWEAR_PRODUCTS,
   MENSWEAR_SHOP_NAME,
   MenswearCategory,
   MenswearProduct,
@@ -33,19 +32,19 @@ export default function MenswearPage() {
   const [sort, setSort] = useState<Sort>('low');
   const [query, setQuery] = useState('');
   const [picking, setPicking] = useState<MenswearProduct | null>(null);
+  const { products: catalog, allSoldOut, minPrice } = useMenswearCatalog();
 
   const products = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const list = MENSWEAR_PRODUCTS.filter(
+    const list = catalog.filter(
       (p) => (category === 'All' || p.category === category) && (!q || p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q))
     );
     if (sort === 'low') return [...list].sort((a, b) => a.price - b.price);
     if (sort === 'high') return [...list].sort((a, b) => b.price - a.price);
     return list;
-  }, [category, sort, query]);
+  }, [catalog, category, sort, query]);
 
   const inYellapur = isInYellapur(deliveryLocation);
-  const minPrice = MENSWEAR_MIN_PRICE;
 
   return (
     <div className="min-h-screen bg-[#f6f6f7] pb-36">
@@ -164,12 +163,16 @@ export default function MenswearPage() {
                       </div>
                     </button>
                     <div className="p-2.5 md:p-3 pt-1.5">
-                      <button
-                        onClick={() => setPicking(p)}
-                        className="w-full flex items-center justify-center gap-1 py-2 rounded-xl border-2 border-[#e11d48] text-[#e11d48] text-xs font-black hover:bg-rose-50 active:scale-95 transition-transform cursor-pointer"
-                      >
-                        ADD <Plus className="w-3.5 h-3.5" strokeWidth={3} />
-                      </button>
+                      {allSoldOut(p) ? (
+                        <p className="w-full text-center py-2 rounded-xl bg-gray-100 text-gray-500 text-xs font-black">Sold out</p>
+                      ) : (
+                        <button
+                          onClick={() => setPicking(p)}
+                          className="w-full flex items-center justify-center gap-1 py-2 rounded-xl border-2 border-[#e11d48] text-[#e11d48] text-xs font-black hover:bg-rose-50 active:scale-95 transition-transform cursor-pointer"
+                        >
+                          ADD <Plus className="w-3.5 h-3.5" strokeWidth={3} />
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}

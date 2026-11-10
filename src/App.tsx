@@ -5,6 +5,8 @@ import { Toaster, toast } from 'react-hot-toast';
 import { useEffect, useCallback, Suspense, lazy } from 'react';
 import { requestForToken, onMessageListener } from './firebase';
 import { flushTelegramOutbox } from './lib/notifyTelegram';
+import { useAuthStore } from './store/authStore';
+import { MENSWEAR_SHOP_ID } from './data/mensWear';
 
 // Components
 const LandingPage = lazy(() => import('./components/LandingPage'));
@@ -47,6 +49,7 @@ const TrackOrderPage = lazy(() => import('./components/TrackOrderPage'));
 const TrackComingSoon = lazy(() => import('./components/TrackComingSoon'));
 const MenswearPage = lazy(() => import('./components/MenswearPage'));
 const MenswearProductPage = lazy(() => import('./components/MenswearProductPage'));
+const MenswearAdminPage = lazy(() => import('./components/MenswearAdminPage'));
 const PrivacyPage = lazy(() => import('./components/PrivacyPage'));
 const DeleteAccountPage = lazy(() => import('./components/DeleteAccountPage'));
 const AddressesPage = lazy(() => import('./components/AddressesPage'));
@@ -57,6 +60,18 @@ import { useMenuStore } from './store/menuStore';
 import { useDishAvailabilityStore } from './store/dishAvailabilityStore';
 
 function GoldenParticles() {
+  return null;
+}
+
+/**
+ * The men's wear shop's admin account goes straight to its own page after
+ * signing in anywhere in the app: it has nothing to order, only stock to run.
+ */
+function MenswearAdminRedirect() {
+  const profile: any = useAuthStore((s) => s.profile);
+  const { pathname } = useLocation();
+  const isShopAdmin = String(profile?.role || '').toUpperCase() === 'HOTEL_ADMIN' && profile?.hotelId === MENSWEAR_SHOP_ID;
+  if (isShopAdmin && !pathname.startsWith('/admin')) return <Navigate to="/admin/menswear" replace />;
   return null;
 }
 
@@ -211,6 +226,7 @@ export default function App() {
         <div className="min-h-screen bg-gradient-to-b from-[#fff5f7] via-[#fff9fb] to-[#ffffff] text-gray-900 font-sans relative flex flex-col selection:bg-rose-500/20">
 
           <main className="flex-1 relative z-10">
+            <MenswearAdminRedirect />
             <PageTransition>
               <Suspense fallback={<FoodLoader />}>
                 <Routes>
@@ -243,6 +259,7 @@ export default function App() {
                   <Route path="/feedback" element={<FeedbackPage />} />
                   <Route path="/about" element={<AboutFounder />} />
                   <Route path="/admin" element={<AdminPage />} />
+                  <Route path="/admin/menswear" element={<MenswearAdminPage />} />
                   {/* The old dark /orders list read stale localStorage; /track is the live list. */}
                   <Route path="/orders" element={<Navigate to="/track" replace />} />
                   <Route path="/spin" element={<LuckyWheelPage />} />

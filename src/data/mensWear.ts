@@ -7,7 +7,7 @@
 // given and are still provisional. Change a category there, or give a
 // product its own `price`, and rebuild the catalog.
 
-export const MENSWEAR_SHOP_ID = 'mintoo_menswear';
+export const MENSWEAR_SHOP_ID = 'mintoo-men-s-wear';
 export const MENSWEAR_SHOP_NAME = "Mintoo Men's Wear";
 /** Item ids start with this, which is how an order line is traced to the shop. */
 export const MENSWEAR_ID_PREFIX = 'mw-';
@@ -39,8 +39,8 @@ export const CATEGORY_PRICE: Record<MenswearCategory, number> = {
   'Jackets': 549,
 };
 
-const LETTER_SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
-const WAIST_SIZES = ['28', '30', '32', '34', '36'];
+export const LETTER_SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
+export const WAIST_SIZES = ['28', '30', '32', '34', '36'];
 
 /** Sizes stocked per category: pants by waist, jackets only L to XXL. */
 export const CATEGORY_SIZES: Record<MenswearCategory, readonly string[]> = {
@@ -68,6 +68,10 @@ interface ProductRow {
 export interface MenswearProduct extends ProductRow {
   price: number;
   sizes: readonly string[];
+  /** Added from the men's wear admin page rather than bundled here. */
+  added?: boolean;
+  /** Hidden from the shop by the admin (only the admin page sees these). */
+  hidden?: boolean;
 }
 
 const ROWS: ProductRow[] = [

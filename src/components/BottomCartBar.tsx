@@ -16,7 +16,7 @@ export default function BottomCartBar() {
 
   const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
   // A men's wear product page has its own Add to cart / Buy now bar here.
-  const isVisible = itemCount > 0 && location.pathname !== '/checkout' && !location.pathname.startsWith('/menswear/');
+  const isVisible = itemCount > 0 && location.pathname !== '/checkout' && !location.pathname.startsWith('/menswear/') && !location.pathname.startsWith('/admin');
 
   return (
     <AnimatePresence>

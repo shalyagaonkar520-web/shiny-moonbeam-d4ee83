@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useCartStore } from '../store/cartStore';
 import { useLocationStore } from '../store/locationStore';
+import { useMenswearStore, sizeDocId } from '../store/menswearStore';
 import { isInYellapur } from './yellapur';
 import { MENSWEAR_SHOP_ID, MENSWEAR_SHOP_NAME, MenswearProduct, menswearItemId } from '../data/mensWear';
 
@@ -23,6 +24,10 @@ export function useAddMenswear() {
     }
     if (!size) {
       toast.error('Please select a size');
+      return false;
+    }
+    if (useMenswearStore.getState().docs[sizeDocId(product.name, size)]?.soldOut === true) {
+      toast.error(`Size ${size} is sold out`);
       return false;
     }
     addItem({

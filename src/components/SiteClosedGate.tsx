@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db, firebaseReady } from '../firebase';
 
@@ -15,6 +16,7 @@ import { db, firebaseReady } from '../firebase';
  */
 export default function SiteClosedGate({ children }: { children: React.ReactNode }) {
   const [closed, setClosed] = useState(false);
+  const { pathname } = useLocation();
 
   useEffect(() => {
     if (!firebaseReady) return;
@@ -30,7 +32,8 @@ export default function SiteClosedGate({ children }: { children: React.ReactNode
     return () => unsub();
   }, []);
 
-  if (!closed) return <>{children}</>;
+  // Staff pages keep working on a closed day: that is when stock gets sorted.
+  if (!closed || pathname.startsWith('/admin')) return <>{children}</>;
 
   // Local preview (npm run dev) keeps working while the live site is shut, so
   // new screens can be checked on a closed day. Production builds never take

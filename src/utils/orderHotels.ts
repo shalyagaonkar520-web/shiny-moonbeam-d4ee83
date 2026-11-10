@@ -25,7 +25,7 @@ export const PARTNER_HOTELS: PartnerHotel[] = [
   { id: 'sankalpa',      name: 'Hotel Sankalpa', idPrefix: 'sankalpa-', descriptionMatch: ['Hotel Sankalpa'] },
   // The clothing shop (src/data/mensWear.ts). Its orders need a hotels/
   // record with this id in the panel, like any kitchen.
-  { id: 'mintoo_menswear', name: "Mintoo Men's Wear", idPrefix: 'mw-', descriptionMatch: ["Mintoo Men's Wear"] },
+  { id: 'mintoo-men-s-wear', name: "Mintoo Men's Wear", idPrefix: 'mw-', descriptionMatch: ["Mintoo Men's Wear"] },
 ];
 
 type AnyItem = {

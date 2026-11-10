@@ -6,7 +6,8 @@ import { useLocationStore } from '../store/locationStore';
 import { useSEO } from '../utils/seo';
 import { isInYellapur } from '../lib/yellapur';
 import { useAddMenswear } from '../lib/useAddMenswear';
-import { MENSWEAR_PRODUCTS, MENSWEAR_SHOP_NAME, findMenswearProduct } from '../data/mensWear';
+import { MENSWEAR_SHOP_NAME } from '../data/mensWear';
+import { useMenswearCatalog } from '../store/menswearStore';
 import MenswearPrice from './MenswearPrice';
 
 /**
@@ -16,7 +17,8 @@ import MenswearPrice from './MenswearPrice';
  */
 export default function MenswearProductPage() {
   const { slug } = useParams();
-  const product = findMenswearProduct(slug);
+  const { products, find, isSoldOut, allSoldOut } = useMenswearCatalog();
+  const product = find(slug);
   useSEO(product ? `${product.name} - ${MENSWEAR_SHOP_NAME}` : MENSWEAR_SHOP_NAME, `${product?.name || 'Men\'s wear'} with 10-minute delivery in Yellapur and 2-day returns.`);
   const navigate = useNavigate();
   const cartCount = useCartStore((s) => s.items.reduce((n, i) => n + i.quantity, 0));
@@ -38,7 +40,7 @@ export default function MenswearProductPage() {
   }
 
   const inYellapur = isInYellapur(deliveryLocation);
-  const similar = MENSWEAR_PRODUCTS.filter((p) => p.category === product.category && p.slug !== product.slug).slice(0, 6);
+  const similar = products.filter((p) => p.category === product.category && p.slug !== product.slug).slice(0, 6);
   const add = (orderNow: boolean) => addMenswear(product, size, orderNow);
 
   const onScroll = () => {
@@ -130,18 +132,28 @@ export default function MenswearProductPage() {
             <section className="bg-white mt-2 md:mt-0 px-4 py-4 md:rounded-3xl md:border md:border-gray-100 md:p-6">
               <p className="text-sm font-black text-gray-900 mb-2.5">{/^\d/.test(product.sizes[0]) ? 'Select waist size' : 'Select size'}</p>
               <div className="flex gap-2 flex-wrap">
-                {product.sizes.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setSize(s)}
-                    className={`min-w-[52px] h-11 px-3 rounded-xl border text-sm font-bold cursor-pointer ${
-                      size === s ? 'border-[#e11d48] bg-rose-50 text-[#e11d48]' : 'border-gray-300 text-gray-800 hover:border-gray-500'
-                    }`}
-                  >
-                    {s}
-                  </button>
-                ))}
+                {product.sizes.map((s) => {
+                  const out = isSoldOut(product, s);
+                  return (
+                    <button
+                      key={s}
+                      disabled={out}
+                      onClick={() => setSize(s)}
+                      className={`min-w-[52px] h-11 px-3 rounded-xl border text-sm font-bold ${
+                        out
+                          ? 'border-gray-200 text-gray-300 line-through cursor-not-allowed'
+                          : size === s
+                            ? 'border-[#e11d48] bg-rose-50 text-[#e11d48] cursor-pointer'
+                            : 'border-gray-300 text-gray-800 hover:border-gray-500 cursor-pointer'
+                      }`}
+                      aria-label={out ? `Size ${s}, sold out` : `Size ${s}`}
+                    >
+                      {s}
+                    </button>
+                  );
+                })}
               </div>
+              {allSoldOut(product) && <p className="text-xs font-bold text-rose-600 mt-2">All sizes are sold out right now.</p>}
               <div className="hidden md:grid grid-cols-2 gap-3 mt-5">{buttons}</div>
             </section>
 

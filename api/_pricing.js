@@ -22,7 +22,7 @@ const HOTELS = [
   { id: 'coastal_crown', name: 'Coastal Crown', prefix: 'coastal-', match: ['Coastal Crown'] },
   { id: 'malabar', name: 'Hotel Malabar', prefix: 'malabar-', match: ['Hotel Malabar', "Kaka's Hotel Malabar"] },
   { id: 'sankalpa', name: 'Hotel Sankalpa', prefix: 'sankalpa-', match: ['Hotel Sankalpa'] },
-  { id: 'mintoo_menswear', name: "Mintoo Men's Wear", prefix: 'mw-', match: ["Mintoo Men's Wear"] },
+  { id: 'mintoo-men-s-wear', name: "Mintoo Men's Wear", prefix: 'mw-', match: ["Mintoo Men's Wear"] },
 ];
 // `id` is deliberately not renamed with the rest of the rebrand: it is written
 // onto every order line as `hotelId` and read by the super admin panel, and

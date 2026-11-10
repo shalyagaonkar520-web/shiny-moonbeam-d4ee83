@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { MenswearProduct } from '../data/mensWear';
 import { useAddMenswear } from '../lib/useAddMenswear';
+import { useMenswearCatalog } from '../store/menswearStore';
 import MenswearPrice from './MenswearPrice';
 
 /**
@@ -10,7 +11,8 @@ import MenswearPrice from './MenswearPrice';
  * centred dialog on laptops. Add to cart keeps shopping; Order now checks out.
  */
 export default function MenswearSizeSheet({ product, onClose }: { product: MenswearProduct; onClose: () => void }) {
-  const [size, setSize] = useState<string | null>(product.sizes.length === 1 ? product.sizes[0] : null);
+  const { isSoldOut } = useMenswearCatalog();
+  const [size, setSize] = useState<string | null>(product.sizes.length === 1 && !isSoldOut(product, product.sizes[0]) ? product.sizes[0] : null);
   const add = useAddMenswear();
 
   useEffect(() => {
@@ -41,17 +43,26 @@ export default function MenswearSizeSheet({ product, onClose }: { product: Mensw
         </div>
         <p className="text-sm font-black text-gray-900 mt-4 mb-2">{/^\d/.test(product.sizes[0]) ? 'Select waist size' : 'Select size'}</p>
         <div className="flex gap-2 flex-wrap">
-          {product.sizes.map((s) => (
-            <button
-              key={s}
-              onClick={() => setSize(s)}
-              className={`min-w-[52px] h-11 px-3 rounded-xl border text-sm font-bold cursor-pointer ${
-                size === s ? 'border-[#e11d48] bg-rose-50 text-[#e11d48]' : 'border-gray-300 text-gray-800 hover:border-gray-500'
-              }`}
-            >
-              {s}
-            </button>
-          ))}
+          {product.sizes.map((s) => {
+            const out = isSoldOut(product, s);
+            return (
+              <button
+                key={s}
+                disabled={out}
+                onClick={() => setSize(s)}
+                className={`min-w-[52px] h-11 px-3 rounded-xl border text-sm font-bold ${
+                  out
+                    ? 'border-gray-200 text-gray-300 line-through cursor-not-allowed'
+                    : size === s
+                      ? 'border-[#e11d48] bg-rose-50 text-[#e11d48] cursor-pointer'
+                      : 'border-gray-300 text-gray-800 hover:border-gray-500 cursor-pointer'
+                }`}
+                aria-label={out ? `Size ${s}, sold out` : `Size ${s}`}
+              >
+                {s}
+              </button>
+            );
+          })}
         </div>
         <div className="grid grid-cols-2 gap-2.5 mt-5">
           <button onClick={() => go(false)} className="py-3.5 rounded-xl border-2 border-gray-900 text-gray-900 font-black text-sm cursor-pointer active:scale-95 transition-transform">
