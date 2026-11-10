@@ -24,6 +24,7 @@ import { useDishOrderable } from '../store/dishAvailabilityStore';
 import { useMmkOpen, isMmkOpenNow, isMmkItem, MMK_CLOSED_MESSAGE, MMK_OPENS_AT_LABEL } from '../lib/mmkHours';
 import { isInYellapur } from '../lib/yellapur';
 import { MENSWEAR_MIN_PRICE } from '../data/mensWear';
+import YellapurChooser from './YellapurChooser';
 
 const ROTATING_SEARCH_PLACEHOLDERS = [
   'Search "Chicken Dum Biryani"',
@@ -453,6 +454,8 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#f6f6f7] text-gray-900 font-sans pb-36">
+      {/* Yellapur sells food and clothes: ask which first. */}
+      <YellapurChooser />
 
       {/* Header. White, like every major food app: where it's going on the
           left, who's ordering on the right, search underneath. It used to be a

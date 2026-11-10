@@ -3,10 +3,9 @@
 // Photos are the shop's own (public/menswear/, cover first). Each product is
 // one colour; its other photos are the back or a close-up of the same piece.
 //
-// PRICES: the owner's prices (5 Nov 2026) plus Rs 100 on each: baggy jeans
-// 500, jackets 450, hoodies 400, formal pants 400. Shirts, T-shirts and
-// jerseys had no price given and are still provisional. Change a category
-// here, or give a product its own `price`, and rebuild.
+// PRICES: see CATEGORY_PRICE. Shirts, T-shirts and jerseys had no price
+// given and are still provisional. Change a category there, or give a
+// product its own `price`, and rebuild the catalog.
 
 export const MENSWEAR_SHOP_ID = 'mintoo_menswear';
 export const MENSWEAR_SHOP_NAME = "Mintoo Men's Wear";
@@ -25,23 +24,20 @@ export const MENSWEAR_CATEGORIES = [
 ] as const;
 export type MenswearCategory = (typeof MENSWEAR_CATEGORIES)[number];
 
-/** What the owner charges per category, before MARKUP. */
-const BASE_PRICE: Record<MenswearCategory, number> = {
-  'Jerseys': 99,
-  'T-Shirts & Polos': 299,
-  'Casual Shirts': 349,
-  'Formal Shirts': 399,
-  'Hoodies & Sweatshirts': 400,
-  'Trousers': 400,
-  'Jeans & Cargos': 500,
-  'Jackets': 450,
+/**
+ * Selling price per category. Jeans, jackets, hoodies and formal pants are
+ * the owner's price plus Rs 100, then set to end in 49/99 (10 Nov 2026).
+ */
+export const CATEGORY_PRICE: Record<MenswearCategory, number> = {
+  'Jerseys': 199,
+  'T-Shirts & Polos': 399,
+  'Casual Shirts': 449,
+  'Formal Shirts': 499,
+  'Hoodies & Sweatshirts': 449,
+  'Trousers': 449,
+  'Jeans & Cargos': 599,
+  'Jackets': 549,
 };
-/** Added to every price, like the food menus' markup. */
-export const MENSWEAR_MARKUP = 100;
-
-export const CATEGORY_PRICE = Object.fromEntries(
-  Object.entries(BASE_PRICE).map(([c, p]) => [c, p + MENSWEAR_MARKUP])
-) as Record<MenswearCategory, number>;
 
 const LETTER_SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
 const WAIST_SIZES = ['28', '30', '32', '34', '36'];

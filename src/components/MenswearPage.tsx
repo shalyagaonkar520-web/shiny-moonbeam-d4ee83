@@ -30,7 +30,7 @@ export default function MenswearPage() {
   const openLocationPicker = useLocationStore((s) => s.openLocationPicker);
   const cartCount = useCartStore((s) => s.items.reduce((n, i) => n + i.quantity, 0));
   const [category, setCategory] = useState<MenswearCategory | 'All'>('All');
-  const [sort, setSort] = useState<Sort>('popular');
+  const [sort, setSort] = useState<Sort>('low');
   const [query, setQuery] = useState('');
   const [picking, setPicking] = useState<MenswearProduct | null>(null);
 
