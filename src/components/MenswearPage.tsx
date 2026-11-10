@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, MapPin, RotateCcw, Search, Shirt, ShoppingBag, Zap, X } from 'lucide-react';
+import { ChevronLeft, MapPin, Plus, RotateCcw, Search, Shirt, ShoppingBag, Zap, X } from 'lucide-react';
+import MenswearPrice from './MenswearPrice';
+import MenswearSizeSheet from './MenswearSizeSheet';
 import { useCartStore } from '../store/cartStore';
 import { useLocationStore } from '../store/locationStore';
 import { useSEO } from '../utils/seo';
@@ -11,6 +13,7 @@ import {
   MENSWEAR_PRODUCTS,
   MENSWEAR_SHOP_NAME,
   MenswearCategory,
+  MenswearProduct,
 } from '../data/mensWear';
 
 type Sort = 'popular' | 'low' | 'high';
@@ -29,6 +32,7 @@ export default function MenswearPage() {
   const [category, setCategory] = useState<MenswearCategory | 'All'>('All');
   const [sort, setSort] = useState<Sort>('popular');
   const [query, setQuery] = useState('');
+  const [picking, setPicking] = useState<MenswearProduct | null>(null);
 
   const products = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -46,7 +50,7 @@ export default function MenswearPage() {
   return (
     <div className="min-h-screen bg-[#f6f6f7] pb-36">
       <header className="sticky top-0 z-40 bg-white border-b border-gray-100">
-        <div className="max-w-4xl mx-auto px-3 py-2.5 flex items-center gap-2">
+        <div className="max-w-6xl mx-auto px-3 md:px-6 py-2.5 flex items-center gap-2">
           <button onClick={() => navigate('/')} className="p-2 rounded-full hover:bg-gray-100 cursor-pointer" aria-label="Back to home">
             <ChevronLeft className="w-6 h-6 text-gray-800" />
           </button>
@@ -68,10 +72,10 @@ export default function MenswearPage() {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-3 pt-3 space-y-3">
-        <section className="rounded-3xl bg-gradient-to-br from-gray-900 via-gray-800 to-indigo-900 text-white p-4">
+      <main className="max-w-6xl mx-auto px-3 md:px-6 pt-3 md:pt-5 space-y-3 md:space-y-4">
+        <section className="rounded-3xl bg-gradient-to-br from-gray-900 via-gray-800 to-indigo-900 text-white p-4 md:p-7">
           <p className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-200">New in Yellapur</p>
-          <h2 className="text-xl font-black leading-tight mt-1">Fresh styles at your door in 10 minutes</h2>
+          <h2 className="text-xl md:text-3xl font-black leading-tight mt-1">Fresh styles at your door in 10 minutes</h2>
           <p className="text-xs text-gray-300 mt-1">Shirts, jeans, hoodies and jackets from ₹{minPrice}</p>
           <div className="flex flex-wrap gap-2 mt-3">
             <span className="inline-flex items-center gap-1.5 bg-white/10 rounded-full px-3 py-1.5 text-[11px] font-bold">
@@ -96,7 +100,7 @@ export default function MenswearPage() {
           </div>
         ) : (
           <>
-            <div className="relative">
+            <div className="relative md:max-w-xl">
               <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 value={query}
@@ -144,30 +148,37 @@ export default function MenswearPage() {
             {products.length === 0 ? (
               <p className="text-center text-sm text-gray-500 py-10">Nothing matches "{query}".</p>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 md:gap-4">
                 {products.map((p) => (
-                  <button
-                    key={p.slug}
-                    onClick={() => navigate(`/menswear/${p.slug}`)}
-                    className="bg-white rounded-2xl overflow-hidden border border-gray-100 text-left active:scale-[0.98] transition-transform cursor-pointer"
-                  >
-                    <div className="relative aspect-[3/4] bg-rose-50/60">
-                      <Shirt className="absolute inset-0 m-auto w-10 h-10 text-rose-200 animate-pulse" />
-                      <img src={p.images[0]} alt={p.name} loading="lazy" className="relative w-full h-full object-cover" />
+                  <div key={p.slug} className="bg-white rounded-2xl overflow-hidden border border-gray-100 flex flex-col md:hover:shadow-lg md:hover:-translate-y-0.5 transition-all">
+                    <button onClick={() => navigate(`/menswear/${p.slug}`)} className="text-left cursor-pointer flex-1" aria-label={`View ${p.name}`}>
+                      <div className="relative aspect-[3/4] bg-rose-50/60 overflow-hidden">
+                        <Shirt className="absolute inset-0 m-auto w-10 h-10 text-rose-200 animate-pulse" />
+                        <img src={p.images[0]} alt={p.name} loading="lazy" className="relative w-full h-full object-cover md:hover:scale-105 transition-transform duration-300" />
+                      </div>
+                      <div className="p-2.5 md:p-3 pb-1">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">{p.category}</p>
+                        <h3 className="text-xs md:text-sm font-bold text-gray-900 leading-snug line-clamp-2 mt-0.5">{p.name}</h3>
+                        <div className="mt-1"><MenswearPrice price={p.price} /></div>
+                        <p className="text-[10px] font-semibold text-emerald-700 mt-0.5">2-day return</p>
+                      </div>
+                    </button>
+                    <div className="p-2.5 md:p-3 pt-1.5">
+                      <button
+                        onClick={() => setPicking(p)}
+                        className="w-full flex items-center justify-center gap-1 py-2 rounded-xl border-2 border-[#e11d48] text-[#e11d48] text-xs font-black hover:bg-rose-50 active:scale-95 transition-transform cursor-pointer"
+                      >
+                        ADD <Plus className="w-3.5 h-3.5" strokeWidth={3} />
+                      </button>
                     </div>
-                    <div className="p-2.5">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">{p.category}</p>
-                      <h3 className="text-xs font-bold text-gray-900 leading-snug line-clamp-2 mt-0.5">{p.name}</h3>
-                      <p className="text-sm font-black text-gray-900 mt-1">₹{p.price}</p>
-                      <p className="text-[10px] font-semibold text-emerald-700 mt-0.5">2-day return</p>
-                    </div>
-                  </button>
+                  </div>
                 ))}
               </div>
             )}
           </>
         )}
       </main>
+      {picking && <MenswearSizeSheet product={picking} onClose={() => setPicking(null)} />}
     </div>
   );
 }

@@ -141,6 +141,23 @@ export function menswearItemId(slug: string, size: MenswearSize): string {
   return `${MENSWEAR_ID_PREFIX}${slug}-${size.toLowerCase()}`;
 }
 
+/**
+ * The struck-through "MRP" shown next to each price: the selling price
+ * marked up so it reads as about 80% off, rounded to end in 99. The selling
+ * price never changes; only this label does. Set SHOW_MRP false to drop it.
+ */
+export const MENSWEAR_SHOW_MRP = true;
+const MRP_DISCOUNT = 0.8;
+export function menswearMrp(price: number): number {
+  // Rounded first: 500 / (1 - 0.8) is 2500.0000000000005 in floating point.
+  return Math.ceil(Math.round(price / (1 - MRP_DISCOUNT)) / 100) * 100 - 1;
+}
+/** Percent off, worked out from the two numbers actually shown. */
+export function menswearOffPct(price: number): number {
+  const mrp = menswearMrp(price);
+  return Math.round(((mrp - price) / mrp) * 100);
+}
+
 /** Cheapest item, for "from Rs X" labels. */
 export const MENSWEAR_MIN_PRICE = Math.min(...MENSWEAR_PRODUCTS.map((p) => p.price));
 
