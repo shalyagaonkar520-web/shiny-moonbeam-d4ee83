@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { create } from 'zustand';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db, firebaseReady } from '../firebase';
 import { DishAvailability, isDishAvailableNow, menuItemId, toDishAvailability } from '../lib/dishAvailability';
 
@@ -12,6 +12,11 @@ import { DishAvailability, isDishAvailableNow, menuItemId, toDishAvailability } 
  * menu keeps working exactly as it did, and the kitchen can still reject an
  * order. Only an explicit "off", "sold out" or a serving window that has
  * closed takes a dish away.
+ *
+ * So only those dishes are read. Listening to the whole collection cost every
+ * visitor one read per dish (232) on every app open, which used up the
+ * project's daily Firestore quota and stopped all orders. Three narrow queries
+ * fetch just the dishes that can be unavailable.
  */
 
 interface DishAvailabilityStore {
@@ -36,17 +41,28 @@ export const useDishAvailabilityStore = create<DishAvailabilityStore>((set, get)
     if (!firebaseReady) return () => {};
     listeners += 1;
     if (!stop) {
-      const unsubscribe = onSnapshot(
-        collection(db, 'menuItems'),
-        (snap) => {
-          const dishes: Record<string, DishAvailability> = {};
-          snap.forEach((d) => {
-            dishes[d.id] = toDishAvailability(d.data());
-          });
-          set({ dishes, loaded: true });
-        },
-        (err) => console.error('Dish availability listener error:', err)
+      const items = collection(db, 'menuItems');
+      const parts: Record<string, Record<string, DishAvailability>> = {};
+      const queries = {
+        off: query(items, where('available', '==', false)),
+        soldOut: query(items, where('soldOut', '==', true)),
+        windowed: query(items, where('availableFrom', '!=', null)),
+      };
+      const unsubs = Object.entries(queries).map(([key, q]) =>
+        onSnapshot(
+          q,
+          (snap) => {
+            const found: Record<string, DishAvailability> = {};
+            snap.forEach((d) => {
+              found[d.id] = toDishAvailability(d.data());
+            });
+            parts[key] = found;
+            set({ dishes: Object.assign({}, ...Object.values(parts)), loaded: true });
+          },
+          (err) => console.error('Dish availability listener error:', err)
+        )
       );
+      const unsubscribe = () => unsubs.forEach((u) => u());
       const timer = window.setInterval(() => set({ tick: Date.now() }), 60_000);
       stop = () => {
         unsubscribe();
