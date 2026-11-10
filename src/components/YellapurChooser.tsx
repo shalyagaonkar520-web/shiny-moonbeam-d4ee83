@@ -49,10 +49,12 @@ export default function YellapurChooser() {
             onClick={() => choose('food')}
             className="group text-left rounded-3xl overflow-hidden bg-white border border-rose-100 shadow-sm hover:shadow-xl active:scale-[0.98] transition-all cursor-pointer"
           >
-            <div className="relative h-36 md:h-52 bg-gradient-to-br from-[#ff4d6d] to-[#e11d48] flex items-center justify-center">
-              <span className="text-6xl md:text-7xl group-hover:scale-110 transition-transform">🍛</span>
-              <span className="absolute top-3 left-3 text-4xl opacity-80">🍗</span>
-              <span className="absolute bottom-3 right-4 text-4xl opacity-80">🍜</span>
+            {/* Real dishes, checked by eye: biryani, and dosa rolls with chutneys. */}
+            <div className="relative h-36 md:h-52 grid grid-cols-2 gap-0.5 bg-rose-50 overflow-hidden">
+              <img src="/chicken_biryani_new.webp" alt="Chicken biryani" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+              <img src="/images/menu/dosa/butter-plain-dosa.jpg" alt="Dosa with chutney" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+              <span className="absolute left-2.5 bottom-2.5 text-[10px] font-black bg-white/90 text-gray-900 rounded-full px-2 py-0.5">Biryani</span>
+              <span className="absolute right-2.5 bottom-2.5 text-[10px] font-black bg-white/90 text-gray-900 rounded-full px-2 py-0.5">Dosa</span>
             </div>
             <div className="p-4 md:p-5 flex items-center gap-3">
               <div className="flex-1">
