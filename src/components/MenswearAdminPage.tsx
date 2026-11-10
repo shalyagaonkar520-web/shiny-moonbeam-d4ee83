@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut, type User } from 'firebase/auth';
+import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import {
@@ -17,6 +17,7 @@ import {
   addProduct, checkMenswearAdmin, friendlyError, setProductHidden, setProductPrice, setShopAcceptingOrders,
   setSizeSoldOut, uniqueSlug, uploadProductPhoto,
 } from '../lib/menswearAdmin';
+import { staffSignIn } from '../lib/staffSignIn';
 
 type Gate = { state: 'loading' } | { state: 'out' } | { state: 'denied'; reason: string } | { state: 'in'; user: User };
 
@@ -85,7 +86,7 @@ function AdminLogin() {
     setBusy(true);
     setError(null);
     try {
-      await signInWithEmailAndPassword(auth, email.trim(), password);
+      await staffSignIn(auth, email, password);
     } catch (err: any) {
       const code = String(err?.code || '');
       setError(

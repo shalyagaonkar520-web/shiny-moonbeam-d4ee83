@@ -175,14 +175,27 @@
         // new build's worker takes over, so it runs the new code instead of the
         // build it was opened with. Not while an online payment is in flight:
         // that screen must stay put, and the next launch picks up the update.
+        //
+        // The reload waits until the page is out of sight (the customer switches
+        // app or locks the phone). Reloading while it was on screen showed the
+        // page, blanked it and drew it again a second later -- the double
+        // flicker iPhones reported on every deploy. A lazy chunk the old build
+        // can no longer fetch still reloads at once (vite:preloadError below).
         var hadController = !!navigator.serviceWorker.controller;
         var reloaded = false;
-        navigator.serviceWorker.addEventListener('controllerchange', function () {
-          if (!hadController || reloaded) return;
+        var updateReady = false;
+        function reloadIfHidden() {
+          if (!updateReady || reloaded || document.visibilityState !== 'hidden') return;
           try { if (localStorage.getItem('mintoo_pending_payment')) return; } catch (e) { /* storage blocked */ }
           reloaded = true;
           location.reload();
+        }
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          if (!hadController) return;
+          updateReady = true;
+          reloadIfHidden();
         });
+        document.addEventListener('visibilitychange', reloadIfHidden);
         window.addEventListener('load', function () {
           try {
             navigator.serviceWorker.register('/sw.js', { scope: '/' })

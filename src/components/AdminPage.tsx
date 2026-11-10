@@ -41,6 +41,8 @@ import AdminMenuManager from './AdminMenuManager';
 import AdminCouponManager from './AdminCouponManager';
 import { getItemHotel } from '../utils/orderHotels';
 import { friendlyAuthError } from '../lib/authErrors';
+import { staffSignIn } from '../lib/staffSignIn';
+import { MENSWEAR_SHOP_ID } from '../data/mensWear';
 
 // Live order window: everything from the last few days plus any order that is
 // still open, capped so a busy year cannot turn every admin open into tens of
@@ -803,8 +805,15 @@ export default function AdminPage() {
     }
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await staffSignIn(auth, email, password);
       const firebaseUser = userCredential.user;
+
+      // The men's wear shop's account has its own page; this one is the owner's.
+      const staff = await getDoc(doc(db, 'users', firebaseUser.uid)).then((s) => s.data()).catch(() => null);
+      if (String(staff?.role || '').toUpperCase() === 'HOTEL_ADMIN' && staff?.hotelId === MENSWEAR_SHOP_ID) {
+        window.location.assign('/admin/menswear');
+        return;
+      }
       
       const adminUser = {
         id: firebaseUser.uid,

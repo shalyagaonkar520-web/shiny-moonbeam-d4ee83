@@ -71,14 +71,16 @@ function MenswearAdminRedirect() {
   const profile: any = useAuthStore((s) => s.profile);
   const { pathname } = useLocation();
   const isShopAdmin = String(profile?.role || '').toUpperCase() === 'HOTEL_ADMIN' && profile?.hotelId === MENSWEAR_SHOP_ID;
-  if (isShopAdmin && !pathname.startsWith('/admin')) return <Navigate to="/admin/menswear" replace />;
+  if (isShopAdmin && pathname !== '/admin/menswear') return <Navigate to="/admin/menswear" replace />;
   return null;
 }
 
 function PageTransition({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   return (
-    <AnimatePresence mode="wait">
+    // initial={false}: the first screen appears as-is. Fading it in from
+    // blank right after the boot screen read as a flicker on iPhones.
+    <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={location.pathname}
         initial={{ opacity: 0 }}
