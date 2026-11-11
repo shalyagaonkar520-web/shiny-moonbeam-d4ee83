@@ -26,15 +26,15 @@ export interface ChetanaItem {
 }
 
 const CARD: ChetanaItem[] = [
-  { name: 'Bhel Puri', cardPrice: 40, image: '/menu/chetana/bhel-puri.webp' },
-  { name: 'Pani Puri', cardPrice: 30, image: '/menu/chetana/pani-puri.webp' },
-  { name: 'Sev Puri', cardPrice: 40, image: '/menu/chetana/sev-puri.webp' },
-  { name: 'Masala Puri', cardPrice: 40, image: '/menu/chetana/masala-puri.webp' },
-  { name: 'Dahi Puri', cardPrice: 40, image: '/menu/chetana/dahi-puri.webp' },
-  { name: 'Sukka Puri', cardPrice: 40, image: '/menu/chetana/sukka-puri.webp' },
-  { name: 'Veg Manchurian', cardPrice: 40, image: '/menu/chetana/veg-manchurian.webp' },
-  { name: 'Masala Samosa (Regular)', cardPrice: 20, image: '/menu/chetana/masala-samosa.webp' },
-  { name: 'Masala Samosa (Large)', cardPrice: 30, image: '/menu/chetana/masala-samosa.webp' },
+  { name: 'Bhel Puri', cardPrice: 40, image: '/menu/chetana/bhel-puri-photo.webp' },
+  { name: 'Pani Puri', cardPrice: 30, image: '/menu/chetana/pani-puri-photo.webp' },
+  { name: 'Sev Puri', cardPrice: 40, image: '/menu/chetana/sev-puri-photo.webp' },
+  { name: 'Masala Puri', cardPrice: 40, image: '/menu/chetana/masala-puri-photo.webp' },
+  { name: 'Dahi Puri', cardPrice: 40, image: '/menu/chetana/dahi-puri-photo.webp' },
+  { name: 'Sukka Puri', cardPrice: 40, image: '/menu/chetana/sukka-puri-photo.webp' },
+  { name: 'Veg Manchurian', cardPrice: 40, image: '/menu/chetana/veg-manchurian-photo.webp' },
+  { name: 'Masala Samosa (Regular)', cardPrice: 20, image: '/menu/chetana/masala-samosa-photo.webp' },
+  { name: 'Masala Samosa (Large)', cardPrice: 30, image: '/menu/chetana/masala-samosa-photo.webp' },
 ];
 
 export interface ChetanaMenuItem extends ChetanaItem {

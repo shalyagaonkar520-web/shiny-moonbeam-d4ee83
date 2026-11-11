@@ -114,7 +114,7 @@ const WHATS_ON_YOUR_MIND = [
   {
     id: 'chats',
     name: 'Chats',
-    image: '/menu/chetana/pani-puri.webp'
+    image: '/menu/chetana/pani-puri-photo.webp'
   },
   {
     id: 'biryani',
