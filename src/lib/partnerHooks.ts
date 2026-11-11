@@ -2,9 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { db } from '../firebase';
 import { reportRiderLocation, sendRiderFix, type RiderFix } from './riderJobs';
 
-const MIN_SEND_MS = 4000; // at most one fix every 4 s per order
-const MIN_MOVE_M = 10; // ...unless the rider has not moved
-const HEARTBEAT_MS = 15000; // re-send the last fix so the customer sees "live"
+// A fix every 3 s keeps the customer's bike moving like a vehicle (the map
+// glides between fixes, see lib/smoothMove); more often costs database
+// writes for no visible gain.
+const MIN_SEND_MS = 3000; // at most one fix every 3 s per order
+const MIN_MOVE_M = 5; // ...unless the rider has not moved
+const HEARTBEAT_MS = 12000; // re-send the last fix so the customer sees "live"
+const MAX_ACCURACY_M = 120; // a reading vaguer than this would make the bike jump about
 const RIDER_DOC_MS = 30000; // the rider's own record, for the admin map
 
 function metres(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
@@ -61,6 +65,10 @@ export function useRiderGps(uid: string | null, activeOrders: any[]) {
 
     const watch = navigator.geolocation.watchPosition(
       (pos) => {
+        // A very vague reading (a few hundred metres, as phones give before
+        // GPS locks on) would make the bike leap; wait for a better one,
+        // unless it is the only one there is.
+        if (lastFix.current && (pos.coords.accuracy || 0) > MAX_ACCURACY_M) return;
         const fix: RiderFix = {
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
@@ -68,6 +76,7 @@ export function useRiderGps(uid: string | null, activeOrders: any[]) {
           at: Date.now(),
           accuracy: Math.round(pos.coords.accuracy || 0),
           heading: typeof pos.coords.heading === 'number' && !isNaN(pos.coords.heading) ? Math.round(pos.coords.heading) : null,
+          speed: typeof pos.coords.speed === 'number' && !isNaN(pos.coords.speed) ? Math.round(pos.coords.speed * 10) / 10 : null,
         };
         lastFix.current = fix;
         setLast(fix);

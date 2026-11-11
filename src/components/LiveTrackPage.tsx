@@ -6,7 +6,7 @@ import { Bike, CheckCircle2, ChevronLeft, Clock, MapPin, Navigation, Wallet } fr
 import { db, firebaseReady } from '../firebase';
 import { useSEO } from '../utils/seo';
 import { useZoneStore } from '../lib/zones';
-import { fetchRoute, estimateRoute, routeAhead, type RouteInfo } from '../lib/route';
+import { fetchRoute, estimateRoute, type RouteInfo } from '../lib/route';
 import { haversineDistance } from '../lib/location';
 import { playSound, SOUNDS } from '../utils/audio';
 import LiveMap from './LiveMap';
@@ -216,7 +216,7 @@ function LiveTrack({ order, offsetTop }: { order: any; offsetTop: boolean }) {
           pickup={null}
           drop={drop}
           rider={delivering && fix ? { lat: fix.lat, lng: fix.lng } : null}
-          route={step === 'delivered' || step === 'completed' || !fix ? null : routeAhead(route?.coords, { lat: fix.lat, lng: fix.lng }, drop)}
+          route={step === 'delivered' || step === 'completed' || !fix ? null : route?.coords || null}
           className="h-72 rounded-[24px] overflow-hidden border border-rose-100"
         />
 

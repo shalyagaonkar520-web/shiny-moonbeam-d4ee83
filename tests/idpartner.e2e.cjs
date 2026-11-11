@@ -244,6 +244,49 @@ async function until(fn) { for (let i = 0; i < 20; i++) { const v = await fn(); 
     ok('rider marker is on the customer map and moves', !!before && !!after && before !== after, `${before} -> ${after}`);
     if (SHOTS) await cust.screenshot({ path: `${SHOTS}/e2e-cust-live.png`, fullPage: true });
 
+    // The bike must glide like a vehicle, not hop from fix to fix: sample its
+    // on-screen position every 100 ms while the rider moves (a GPS fix every
+    // 3.5 s) and measure how long it stands still and how far it ever jumps.
+    await cust.evaluate(() => {
+      const bike = () => [...document.querySelectorAll('.leaflet-marker-icon')].find((e) => e.textContent.includes('🛵'));
+      window.__trace = [];
+      window.__traceTimer = setInterval(() => {
+        const b = bike();
+        if (!b) return;
+        const r = b.getBoundingClientRect();
+        window.__trace.push([performance.now(), r.left + r.width / 2, r.top + r.height / 2, Number(b.getAttribute('data-lat')), Number(b.getAttribute('data-lng'))]);
+      }, 100);
+    });
+    const base = { latitude: pos.latitude, longitude: pos.longitude };
+    for (let i = 1; i <= 6; i++) {
+      await rctx.setGeolocation({ latitude: base.latitude + 0.0003 * i, longitude: base.longitude + 0.0001 * i });
+      await sleep(3500);
+    }
+    const trace = await cust.evaluate(() => { clearInterval(window.__traceTimer); return window.__trace; });
+    const t0 = trace.length ? trace[0][0] + 5000 : 0; // skip the first fix's settling time
+    // ...and the 3.5 s after the last fix, where the bike rightly slows to a stop.
+    const tEnd = trace.length ? trace[trace.length - 1][0] - 3500 : 0;
+    const win = trace.filter((s) => s[0] >= t0 && s[0] <= tEnd);
+    // Screen jumps catch the map or the bike teleporting; the bike's real
+    // position on the map (not its screen position, which stands still while
+    // the map scrolls to follow it) shows whether it keeps moving.
+    const metresGeo = (a, b) => Math.hypot((b[3] - a[3]) * 111320, (b[4] - a[4]) * 111320 * Math.cos((a[3] * Math.PI) / 180));
+    let longestStallMs = 0, stallStart = null, maxJumpPx = 0, maxStepM = 0, travelledM = 0;
+    for (let i = 1; i < win.length; i++) {
+      maxJumpPx = Math.max(maxJumpPx, Math.hypot(win[i][1] - win[i - 1][1], win[i][2] - win[i - 1][2]));
+      const m = metresGeo(win[i - 1], win[i]);
+      travelledM += m;
+      maxStepM = Math.max(maxStepM, m);
+      if (m < 0.15) { if (stallStart === null) stallStart = win[i - 1][0]; longestStallMs = Math.max(longestStallMs, win[i][0] - stallStart); } else stallStart = null;
+    }
+    // Metres moved in each half second, to see WHERE any pause falls.
+    const profile = [];
+    for (let i = 1; i < win.length; i++) { const b = Math.floor((win[i][0] - win[0][0]) / 500); profile[b] = (profile[b] || 0) + metresGeo(win[i - 1], win[i]); }
+    console.log('    [profile m/0.5s]', profile.map((v) => (v || 0).toFixed(1)).join(' '));
+    console.log(`    [motion] samples=${win.length} travelled=${travelledM.toFixed(0)}m longestStall=${longestStallMs.toFixed(0)}ms maxStep=${maxStepM.toFixed(1)}m/100ms maxScreenJump=${maxJumpPx.toFixed(1)}px`);
+    ok('bike keeps moving between GPS fixes (never stands still for over 1 s)', win.length > 50 && travelledM > 40 && longestStallMs < 1000, `stall ${longestStallMs.toFixed(0)}ms`);
+    ok('bike never teleports (under 4 m and 12 px per 100 ms)', win.length > 50 && maxStepM < 4 && maxJumpPx < 12, `step ${maxStepM.toFixed(1)}m jump ${maxJumpPx.toFixed(1)}px`);
+
     // Delivered -> payment.
     await rider.getByRole('button', { name: 'Delivered', exact: true }).last().click();
     await rider.getByRole('button', { name: /Collect payment/ }).waitFor({ timeout: 15000 });

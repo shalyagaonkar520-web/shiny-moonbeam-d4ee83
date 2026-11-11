@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import LiveMap from './LiveMap';
-import { fetchRoute, routeAhead, type RouteInfo } from '../lib/route';
+import { fetchRoute, type RouteInfo } from '../lib/route';
 import { haversineDistance } from '../lib/location';
 
 interface Pt {
@@ -30,7 +30,7 @@ export default function RouteMap({ from, to, className = '' }: { from: Pt | null
 
   return (
     <div className="relative">
-      <LiveMap rider={from} drop={to} route={from ? routeAhead(route?.coords, from, to) : null} className={className} />
+      <LiveMap rider={from} drop={to} route={from ? route?.coords || null : null} className={className} />
       {from && route && (
         <span className="absolute top-2 right-2 z-[500] bg-white/95 rounded-full px-3 py-1 text-xs font-black text-gray-900 shadow">
           {route.distanceKm < 1 ? `${Math.round(route.distanceKm * 1000)} m` : `${route.distanceKm.toFixed(1)} km`} · {route.durationMin} min

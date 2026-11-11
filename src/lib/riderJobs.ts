@@ -170,6 +170,8 @@ export interface RiderFix {
   accuracy?: number;
   /** Degrees from north, when the phone knows it. */
   heading?: number | null;
+  /** Metres per second, when the phone knows it. */
+  speed?: number | null;
 }
 
 /**
