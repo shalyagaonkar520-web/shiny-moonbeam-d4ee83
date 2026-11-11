@@ -167,3 +167,22 @@ export function useOnline() {
   }, []);
   return online;
 }
+
+/**
+ * The rider's own position for their maps (not sent anywhere). Runs while
+ * the rider is online or has a job, so the route to the customer is ready
+ * before pickup.
+ */
+export function useMyPosition(active: boolean) {
+  const [pos, setPos] = useState<{ lat: number; lng: number } | null>(null);
+  useEffect(() => {
+    if (!active || !navigator.geolocation) return;
+    const id = navigator.geolocation.watchPosition(
+      (p) => setPos({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      () => {},
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 }
+    );
+    return () => navigator.geolocation.clearWatch(id);
+  }, [active]);
+  return pos;
+}

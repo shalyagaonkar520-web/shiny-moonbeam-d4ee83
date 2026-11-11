@@ -58,6 +58,11 @@ export default function LiveMap({ pickup, drop, rider, route, className = '' }: 
     map.current = m;
     return () => {
       if (anim.current) cancelAnimationFrame(anim.current);
+      try {
+        m.stop(); // a pan/zoom still animating would touch removed panes
+      } catch {
+        /* already stopped */
+      }
       m.remove();
       map.current = null;
       markers.current = {};
@@ -126,8 +131,16 @@ export default function LiveMap({ pickup, drop, rider, route, className = '' }: 
     const m = map.current;
     if (!m || userMoved.current) return;
     const pts = [rider, drop, rider ? null : pickup].filter(Boolean) as Pt[];
-    if (pts.length === 1) m.setView([pts[0].lat, pts[0].lng], 16, { animate: true });
-    else if (pts.length > 1) m.fitBounds(L.latLngBounds(pts.map((p) => [p.lat, p.lng] as [number, number])), { padding: [50, 50], maxZoom: 17, animate: true });
+    // Starting a new view while an earlier zoom is still animating is what
+    // makes Leaflet throw "_leaflet_pos" (and leave the map half-drawn), so
+    // stop it first and never let a re-centre take the page down.
+    try {
+      m.stop();
+      if (pts.length === 1) m.setView([pts[0].lat, pts[0].lng], 16, { animate: false });
+      else if (pts.length > 1) m.fitBounds(L.latLngBounds(pts.map((p) => [p.lat, p.lng] as [number, number])), { padding: [50, 50], maxZoom: 17, animate: false });
+    } catch {
+      /* map not ready yet; the next update re-centres */
+    }
   }, [rider?.lat, rider?.lng, drop?.lat, drop?.lng, pickup?.lat, pickup?.lng]);
 
   return <div ref={box} className={`w-full ${className}`} style={{ zIndex: 0 }} />;

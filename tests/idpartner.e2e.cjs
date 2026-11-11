@@ -200,6 +200,7 @@ async function until(fn) { for (let i = 0; i < 20; i++) { const v = await fn(); 
     await rider.getByRole('button', { name: 'Picked up order' }).waitFor({ timeout: 15000 });
     const accepted = await until(async () => { const o = await get(`orders/${orderId}`); return o?.riderId ? o : null; });
     ok('order assigned to this rider', accepted?.riderId === uid && accepted?.riderOffer === 'TAKEN');
+    ok('rider map joins rider to customer (distance and minutes shown)', await rider.getByText(/(km|m) · [0-9]+ min/).first().waitFor({ timeout: 15000 }).then(() => true, () => false));
 
     await cust.getByText('Your order has been accepted!').first().waitFor({ timeout: 15000 });
     ok('customer sees "accepted" live, with approximate ETA', (await cust.getByText(/about 10 min/).count()) > 0);

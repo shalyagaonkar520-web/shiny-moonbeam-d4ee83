@@ -5,8 +5,8 @@ import toast from 'react-hot-toast';
 import { Bike, CheckCircle2, ChevronLeft, Clock, MapPin, Navigation, Wallet } from 'lucide-react';
 import { db, firebaseReady } from '../firebase';
 import { useSEO } from '../utils/seo';
-import { useZoneStore, YELLAPUR_ZONE } from '../lib/zones';
-import { fetchRoute, estimateRoute, type RouteInfo } from '../lib/route';
+import { useZoneStore } from '../lib/zones';
+import { fetchRoute, estimateRoute, routeAhead, type RouteInfo } from '../lib/route';
 import { haversineDistance } from '../lib/location';
 import { playSound, SOUNDS } from '../utils/audio';
 import LiveMap from './LiveMap';
@@ -132,14 +132,13 @@ function LiveTrack({ order, offsetTop }: { order: any; offsetTop: boolean }) {
   }, [step]);
 
   const drop = t?.dropLocation || (order.deliveryLocation ? { lat: order.deliveryLocation.lat, lng: order.deliveryLocation.lng } : null);
-  const pickup = t?.hotelLocation || YELLAPUR_ZONE.origin;
   const delivering = status === 'OUT_FOR_DELIVERY';
 
-  // Road route + ETA: from the rider while delivering, else pickup -> customer.
+  // Road route + ETA: from the rider's live position to the customer.
   useEffect(() => {
     if (!drop) return;
-    const from = delivering && fix ? { lat: fix.lat, lng: fix.lng } : pickup;
-    if (!from) return;
+    if (!fix) return;
+    const from = { lat: fix.lat, lng: fix.lng };
     const prev = routeFrom.current;
     const moved = prev ? haversineDistance(prev.lat, prev.lng, from.lat, from.lng) * 1000 : Infinity;
     // Re-route when the rider has moved 150 m or every 45 s; in between the
@@ -149,7 +148,7 @@ function LiveTrack({ order, offsetTop }: { order: any; offsetTop: boolean }) {
     const ac = new AbortController();
     fetchRoute(from, drop, ac.signal).then(setRoute);
     return () => ac.abort();
-  }, [fix?.lat, fix?.lng, delivering, drop?.lat, drop?.lng, pickup?.lat, pickup?.lng]);
+  }, [fix?.lat, fix?.lng, drop?.lat, drop?.lng]);
 
   const eta = useMemo(() => {
     if (!drop) return null;
@@ -214,10 +213,10 @@ function LiveTrack({ order, offsetTop }: { order: any; offsetTop: boolean }) {
         </section>
 
         <LiveMap
-          pickup={step === 'placed' || step === 'accepted' ? pickup : null}
+          pickup={null}
           drop={drop}
           rider={delivering && fix ? { lat: fix.lat, lng: fix.lng } : null}
-          route={step === 'delivered' || step === 'completed' ? null : route?.coords || null}
+          route={step === 'delivered' || step === 'completed' || !fix ? null : routeAhead(route?.coords, { lat: fix.lat, lng: fix.lng }, drop)}
           className="h-72 rounded-[24px] overflow-hidden border border-rose-100"
         />
 

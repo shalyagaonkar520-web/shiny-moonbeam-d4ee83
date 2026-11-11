@@ -14,11 +14,11 @@ import { staffSignIn } from '../lib/staffSignIn';
 import { friendlyAuthError } from '../lib/authErrors';
 import { useZoneStore } from '../lib/zones';
 import {
-  acceptOrder, collectPayment, handBack, hotelPoint, markDelivered, markPickedUp, publishTracking, setRiderOnline, type RiderIdentity,
+  acceptOrder, collectPayment, handBack, markDelivered, markPickedUp, publishTracking, setRiderOnline, type RiderIdentity,
 } from '../lib/riderJobs';
 import { askNotificationPermission, notifyNewOrder, startAlarm, stopAlarm, unlockAlarm } from '../lib/alarm';
-import { useOnline, useRiderGps, useWakeLock } from '../lib/partnerHooks';
-import LiveMap from './LiveMap';
+import { useMyPosition, useOnline, useRiderGps, useWakeLock } from '../lib/partnerHooks';
+import RouteMap from './RouteMap';
 
 /** Usernames without a domain map to this, so "partner" signs in as partner@idpartner.momsmagic.shop. */
 const RIDER_EMAIL_DOMAIN = 'idpartner.momsmagic.shop';
@@ -165,22 +165,6 @@ type Tab = 'new' | 'accepted' | 'picked' | 'delivered' | 'history';
 const amountOf = (o: any) => Number(o.payableAmount ?? o.grandTotal ?? o.totalAmount ?? 0);
 const shortId = (id: string) => String(id).slice(-6).toUpperCase();
 const navUrl = (p: { lat: number; lng: number }) => `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}&travelmode=two-wheeler`;
-/** Directions to the restaurant: its panel location, or a map search by name. */
-const pickupUrl = (o: any, p: { lat: number; lng: number } | null) =>
-  p ? navUrl(p) : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${o.hotelName || 'Restaurant'}, Yellapur`)}`;
-
-/** The order's restaurant position, as set in the panel (null if not set). */
-function useHotelPoint(hotelId: string | undefined) {
-  const [p, setP] = useState<{ lat: number; lng: number } | null>(null);
-  useEffect(() => {
-    let live = true;
-    hotelPoint(db, hotelId).then((v) => live && setP(v));
-    return () => {
-      live = false;
-    };
-  }, [hotelId]);
-  return p;
-}
 const paymentLabel = (o: any) =>
   o.paymentStatus === 'completed' ? (o.cashCollected ? 'Cash collected' : 'Paid online') : o.paymentMethod === 'online' ? 'Online (not confirmed)' : 'Cash on delivery';
 
@@ -282,6 +266,9 @@ function Dashboard({ rider, email }: { rider: RiderIdentity; email: string }) {
 
   const gps = useRiderGps(rider.uid, picked);
   const awake = useWakeLock(isOnline || picked.length > 0);
+  // The rider's own position, for the route to each customer.
+  const myPos = useMyPosition(isOnline || mine.some((o) => o.orderStatus === 'NEW' || o.orderStatus === 'OUT_FOR_DELIVERY'));
+  const here = gps.last ? { lat: gps.last.lat, lng: gps.last.lng } : myPos;
 
   // New offer -> popup + alarm until the rider answers.
   useEffect(() => {
@@ -418,8 +405,7 @@ function Dashboard({ rider, email }: { rider: RiderIdentity; email: string }) {
         )}
 
         {tab === 'accepted' && (accepted.length === 0 ? <Empty icon={<CheckCircle2 className="w-10 h-10" />} text="No accepted orders." /> : accepted.map((o) => (
-          <OrderCard key={o.id} o={o} showMap showPickup>
-            <PickupLink o={o} />
+          <OrderCard key={o.id} o={o} showMap here={here}>
             <BigButton busy={busy === `pick-${o.id}`} onClick={() => run(`pick-${o.id}`, () => markPickedUp(db, o.id, rider), {
               done: 'Picked up. Live tracking is on.', already: 'Already picked up.', not_allowed: 'This order can no longer be picked up.',
             }).then((r) => { if (r === 'done' || r === 'already') setTab('picked'); })}>Picked up order</BigButton>
@@ -429,7 +415,7 @@ function Dashboard({ rider, email }: { rider: RiderIdentity; email: string }) {
         )))}
 
         {tab === 'picked' && (picked.length === 0 ? <Empty icon={<Bike className="w-10 h-10" />} text="Nothing out for delivery." /> : picked.map((o) => (
-          <OrderCard key={o.id} o={o} showMap rider={gps.last}>
+          <OrderCard key={o.id} o={o} showMap here={here}>
             <a href={navUrl(o.deliveryLocation)} target="_blank" rel="noreferrer" className="block w-full text-center py-3 rounded-2xl border-2 border-gray-900 font-black text-sm">
               <Navigation className="w-4 h-4 inline -mt-0.5 mr-1" /> Navigate to customer
             </a>
@@ -479,7 +465,7 @@ function Dashboard({ rider, email }: { rider: RiderIdentity; email: string }) {
               <button onClick={() => { stopAlarm(); setPopup(null); setTab('new'); }} className="p-1.5 rounded-full bg-gray-100" aria-label="Close"><X className="w-5 h-5" /></button>
             </div>
             <OrderDetails o={popup} />
-            <PickupMap o={popup} className="h-44 rounded-2xl overflow-hidden" />
+            <RouteMap from={here} to={popup.deliveryLocation} className="h-44 rounded-2xl overflow-hidden" />
             <div className="grid grid-cols-2 gap-2.5">
               <BigButton tone="ghost" onClick={() => reject(popup)}>Reject order</BigButton>
               <BigButton busy={busy === `accept-${popup.id}`} onClick={() => accept(popup)}>Accept order</BigButton>
@@ -522,27 +508,13 @@ function OrderDetails({ o }: { o: any }) {
   );
 }
 
-function PickupMap({ o, rider, showPickup = true, className }: { o: any; rider?: { lat: number; lng: number } | null; showPickup?: boolean; className: string }) {
-  const p = useHotelPoint(o.hotelId);
-  return <LiveMap pickup={showPickup ? p : null} drop={o.deliveryLocation} rider={rider || null} className={className} />;
-}
-
-function PickupLink({ o }: { o: any }) {
-  const p = useHotelPoint(o.hotelId);
-  return (
-    <a href={pickupUrl(o, p)} target="_blank" rel="noreferrer" className="block w-full text-center py-3 rounded-2xl border-2 border-gray-900 font-black text-sm">
-      <MapPin className="w-4 h-4 inline -mt-0.5 mr-1" /> Navigate to {o.hotelName || 'restaurant'}
-    </a>
-  );
-}
-
-function OrderCard({ o, children, showMap, showPickup, rider }: {
-  o: any; children: React.ReactNode; showMap?: boolean; showPickup?: boolean; rider?: { lat: number; lng: number } | null;
+function OrderCard({ o, children, showMap, here }: {
+  o: any; children: React.ReactNode; showMap?: boolean; here?: { lat: number; lng: number } | null;
 }) {
   return (
     <div className="bg-white rounded-[24px] border border-rose-100 shadow-sm p-4 space-y-3">
       <OrderDetails o={o} />
-      {showMap && <PickupMap o={o} rider={rider} showPickup={!!showPickup} className="h-48 rounded-2xl overflow-hidden" />}
+      {showMap && <RouteMap from={here || null} to={o.deliveryLocation} className="h-48 rounded-2xl overflow-hidden" />}
       {children}
     </div>
   );
