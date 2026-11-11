@@ -33,7 +33,7 @@ import {
   loadRazorpay,
   preconnectRazorpay,
 } from '../lib/checkoutApi';
-import { inServiceArea as zoneInServiceArea, servedAreasText, useZoneStore, riderDirectFields } from '../lib/zones';
+import { inServiceArea as zoneInServiceArea, servedAreasText, riderDirectFields } from '../lib/zones';
 
 // Publishable Razorpay key id (safe in the browser). The server returns the
 // key that matches the order it created; this is the fallback path's key.
@@ -313,11 +313,7 @@ export default function Checkout() {
       return;
     }
     if (!zoneInServiceArea(deliveryLocation)) {
-      toast.error(
-        deliveryLocation.zoneId === 'lpu'
-          ? `Sorry, ${useZoneStore.getState().lpu.name} deliveries are paused right now, or this spot is outside the campus delivery zone.`
-          : `Sorry, we deliver only in ${servedAreasText()}.`
-      );
+      toast.error(`Sorry, we deliver only in ${servedAreasText()}, within ${SERVICE_RADIUS_KM} km of our kitchen.`);
       return;
     }
     if (distanceKm > 5 && paymentMethod === 'cod') {
@@ -540,7 +536,7 @@ export default function Checkout() {
           // Legacy lowercase mirror, still read by the tracking screen.
           status: 'pending',
           deliveryLocation,
-          // LPU: straight to ID Partner riders, with a live-tracking id.
+          // Rider delivery on: straight to ID Partner riders, with a live-tracking id.
           ...(riderDirectFields(deliveryLocation) || {}),
           // Lets /api/notify-order push status updates to this device.
           customerPushToken: pushToken,

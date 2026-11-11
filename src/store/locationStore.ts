@@ -15,7 +15,7 @@ export interface DeliveryLocation {
   lat: number;
   lng: number;
   address: string;
-  distance: number; // in km, from the zone's origin (kitchen or LPU pickup point)
+  distance: number; // in km, from the Yellapur kitchen
   isDeliverable: boolean;
   /** Which delivery zone serves this point (see lib/zones). Absent on locations saved before zones. */
   zoneId?: ZoneId | null;

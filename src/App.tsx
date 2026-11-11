@@ -48,11 +48,11 @@ const LuckyWheelPage = lazy(() => import('./components/LuckyWheelPage'));
 const AuthPage = lazy(() => import('./components/AuthPage'));
 const TrackOrderPage = lazy(() => import('./components/TrackOrderPage'));
 const TrackComingSoon = lazy(() => import('./components/TrackComingSoon'));
-// LPU orders: live map + timeline. Other orders still see "coming soon".
+// Rider-delivered orders: live map + timeline. Other orders still see "coming soon".
 const TrackRoute = lazy(() => import('./components/LiveTrackPage'));
-// ID Partner, the rider app for LPU deliveries.
+// ID Partner, the rider app.
 const PartnerApp = lazy(() => import('./components/PartnerApp'));
-const LpuZoneAdmin = lazy(() => import('./components/LpuZoneAdmin'));
+const RiderDeliveryAdmin = lazy(() => import('./components/RiderDeliveryAdmin'));
 const MenswearPage = lazy(() => import('./components/MenswearPage'));
 const MenswearProductPage = lazy(() => import('./components/MenswearProductPage'));
 const MenswearAdminPage = lazy(() => import('./components/MenswearAdminPage'));
@@ -107,7 +107,7 @@ export default function App() {
 
   const setDeferredPrompt = useInstallModalStore(state => state.setDeferredPrompt);
 
-  // The LPU delivery zone (rectangle, pickup point, ETA): one read per start.
+  // ID Partner rider delivery on/off, area and ETA: one read per start.
   useEffect(() => {
     void useZoneStore.getState().load();
   }, []);
@@ -274,7 +274,7 @@ export default function App() {
                   <Route path="/about" element={<AboutFounder />} />
                   <Route path="/admin" element={<AdminPage />} />
                   <Route path="/admin/menswear" element={<MenswearAdminPage />} />
-                  <Route path="/admin/lpu" element={<LpuZoneAdmin />} />
+                  <Route path="/admin/rider-delivery" element={<RiderDeliveryAdmin />} />
                   {/* The old dark /orders list read stale localStorage; /track is the live list. */}
                   <Route path="/orders" element={<Navigate to="/track" replace />} />
                   <Route path="/spin" element={<LuckyWheelPage />} />

@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { Bike, CheckCircle2, ChevronLeft, Clock, MapPin, Navigation, Wallet } from 'lucide-react';
 import { db, firebaseReady } from '../firebase';
 import { useSEO } from '../utils/seo';
-import { useZoneStore } from '../lib/zones';
+import { useZoneStore, YELLAPUR_ZONE } from '../lib/zones';
 import { fetchRoute, estimateRoute, type RouteInfo } from '../lib/route';
 import { haversineDistance } from '../lib/location';
 import { playSound, SOUNDS } from '../utils/audio';
@@ -22,7 +22,7 @@ function localOrders(): any[] {
 }
 
 /**
- * /track/:orderId. LPU (rider-direct) orders carry a trackingId and get the
+ * /track/:orderId. Rider-direct orders carry a trackingId and get the
  * live map; any other order keeps the "coming soon" screen.
  */
 export default function TrackRoute() {
@@ -76,7 +76,7 @@ const STALE_MS = 60_000;
 function LiveTrack({ order, offsetTop }: { order: any; offsetTop: boolean }) {
   useSEO('Track your order - Mintoo', 'Live order tracking.');
   const navigate = useNavigate();
-  const lpu = useZoneStore((s) => s.lpu);
+  const zone = useZoneStore((s) => s.rider);
   const [t, setT] = useState<any | null>(null);
   const [connected, setConnected] = useState(true);
   const [route, setRoute] = useState<RouteInfo | null>(null);
@@ -132,7 +132,7 @@ function LiveTrack({ order, offsetTop }: { order: any; offsetTop: boolean }) {
   }, [step]);
 
   const drop = t?.dropLocation || (order.deliveryLocation ? { lat: order.deliveryLocation.lat, lng: order.deliveryLocation.lng } : null);
-  const pickup = t?.hotelLocation || lpu.pickup;
+  const pickup = t?.hotelLocation || YELLAPUR_ZONE.origin;
   const delivering = status === 'OUT_FOR_DELIVERY';
 
   // Road route + ETA: from the rider while delivering, else pickup -> customer.
@@ -160,7 +160,7 @@ function LiveTrack({ order, offsetTop }: { order: any; offsetTop: boolean }) {
     return null;
   }, [route, delivering, fix?.lat, fix?.lng, drop?.lat, drop?.lng]);
 
-  const etaMinutes = Number(order.etaMinutes) || lpu.etaMinutes;
+  const etaMinutes = Number(order.etaMinutes) || zone.etaMinutes;
   const [headline, sub] = HEADLINES[step];
   const times: Record<string, number> = { placed: Date.parse(order.createdAt) || 0, ...(t?.times || {}) };
   const reached = STEPS.findIndex(([k]) => k === step);

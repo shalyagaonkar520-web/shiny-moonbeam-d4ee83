@@ -14,7 +14,7 @@ import { staffSignIn } from '../lib/staffSignIn';
 import { friendlyAuthError } from '../lib/authErrors';
 import { useZoneStore } from '../lib/zones';
 import {
-  acceptOrder, collectPayment, handBack, markDelivered, markPickedUp, publishTracking, setRiderOnline, type RiderIdentity,
+  acceptOrder, collectPayment, handBack, hotelPoint, markDelivered, markPickedUp, publishTracking, setRiderOnline, type RiderIdentity,
 } from '../lib/riderJobs';
 import { askNotificationPermission, notifyNewOrder, startAlarm, stopAlarm, unlockAlarm } from '../lib/alarm';
 import { useOnline, useRiderGps, useWakeLock } from '../lib/partnerHooks';
@@ -31,7 +31,7 @@ const toEmail = (u: string) => {
 type Gate = { s: 'loading' } | { s: 'out' } | { s: 'denied'; reason: string } | { s: 'in'; user: User; name: string };
 
 /**
- * ID Partner: the rider app for rider-direct (LPU) orders, at /partner.
+ * ID Partner: the rider app for rider-direct orders, at /partner.
  *
  * Riders are the panel's RIDER accounts (Firebase Authentication keeps the
  * passwords, hashed; nothing is stored here). Every action is checked by the
@@ -165,11 +165,26 @@ type Tab = 'new' | 'accepted' | 'picked' | 'delivered' | 'history';
 const amountOf = (o: any) => Number(o.payableAmount ?? o.grandTotal ?? o.totalAmount ?? 0);
 const shortId = (id: string) => String(id).slice(-6).toUpperCase();
 const navUrl = (p: { lat: number; lng: number }) => `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}&travelmode=two-wheeler`;
+/** Directions to the restaurant: its panel location, or a map search by name. */
+const pickupUrl = (o: any, p: { lat: number; lng: number } | null) =>
+  p ? navUrl(p) : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${o.hotelName || 'Restaurant'}, Yellapur`)}`;
+
+/** The order's restaurant position, as set in the panel (null if not set). */
+function useHotelPoint(hotelId: string | undefined) {
+  const [p, setP] = useState<{ lat: number; lng: number } | null>(null);
+  useEffect(() => {
+    let live = true;
+    hotelPoint(db, hotelId).then((v) => live && setP(v));
+    return () => {
+      live = false;
+    };
+  }, [hotelId]);
+  return p;
+}
 const paymentLabel = (o: any) =>
   o.paymentStatus === 'completed' ? (o.cashCollected ? 'Cash collected' : 'Paid online') : o.paymentMethod === 'online' ? 'Online (not confirmed)' : 'Cash on delivery';
 
 function Dashboard({ rider, email }: { rider: RiderIdentity; email: string }) {
-  const lpu = useZoneStore((s) => s.lpu);
   const netOnline = useOnline();
   const [riderDoc, setRiderDoc] = useState<any>(null);
   const [offers, setOffers] = useState<any[]>([]);
@@ -393,7 +408,7 @@ function Dashboard({ rider, email }: { rider: RiderIdentity; email: string }) {
           !isOnline ? <Empty icon={<Power className="w-10 h-10" />} text="You are offline. Go online to receive new orders." />
           : newOffers.length === 0 ? <Empty icon={<Package className="w-10 h-10" />} text="Waiting for orders… This screen will ring when one arrives." />
           : newOffers.map((o) => (
-            <OrderCard key={o.id} o={o} pickupLabel={lpu.pickup.label}>
+            <OrderCard key={o.id} o={o}>
               <div className="grid grid-cols-2 gap-2.5">
                 <BigButton tone="ghost" onClick={() => reject(o)}>Reject</BigButton>
                 <BigButton busy={busy === `accept-${o.id}`} onClick={() => accept(o)}>Accept order</BigButton>
@@ -403,10 +418,8 @@ function Dashboard({ rider, email }: { rider: RiderIdentity; email: string }) {
         )}
 
         {tab === 'accepted' && (accepted.length === 0 ? <Empty icon={<CheckCircle2 className="w-10 h-10" />} text="No accepted orders." /> : accepted.map((o) => (
-          <OrderCard key={o.id} o={o} pickupLabel={lpu.pickup.label} showMap mapPickup={lpu.pickup}>
-            <a href={navUrl(lpu.pickup)} target="_blank" rel="noreferrer" className="block w-full text-center py-3 rounded-2xl border-2 border-gray-900 font-black text-sm">
-              <MapPin className="w-4 h-4 inline -mt-0.5 mr-1" /> Navigate to pickup
-            </a>
+          <OrderCard key={o.id} o={o} showMap showPickup>
+            <PickupLink o={o} />
             <BigButton busy={busy === `pick-${o.id}`} onClick={() => run(`pick-${o.id}`, () => markPickedUp(db, o.id, rider), {
               done: 'Picked up. Live tracking is on.', already: 'Already picked up.', not_allowed: 'This order can no longer be picked up.',
             }).then((r) => { if (r === 'done' || r === 'already') setTab('picked'); })}>Picked up order</BigButton>
@@ -416,7 +429,7 @@ function Dashboard({ rider, email }: { rider: RiderIdentity; email: string }) {
         )))}
 
         {tab === 'picked' && (picked.length === 0 ? <Empty icon={<Bike className="w-10 h-10" />} text="Nothing out for delivery." /> : picked.map((o) => (
-          <OrderCard key={o.id} o={o} pickupLabel={lpu.pickup.label} showMap rider={gps.last}>
+          <OrderCard key={o.id} o={o} showMap rider={gps.last}>
             <a href={navUrl(o.deliveryLocation)} target="_blank" rel="noreferrer" className="block w-full text-center py-3 rounded-2xl border-2 border-gray-900 font-black text-sm">
               <Navigation className="w-4 h-4 inline -mt-0.5 mr-1" /> Navigate to customer
             </a>
@@ -427,7 +440,7 @@ function Dashboard({ rider, email }: { rider: RiderIdentity; email: string }) {
         )))}
 
         {tab === 'delivered' && (delivered.length === 0 ? <Empty icon={<Banknote className="w-10 h-10" />} text="No payments to collect." /> : delivered.map((o) => (
-          <OrderCard key={o.id} o={o} pickupLabel={lpu.pickup.label}>
+          <OrderCard key={o.id} o={o}>
             <PaymentBox o={o} busy={busy === `pay-${o.id}`} onCollect={() => run(`pay-${o.id}`, () => collectPayment(db, o.id, rider), {
               cash_collected: `₹${amountOf(o)} cash collected. Delivery closed.`,
               closed_paid_online: 'Paid online. Delivery closed.',
@@ -465,8 +478,8 @@ function Dashboard({ rider, email }: { rider: RiderIdentity; email: string }) {
               <p className="flex-1 text-lg font-black text-[#e11d48]">New order!</p>
               <button onClick={() => { stopAlarm(); setPopup(null); setTab('new'); }} className="p-1.5 rounded-full bg-gray-100" aria-label="Close"><X className="w-5 h-5" /></button>
             </div>
-            <OrderDetails o={popup} pickupLabel={lpu.pickup.label} />
-            <LiveMap pickup={lpu.pickup} drop={popup.deliveryLocation} className="h-44 rounded-2xl overflow-hidden" />
+            <OrderDetails o={popup} />
+            <PickupMap o={popup} className="h-44 rounded-2xl overflow-hidden" />
             <div className="grid grid-cols-2 gap-2.5">
               <BigButton tone="ghost" onClick={() => reject(popup)}>Reject order</BigButton>
               <BigButton busy={busy === `accept-${popup.id}`} onClick={() => accept(popup)}>Accept order</BigButton>
@@ -480,7 +493,7 @@ function Dashboard({ rider, email }: { rider: RiderIdentity; email: string }) {
   );
 }
 
-function OrderDetails({ o, pickupLabel }: { o: any; pickupLabel: string }) {
+function OrderDetails({ o }: { o: any }) {
   const items: any[] = Array.isArray(o.items) ? o.items : [];
   return (
     <div className="space-y-2.5">
@@ -503,19 +516,33 @@ function OrderDetails({ o, pickupLabel }: { o: any; pickupLabel: string }) {
         ))}
       </ul>
       {o.instructions && <p className="text-xs text-gray-600 bg-amber-50 rounded-xl px-2.5 py-2"><b>Note:</b> {o.instructions}</p>}
-      <p className="text-xs text-gray-600"><b>Pick up:</b> {pickupLabel}</p>
+      <p className="text-xs text-gray-600"><b>Pick up from:</b> {o.hotelName || 'Restaurant'}</p>
       <p className="text-sm text-gray-900 flex gap-1.5"><MapPin className="w-4 h-4 text-[#e11d48] shrink-0 mt-0.5" /> {o.deliveryLocation?.address}</p>
     </div>
   );
 }
 
-function OrderCard({ o, children, pickupLabel, showMap, mapPickup, rider }: {
-  o: any; children: React.ReactNode; pickupLabel: string; showMap?: boolean; mapPickup?: { lat: number; lng: number } | null; rider?: { lat: number; lng: number } | null;
+function PickupMap({ o, rider, showPickup = true, className }: { o: any; rider?: { lat: number; lng: number } | null; showPickup?: boolean; className: string }) {
+  const p = useHotelPoint(o.hotelId);
+  return <LiveMap pickup={showPickup ? p : null} drop={o.deliveryLocation} rider={rider || null} className={className} />;
+}
+
+function PickupLink({ o }: { o: any }) {
+  const p = useHotelPoint(o.hotelId);
+  return (
+    <a href={pickupUrl(o, p)} target="_blank" rel="noreferrer" className="block w-full text-center py-3 rounded-2xl border-2 border-gray-900 font-black text-sm">
+      <MapPin className="w-4 h-4 inline -mt-0.5 mr-1" /> Navigate to {o.hotelName || 'restaurant'}
+    </a>
+  );
+}
+
+function OrderCard({ o, children, showMap, showPickup, rider }: {
+  o: any; children: React.ReactNode; showMap?: boolean; showPickup?: boolean; rider?: { lat: number; lng: number } | null;
 }) {
   return (
     <div className="bg-white rounded-[24px] border border-rose-100 shadow-sm p-4 space-y-3">
-      <OrderDetails o={o} pickupLabel={pickupLabel} />
-      {showMap && <LiveMap pickup={mapPickup || null} drop={o.deliveryLocation} rider={rider || null} className="h-48 rounded-2xl overflow-hidden" />}
+      <OrderDetails o={o} />
+      {showMap && <PickupMap o={o} rider={rider} showPickup={!!showPickup} className="h-48 rounded-2xl overflow-hidden" />}
       {children}
     </div>
   );

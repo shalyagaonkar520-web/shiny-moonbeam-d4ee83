@@ -1,16 +1,17 @@
 import {
   arrayUnion,
   doc,
+  getDoc,
   runTransaction,
   serverTimestamp,
   setDoc,
   updateDoc,
   type Firestore,
 } from 'firebase/firestore';
-import { useZoneStore } from './zones';
+import { YELLAPUR_ZONE } from './zones';
 
 /**
- * ID Partner's job steps for rider-direct (LPU) orders.
+ * ID Partner's job steps for rider-direct orders.
  *
  * The guarantees are in the Firestore rules (panel firestore.rules):
  * isValidRiderAccept lets exactly one rider claim an open offer, and
@@ -88,7 +89,7 @@ async function advance(
   });
 }
 
-/** No kitchen in LPU: the rider collects the food straight from NEW. */
+/** No kitchen step: the rider collects the food from the restaurant straight from NEW. */
 export const markPickedUp = (db: Firestore, orderId: string, rider: RiderIdentity) =>
   advance(db, orderId, rider, 'NEW', 'OUT_FOR_DELIVERY');
 
@@ -152,6 +153,36 @@ export async function handBack(db: Firestore, orderId: string, rider: RiderIdent
   });
 }
 
+// ── Restaurant locations (the pickup point) ───────────────────────────
+
+const hotelPoints = new Map<string, Promise<{ lat: number; lng: number } | null>>();
+
+/**
+ * Where to collect an order: the restaurant's position as set in the panel
+ * (Restaurants > Location). Null when it has not been set; callers fall back
+ * to the Yellapur kitchen and a map search by the restaurant's name.
+ */
+export function hotelPoint(db: Firestore, hotelId: string | null | undefined) {
+  if (!hotelId) return Promise.resolve(null);
+  if (!hotelPoints.has(hotelId)) {
+    hotelPoints.set(
+      hotelId,
+      getDoc(doc(db, 'hotels', hotelId))
+        .then((s) => {
+          const d: any = s.data() || {};
+          const lat = Number(d.lat ?? d.location?.lat);
+          const lng = Number(d.lng ?? d.location?.lng);
+          return isFinite(lat) && isFinite(lng) && lat !== 0 ? { lat, lng } : null;
+        })
+        .catch(() => {
+          hotelPoints.delete(hotelId);
+          return null;
+        })
+    );
+  }
+  return hotelPoints.get(hotelId)!;
+}
+
 // ── Live tracking ────────────────────────────────────────────────────
 
 function millis(v: any): number | null {
@@ -179,7 +210,7 @@ export interface RiderFix {
  */
 export async function publishTracking(db: Firestore, order: any, riderLocation?: RiderFix | null): Promise<void> {
   if (!order?.trackingId) return;
-  const lpu = useZoneStore.getState().lpu;
+  const pickup = (await hotelPoint(db, order.hotelId)) || YELLAPUR_ZONE.origin;
   const t: Record<string, number> = {};
   const add = (k: string, v: any) => {
     const m = millis(v);
@@ -198,7 +229,7 @@ export async function publishTracking(db: Firestore, order: any, riderLocation?:
       orderNumber: String(order.id).slice(-6).toUpperCase(),
       status: order.orderStatus,
       hotelName: order.hotelName || '',
-      hotelLocation: { lat: lpu.pickup.lat, lng: lpu.pickup.lng },
+      hotelLocation: { lat: pickup.lat, lng: pickup.lng },
       dropLocation: drop && typeof drop.lat === 'number' ? { lat: drop.lat, lng: drop.lng } : null,
       riderId: order.riderId || '',
       riderName: order.riderName || '',

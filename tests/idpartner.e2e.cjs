@@ -6,7 +6,7 @@
  *   cd "<panel>" && firebase emulators:exec --only auth,firestore --project momsmagic-d131a \
  *     "node <this repo>/tests/idpartner.e2e.cjs"
  *
- * A customer at LPU orders (cash), the rider's app rings, the rider accepts,
+ * With rider delivery switched on for Yellapur, a customer orders (cash), the rider's app rings, the rider accepts,
  * picks up, moves (real geolocation updates), delivers and collects cash;
  * the customer's tracking page must follow every step live.
  */
@@ -24,9 +24,10 @@ const SHOTS = process.env.SHOTS || '';
 // Emulator-only account: a throwaway password, never the real one.
 const TEST_PASSWORD = 'emulator-only-test-pass';
 
-const LPU = { minLat: 31.244, maxLat: 31.264, minLng: 75.692, maxLng: 75.715 };
-const PICKUP = { lat: 31.2554, lng: 75.705 };
-const DROP = { lat: 31.2512, lng: 75.7008, address: 'Boys Hostel 4, LPU, Phagwara' };
+const ZONE = { minLat: 14.856, maxLat: 15.073, minLng: 74.6, maxLng: 74.824 };
+// Hotel Mumtaz's position as the panel would hold it (the rider's pickup).
+const PICKUP = { lat: 14.9662, lng: 74.7135 };
+const DROP = { lat: 14.9601, lng: 74.7079, address: 'Ganesh Nagar, Yellapur' };
 
 let passed = 0;
 let failed = 0;
@@ -87,10 +88,9 @@ async function seed() {
   if (!uid) throw new Error('could not create rider: ' + JSON.stringify(signUp));
   await put(`users/${uid}`, { uid, email: 'partner@idpartner.momsmagic.shop', name: 'Ravi', role: 'RIDER', active: true });
   await put(`riders/${uid}`, { uid, name: 'Ravi', phone: '9000000001', status: 'offline', active: true, earnings: 0, deliveredCount: 0 });
-  await put('cities/lpu', { name: 'LPU', active: true, riderDirect: true, deliveryBounds: LPU, pickupLocation: { ...PICKUP, label: 'LPU Food Court' }, etaMinutes: 10 });
-  await put('cities/yellapur', { name: 'Yellapur', active: true });
+  await put('cities/yellapur', { name: 'Yellapur', active: true, riderDirect: true, deliveryBounds: ZONE, etaMinutes: 10 });
   for (const id of ['mumtaz', 'moms-magic', 'al_amin', 'coastal_crown', 'malabar', 'sankalpa']) {
-    await put(`hotels/${id}`, { name: id, cityId: 'yellapur', status: 'ACTIVE', acceptingOrders: true });
+    await put(`hotels/${id}`, { name: id, cityId: 'yellapur', status: 'ACTIVE', acceptingOrders: true, ...(id === 'mumtaz' ? PICKUP : {}) });
   }
   return uid;
 }
@@ -132,17 +132,17 @@ async function until(fn) { for (let i = 0; i < 20; i++) { const v = await fn(); 
     await waitFor(BASE + '/');
     browser = await chromium.launch();
 
-    // ── Customer at LPU ──────────────────────────────────────────────
+    // ── Customer in Yellapur ─────────────────────────────────────────
     const cctx = await browser.newContext({ viewport: { width: 390, height: 844 }, geolocation: { latitude: DROP.lat, longitude: DROP.lng }, permissions: ['geolocation'] });
     await cctx.route(/wa\.me|api\.whatsapp\.com|api\.telegram\.org/, (r) => r.abort());
-    await cctx.addInitScript(({ drop, lpu, pickup }) => {
+    await cctx.addInitScript(({ drop }) => {
       localStorage.setItem('delivery-location-storage', JSON.stringify({
-        state: { deliveryLocation: { lat: drop.lat, lng: drop.lng, address: drop.address, distance: 0.6, isDeliverable: true, zoneId: 'lpu' } }, version: 0,
+        state: { deliveryLocation: { lat: drop.lat, lng: drop.lng, address: drop.address, distance: 0.6, isDeliverable: true, zoneId: 'yellapur' } }, version: 0,
       }));
       localStorage.setItem('mintoo_location_confirmed', String(Date.now()));
-      localStorage.setItem('mintoo_lpu_zone', JSON.stringify({ active: true, name: 'LPU', bounds: lpu, pickup: { ...pickup, label: 'LPU Food Court' }, etaMinutes: 10 }));
+      sessionStorage.setItem('mintoo_yellapur_choice', 'food');
       window.open = () => null; // the WhatsApp hand-off
-    }, { drop: DROP, lpu: LPU, pickup: PICKUP });
+    }, { drop: DROP });
     const cust = await cctx.newPage();
     global.__pages = { cust };
     cust.on('pageerror', (e) => console.log('    [customer error]', e.message));
@@ -170,7 +170,7 @@ async function until(fn) { for (let i = 0; i < 20; i++) { const v = await fn(); 
     // Customer orders from a menu, cash on delivery.
     await cust.goto(BASE + '/hotel-mumtaz?preview=1');
     await cust.getByRole('button', { name: /Continue/ }).click({ timeout: 15000 });
-    ok('LPU address is accepted as a delivery zone', true);
+    ok('Yellapur customer reaches the menu', true);
     await cust.getByText('ADD', { exact: true }).first().click({ timeout: 20000 });
     await sleep(600);
     await cust.goto(BASE + '/checkout?preview=1');
@@ -181,7 +181,7 @@ async function until(fn) { for (let i = 0; i < 20; i++) { const v = await fn(); 
     await cust.waitForURL(/\/track\//, { timeout: 25000 });
     const orderId = new URL(cust.url()).pathname.split('/').pop();
     const order = (await listOrders()).find((o) => o.id === orderId);
-    ok('order saved as rider-direct LPU order', order?.dispatchStatus === 'RIDER_DIRECT' && order?.riderOffer === 'OPEN' && order?.cityId === 'lpu' && !!order?.trackingId,
+    ok('order saved as a rider-direct order', order?.dispatchStatus === 'RIDER_DIRECT' && order?.riderOffer === 'OPEN' && order?.cityId === 'yellapur' && !!order?.trackingId,
       JSON.stringify({ d: order?.dispatchStatus, o: order?.riderOffer, c: order?.cityId }));
     await cust.getByText('Finding a delivery partner').first().waitFor({ timeout: 15000 });
     ok('customer sees "Order placed"', true);
@@ -193,7 +193,8 @@ async function until(fn) { for (let i = 0; i < 20; i++) { const v = await fn(); 
     const popup = rider.getByRole('alertdialog');
     ok('popup shows customer, phone, item, total and address',
       (await popup.getByText('Asha').count()) > 0 && (await popup.getByText('9876543210').count()) > 0 &&
-      (await popup.getByText(/Boys Hostel 4/).count()) > 0 && (await popup.getByText(/₹\d+/).count()) > 0);
+      (await popup.getByText(/Ganesh Nagar/).count()) > 0 && (await popup.getByText(/₹\d+/).count()) > 0 &&
+      (await popup.getByText(/Pick up from/).count()) > 0);
     if (SHOTS) await rider.screenshot({ path: `${SHOTS}/e2e-rider-popup.png` });
     await popup.getByRole('button', { name: 'Accept order' }).click();
     await rider.getByRole('button', { name: 'Picked up order' }).waitFor({ timeout: 15000 });
@@ -257,7 +258,8 @@ async function until(fn) { for (let i = 0; i < 20; i++) { const v = await fn(); 
     const t2 = (await get(`tracking/${track}`))?.riderLocation?.at;
     ok('GPS stops after delivery is closed', t1 === t2);
 
-    // A Yellapur customer is unaffected: their order still goes to JIS.
+    // Rider delivery switched OFF: orders go to JIS as before.
+    await put('cities/yellapur', { name: 'Yellapur', active: true, riderDirect: false, deliveryBounds: ZONE, etaMinutes: 10 });
     const yctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
     await yctx.route(/wa\.me|api\.whatsapp\.com|api\.telegram\.org/, (r) => r.abort());
     await yctx.addInitScript(() => {
@@ -266,6 +268,7 @@ async function until(fn) { for (let i = 0; i < 20; i++) { const v = await fn(); 
       }));
       localStorage.setItem('mintoo_location_confirmed', String(Date.now()));
       sessionStorage.setItem('mintoo_yellapur_choice', 'food');
+      localStorage.removeItem('mintoo_rider_zone');
       window.open = () => null;
     });
     const y = await yctx.newPage();
@@ -280,8 +283,8 @@ async function until(fn) { for (let i = 0; i < 20; i++) { const v = await fn(); 
     await y.waitForURL(/\/track\//, { timeout: 25000 });
     const yid = new URL(y.url()).pathname.split('/').pop();
     const yo = await get(`orders/${yid}`);
-    ok('Yellapur order unchanged: PENDING_DISPATCH, no rider offer', yo?.dispatchStatus === 'PENDING_DISPATCH' && yo?.riderOffer === undefined && !yo?.trackingId);
-    ok('Yellapur customer still sees "coming soon" tracking', await y.getByText('Coming soon').first().waitFor({ timeout: 15000 }).then(() => true, () => false));
+    ok('rider delivery OFF: order goes to JIS (PENDING_DISPATCH, no rider offer)', yo?.dispatchStatus === 'PENDING_DISPATCH' && yo?.riderOffer === undefined && !yo?.trackingId);
+    ok('rider delivery OFF: customer sees the usual "coming soon" tracking', await y.getByText('Coming soon').first().waitFor({ timeout: 15000 }).then(() => true, () => false));
   } catch (e) {
     failed++;
     console.log('  FAIL  run aborted:', e.message.split(String.fromCharCode(10))[0]);

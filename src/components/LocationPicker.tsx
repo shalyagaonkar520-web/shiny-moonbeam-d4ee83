@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { useLocationStore, NearbyRestaurant } from '../store/locationStore';
 
 import { haversineDistance, reverseGeocode } from '../lib/location';
-import { locate, useZoneStore, type ZoneId } from '../lib/zones';
+import { locate, type ZoneId } from '../lib/zones';
 
 // ═══════════════════════════════════════════════════════════════
 // OVERPASS API - FETCH NEARBY RESTAURANTS
@@ -134,18 +134,16 @@ export default function LocationPicker() {
             .bindPopup(popupNode('Delivery Location', addr));
         }
 
-        // Draw the delivery area: the LPU rectangle, or the Yellapur circle.
+        // Draw delivery range circle
         if (circleRef.current) map.removeLayer(circleRef.current);
-        const areaStyle = { color: '#e11d48', fillColor: '#e11d48', fillOpacity: 0.05, weight: 1.5, dashArray: '8, 6' };
-        if (located.zoneId === 'lpu') {
-          const b = useZoneStore.getState().lpu.bounds;
-          circleRef.current = L.rectangle([[b.minLat, b.minLng], [b.maxLat, b.maxLng]], areaStyle).addTo(map);
-        } else {
-          circleRef.current = L.circle([restaurantLocation.lat, restaurantLocation.lng], {
-            radius: maxDeliveryRange * 1000,
-            ...areaStyle,
-          }).addTo(map);
-        }
+        circleRef.current = L.circle([restaurantLocation.lat, restaurantLocation.lng], {
+          radius: maxDeliveryRange * 1000,
+          color: '#e11d48',
+          fillColor: '#e11d48',
+          fillOpacity: 0.05,
+          weight: 1.5,
+          dashArray: '8, 6',
+        }).addTo(map);
       }
 
       // Fetch nearby restaurants

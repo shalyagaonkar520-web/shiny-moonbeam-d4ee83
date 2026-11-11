@@ -10,8 +10,5 @@ export const YELLAPUR_TOWN_KM = 5;
 /** Is this delivery address in Yellapur? */
 export function isInYellapur(loc: DeliveryLocation | null | undefined): boolean {
   if (!loc) return false;
-  // Distances are measured from each zone's own origin, so a spot near the
-  // LPU pickup point must not pass as "near the Yellapur kitchen".
-  if (loc.zoneId && loc.zoneId !== 'yellapur') return false;
   return /yellapur/i.test(loc.address || '') || (typeof loc.distance === 'number' && loc.distance <= YELLAPUR_TOWN_KM);
 }

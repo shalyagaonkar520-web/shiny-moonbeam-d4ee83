@@ -152,7 +152,7 @@ export async function priceOrder({ items, couponCode, location, origin = KITCHEN
   });
 
   const subtotal = lines.reduce((s, l) => s + l.price * l.quantity, 0);
-  // From the zone's own origin: the Yellapur kitchen, or the LPU pickup point.
+  // From the Yellapur kitchen unless a caller gives another origin.
   const distanceKm = Math.round(haversineKm(origin.lat, origin.lng, location.lat, location.lng) * 100) / 100;
 
   const coupons = Array.isArray(settings.coupons) ? settings.coupons : [];

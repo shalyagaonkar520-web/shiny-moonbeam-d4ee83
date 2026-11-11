@@ -7,7 +7,7 @@ import { priceOrder, liveSettings, isHalfPortionLine, SERVICE_RADIUS_KM, COD_MAX
 import { announceOnce } from './_orderMessage.js';
 import { paymentsConfigured, createPaymentOrder, usingShalya } from './_payments.js';
 import { upiIntentLink } from './_shalyaPay.js';
-import { activeLpuZone, inBounds, newTrackingId, LPU_CITY_ID } from './_zones.js';
+import { activeRiderZone, inBounds, newTrackingId, DIRECT_CITY_ID } from './_zones.js';
 
 // POST /api/place-order
 //
@@ -96,15 +96,14 @@ export default async function handler(req, res) {
     });
   }
 
-  // LPU: inside its rectangle the order is priced from the LPU pickup point
-  // and goes straight to riders (see the order fields below).
-  const lpu = await activeLpuZone(adminDb);
-  const inLpu = !!lpu && inBounds(lat, lng, lpu.bounds);
+  // ID Partner rider delivery: inside its rectangle (and while it is on) the
+  // order goes straight to riders (see the order fields below).
+  const riderZone = await activeRiderZone(adminDb);
+  const direct = !!riderZone && inBounds(lat, lng, riderZone.bounds);
 
   let priced;
   try {
     priced = await priceOrder({
-    origin: inLpu ? lpu.pickup : undefined,
     items: items.map((i) => ({
       id: str(i.id, 120),
       name: str(i.name, 120),
@@ -135,7 +134,7 @@ export default async function handler(req, res) {
     throw err;
   }
 
-  if (!inLpu && priced.distanceKm > SERVICE_RADIUS_KM) return bad(res, 422, 'outside_service_area', { distanceKm: priced.distanceKm });
+  if (priced.distanceKm > SERVICE_RADIUS_KM) return bad(res, 422, 'outside_service_area', { distanceKm: priced.distanceKm });
   if (paymentMethod === 'cod' && priced.distanceKm > COD_MAX_KM && priced.grandTotal > 0) {
     return bad(res, 422, 'cod_not_available', { distanceKm: priced.distanceKm });
   }
@@ -235,10 +234,10 @@ export default async function handler(req, res) {
     // An unpaid online order is not yet a kitchen order: the admin and rider
     // screens only list it once markGroupPaid turns it into pending / NEW.
     orderStatus: cash ? 'NEW' : 'AWAITING_PAYMENT',
-    // LPU orders skip the kitchen: an open offer to ID Partner riders, once
-    // paid (an online order is opened by markGroupPaid).
-    ...(inLpu
-      ? { dispatchStatus: 'RIDER_DIRECT', riderOffer: cash ? 'OPEN' : 'AWAITING_PAYMENT', riderId: '', riderName: '', cityId: LPU_CITY_ID, trackingId: newTrackingId() }
+    // Rider delivery on: no kitchen dispatch, an open offer to ID Partner
+    // riders once paid (an online order is opened by markGroupPaid).
+    ...(direct
+      ? { dispatchStatus: 'RIDER_DIRECT', riderOffer: cash ? 'OPEN' : 'AWAITING_PAYMENT', riderId: '', riderName: '', cityId: DIRECT_CITY_ID, trackingId: newTrackingId(), ...(riderZone.etaMinutes ? { etaMinutes: riderZone.etaMinutes } : {}) }
       : { dispatchStatus: 'PENDING_DISPATCH' }),
     sentAt: null,
     sentBy: null,
