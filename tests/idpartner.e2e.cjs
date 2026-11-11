@@ -335,6 +335,21 @@ async function until(fn) { for (let i = 0; i < 20; i++) { const v = await fn(); 
     const yo = await get(`orders/${yid}`);
     ok('rider delivery OFF: order goes to JIS (PENDING_DISPATCH, no rider offer)', yo?.dispatchStatus === 'PENDING_DISPATCH' && yo?.riderOffer === undefined && !yo?.trackingId);
     ok('rider delivery OFF: customer sees the usual "coming soon" tracking', await y.getByText('Coming soon').first().waitFor({ timeout: 15000 }).then(() => true, () => false));
+
+    // Switched ON while this customer's page is still open (no reload): the
+    // next order must go to riders, because checkout re-reads the switch.
+    await put('cities/yellapur', { name: 'Yellapur', active: true, riderDirect: true, deliveryBounds: ZONE, etaMinutes: 10 });
+    await y.evaluate(() => { history.pushState({}, '', '/hotel-mumtaz'); dispatchEvent(new PopStateEvent('popstate')); });
+    await y.getByText('ADD', { exact: true }).first().click({ timeout: 20000 });
+    await sleep(600);
+    await y.evaluate(() => { history.pushState({}, '', '/checkout'); dispatchEvent(new PopStateEvent('popstate')); });
+    await y.getByPlaceholder(/mobile/i).first().waitFor({ timeout: 15000 });
+    await y.getByPlaceholder(/name/i).first().fill('Ravi Y');
+    await y.getByPlaceholder(/mobile/i).first().fill('9876500000');
+    await y.getByRole('button', { name: /Confirm order/ }).click();
+    await y.waitForURL((u) => { const path = new URL(String(u)).pathname; return path.startsWith('/track/') && !path.endsWith(yid); }, { timeout: 25000 });
+    const y2 = await get(`orders/${new URL(y.url()).pathname.split('/').pop()}`);
+    ok('switched ON while the page was open: next order still goes to riders', y2?.dispatchStatus === 'RIDER_DIRECT' && y2?.riderOffer === 'OPEN', String(y2?.dispatchStatus));
   } catch (e) {
     failed++;
     console.log('  FAIL  run aborted:', e.message.split(String.fromCharCode(10))[0]);

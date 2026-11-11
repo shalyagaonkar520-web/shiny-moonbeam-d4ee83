@@ -33,7 +33,7 @@ import {
   loadRazorpay,
   preconnectRazorpay,
 } from '../lib/checkoutApi';
-import { inServiceArea as zoneInServiceArea, servedAreasText, riderDirectFields } from '../lib/zones';
+import { inServiceArea as zoneInServiceArea, servedAreasText, riderDirectFields, refreshRiderZone } from '../lib/zones';
 
 // Publishable Razorpay key id (safe in the browser). The server returns the
 // key that matches the order it created; this is the fallback path's key.
@@ -607,6 +607,10 @@ export default function Checkout() {
     }
 
     setIsSubmitting(true);
+
+    // Rider delivery may have been switched on or off since this page loaded:
+    // read it fresh so the order goes where the switch says now.
+    await refreshRiderZone();
 
     let idToken: string | undefined;
     try { idToken = await user?.getIdToken(); } catch { /* guest order */ }

@@ -115,6 +115,24 @@ export const useZoneStore = create<ZoneStore>((set, get) => ({
   },
 }));
 
+/**
+ * Re-reads the rider-delivery setting from the database. Checkout calls this
+ * right before writing an order, so a page opened before the admin flipped
+ * the switch still routes the order the way the switch says now. Keeps the
+ * last known value if the read fails (offline, quota).
+ */
+export async function refreshRiderZone(): Promise<RiderZone> {
+  const store = useZoneStore.getState();
+  if (!firebaseReady) return store.rider;
+  try {
+    const snap = await getDoc(doc(db, 'cities', DIRECT_CITY_ID));
+    store.setRider(riderZoneFromDoc(snap.data()));
+  } catch (err) {
+    console.warn('Could not refresh the rider-delivery setting.', err);
+  }
+  return useZoneStore.getState().rider;
+}
+
 export function inBounds(p: LatLng, b: Bounds): boolean {
   return p.lat >= b.minLat && p.lat <= b.maxLat && p.lng >= b.minLng && p.lng <= b.maxLng;
 }

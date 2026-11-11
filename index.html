@@ -196,6 +196,21 @@
           reloadIfHidden();
         });
         document.addEventListener('visibilitychange', reloadIfHidden);
+        // A page that never goes out of sight (a desktop tab) takes the update
+        // on its next in-app navigation instead: the screen is changing anyway,
+        // and the cart and location live in storage, so nothing is lost.
+        try {
+          var push = history.pushState;
+          history.pushState = function () {
+            var r = push.apply(this, arguments);
+            if (updateReady && !reloaded) {
+              var paying = false;
+              try { paying = !!localStorage.getItem('mintoo_pending_payment'); } catch (e) {}
+              if (!paying) { reloaded = true; location.reload(); }
+            }
+            return r;
+          };
+        } catch (e) { /* history not patchable: the hidden-page reload still works */ }
         window.addEventListener('load', function () {
           try {
             navigator.serviceWorker.register('/sw.js', { scope: '/' })
