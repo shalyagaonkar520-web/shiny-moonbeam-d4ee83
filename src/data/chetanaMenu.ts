@@ -7,8 +7,8 @@
 //  - "Masala Samosa 20/30" has two prices and no labels. They are listed here
 //    as Regular (board 20) and Large (board 30): CONFIRM WITH THE SHOP what
 //    the two sizes really are and rename them.
-//  - "1 bhel samosa => 60" is written by hand under the printed list, so it
-//    is listed too. It has no photo of its own and shares the Masala Samosa one.
+//  - "1 bhel samosa => 60" is written by hand under the printed list. The
+//    owner chose to leave it out, so it is NOT on the menu.
 //  - "Veg Manchrian" and "Shev Puri" are spelled as the usual "Manchurian" and
 //    "Sev" so customers can find them by search.
 
@@ -35,7 +35,6 @@ const CARD: ChetanaItem[] = [
   { name: 'Veg Manchurian', cardPrice: 40, image: '/menu/chetana/veg-manchurian.webp' },
   { name: 'Masala Samosa (Regular)', cardPrice: 20, image: '/menu/chetana/masala-samosa.webp' },
   { name: 'Masala Samosa (Large)', cardPrice: 30, image: '/menu/chetana/masala-samosa.webp' },
-  { name: 'Bhel Samosa', cardPrice: 60, image: '/menu/chetana/masala-samosa.webp' },
 ];
 
 export interface ChetanaMenuItem extends ChetanaItem {

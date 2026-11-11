@@ -28,11 +28,12 @@ const check = (name, ok, extra = '') => {
 
 const board = {
   'Bhel Puri': 40, 'Pani Puri': 30, 'Sev Puri': 40, 'Masala Puri': 40, 'Dahi Puri': 40,
-  'Sukka Puri': 40, 'Veg Manchurian': 40, 'Masala Samosa (Regular)': 20, 'Masala Samosa (Large)': 30, 'Bhel Samosa': 60,
+  'Sukka Puri': 40, 'Veg Manchurian': 40, 'Masala Samosa (Regular)': 20, 'Masala Samosa (Large)': 30,
 };
 const menu = lib.CHETANA_MENU;
 
-check('ten items from the board', menu.length === 10, String(menu.length));
+check('nine items on the menu', menu.length === 9, String(menu.length));
+check('Bhel Samosa is not on the menu (owner removed it)', !menu.some((i) => /bhel samosa/i.test(i.name)));
 check('every price is the board price plus Rs 10',
   menu.every((i) => board[i.name] !== undefined && i.cardPrice === board[i.name] && i.price === board[i.name] + 10),
   JSON.stringify(menu.map((i) => [i.name, i.price])));
