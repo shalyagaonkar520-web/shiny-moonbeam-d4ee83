@@ -2,13 +2,17 @@
 // From the "Sai Fastfood" printed menu card; every price here is the card price
 // plus Rs 10 (the card price is kept alongside so the margin stays visible).
 //
-// Photos (public/menu/mmk/, one per dish, each checked by eye against its name):
-//  - Most dishes use a free-licence Pexels photo (<slug>-photo.webp; credits in
-//    public/menu/attributions.json).
-//  - Eight dishes keep their crop of the kitchen's own poster, because no stock photo
-//    matched them honestly: the paneer and mushroom rice dishes, baby corn fried
-//    rice, triple schezwan rice and egg fried rice with noodles. Do not swap those
-//    for a look-alike without looking at the result.
+// Photos (public/menu/mmk/, one per dish): every dish uses a free-licence stock photo
+// (Pexels or Unsplash; credits in public/menu/attributions.json), each looked at before
+// use. Some are only look-alikes, because no stock photo of the exact dish exists:
+//   Paneer Fried Rice / Paneer Schezwan Rice (tofu cubes stand in for paneer),
+//   Paneer Crispy (saucy paneer), Veg Crispy (cauliflower and capsicum),
+//   Mushroom Schezwan Rice (mushroom rice, not red), Mushroom Garlic Rice (mushroom
+//   vegetable bowl), Baby Corn Fried Rice (plain veg fried rice), Triple Schezwan Rice
+//   (noodles and gravy, no rice), Egg Fried Rice with Noodles (no noodles in frame),
+//   Veg Tripura Rice (spicy rice with a curry bowl).
+// The kitchen's own poster crops looked better matched but computer-generated, and the
+// owner asked for every photo to be replaced. Real photos from the kitchen would be best.
 // The poster's Mushroom Schezwan Noodles bowl shows paneer, not mushroom.
 
 export interface MomsMagicKitchenItem {
@@ -42,14 +46,14 @@ const CARD: MomsMagicKitchenCategory[] = [
       { name: 'Veg Schezwan Fried Rice', cardPrice: 100, isVeg: true, image: '/menu/mmk/veg-schezwan-fried-rice-photo.webp' },
       { name: 'Veg Garlic Rice', cardPrice: 100, isVeg: true, image: '/menu/mmk/veg-garlic-rice-photo.webp' },
       { name: 'Veg Singapore Rice', cardPrice: 120, isVeg: true, image: '/menu/mmk/veg-singapore-rice-photo.webp' },
-      { name: 'Paneer Fried Rice', cardPrice: 120, isVeg: true, image: '/menu/mmk/paneer-fried-rice.webp' },
-      { name: 'Paneer Schezwan Rice', cardPrice: 140, isVeg: true, image: '/menu/mmk/paneer-schezwan-rice.webp' },
-      { name: 'Mushroom Fried Rice', cardPrice: 120, isVeg: true, image: '/menu/mmk/mushroom-fried-rice.webp' },
-      { name: 'Mushroom Schezwan Rice', cardPrice: 140, isVeg: true, image: '/menu/mmk/mushroom-schezwan-rice.webp' },
-      { name: 'Mushroom Garlic Rice', cardPrice: 140, isVeg: true, image: '/menu/mmk/mushroom-garlic-rice.webp' },
-      { name: 'Baby Corn Fried Rice', cardPrice: 120, isVeg: true, image: '/menu/mmk/baby-corn-fried-rice.webp' },
+      { name: 'Paneer Fried Rice', cardPrice: 120, isVeg: true, image: '/menu/mmk/paneer-fried-rice-photo.webp' },
+      { name: 'Paneer Schezwan Rice', cardPrice: 140, isVeg: true, image: '/menu/mmk/paneer-schezwan-rice-photo.webp' },
+      { name: 'Mushroom Fried Rice', cardPrice: 120, isVeg: true, image: '/menu/mmk/mushroom-fried-rice-photo.webp' },
+      { name: 'Mushroom Schezwan Rice', cardPrice: 140, isVeg: true, image: '/menu/mmk/mushroom-schezwan-rice-photo.webp' },
+      { name: 'Mushroom Garlic Rice', cardPrice: 140, isVeg: true, image: '/menu/mmk/mushroom-garlic-rice-photo.webp' },
+      { name: 'Baby Corn Fried Rice', cardPrice: 120, isVeg: true, image: '/menu/mmk/baby-corn-fried-rice-photo.webp' },
       { name: 'Mixed Veg Fried Rice', cardPrice: 120, isVeg: true, image: '/menu/mmk/mixed-veg-fried-rice-photo.webp' },
-      { name: 'Triple Schezwan Rice', cardPrice: 150, isVeg: true, image: '/menu/mmk/triple-schezwan-rice.webp' },
+      { name: 'Triple Schezwan Rice', cardPrice: 150, isVeg: true, image: '/menu/mmk/triple-schezwan-rice-photo.webp' },
     ],
   },
   {
@@ -70,7 +74,7 @@ const CARD: MomsMagicKitchenCategory[] = [
       { name: 'Chicken Fried Rice', cardPrice: 100, isVeg: false, image: '/menu/mmk/chicken-fried-rice-photo.webp' },
       { name: 'Chicken Schezwan Fried Rice', cardPrice: 120, isVeg: false, image: '/menu/mmk/chicken-schezwan-fried-rice-photo.webp' },
       { name: 'Egg Schezwan Fried Rice', cardPrice: 100, isVeg: false, image: '/menu/mmk/egg-schezwan-fried-rice-photo.webp' },
-      { name: 'Egg Fried Rice with Noodles', cardPrice: 120, isVeg: false, image: '/menu/mmk/egg-fried-rice-with-noodles.webp' },
+      { name: 'Egg Fried Rice with Noodles', cardPrice: 120, isVeg: false, image: '/menu/mmk/egg-fried-rice-with-noodles-photo.webp' },
       { name: 'Non Veg Mix Fried Rice', cardPrice: 150, isVeg: false, image: '/menu/mmk/non-veg-mix-fried-rice-photo.webp' },
     ],
   },
@@ -99,7 +103,7 @@ const CARD: MomsMagicKitchenCategory[] = [
   {
     title: 'Rice Special',
     items: [
-      { name: 'Veg Tripura Rice', cardPrice: 150, isVeg: true, image: '/menu/mmk/veg-tripura-rice-photo.webp' },
+      { name: 'Veg Tripura Rice', cardPrice: 150, isVeg: true, image: '/menu/mmk/veg-tripura-rice-photo2.webp' },
       { name: 'Chicken Tripura Rice', cardPrice: 180, isVeg: false, image: '/menu/mmk/chicken-tripura-rice-photo.webp' },
     ],
   },

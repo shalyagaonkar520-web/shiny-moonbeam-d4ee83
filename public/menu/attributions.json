@@ -1,6 +1,6 @@
 {
   "_comment": "Pexels source attribution for the verified dish photos used by Hotel Mumtaz, Coastal Crown, Kaka's Hotel Malabar and Moms Magic Kitchen. Every photo was visually checked against its dish before being committed. Photo URL pattern: https://www.pexels.com/photo/<pexelsId>/",
-  "_license": "Pexels License - free to use, no attribution required. Recorded here for traceability.",
+  "_license": "Pexels License and Unsplash License - both free to use commercially, no attribution required. Recorded here for traceability.",
   "photos": [
     {
       "file": "egg-mumtaz-spl.webp",
@@ -505,13 +505,6 @@
       "note": "Moms Magic Kitchen, Chicken Kebab (exact match)"
     },
     {
-      "file": "mmk/veg-tripura-rice-photo.webp",
-      "pexelsId": 10695966,
-      "photographer": "Skyler Ewing",
-      "shows": "Rice bowl topped with stir-fried mushrooms, cauliflower, red pepper, snap peas and broccoli in sauce; vegetarian, not Indo-Chinese fried rice.",
-      "note": "Moms Magic Kitchen, Mushroom Fried Rice (close match)"
-    },
-    {
       "file": "mmk/chicken-tripura-rice-photo.webp",
       "pexelsId": 36388450,
       "photographer": "Muhammad Khawar Nazir",
@@ -538,6 +531,73 @@
       "photographer": "Milton Das",
       "shows": "Dry crispy cauliflower florets tossed with green capsicum and onion in dark sauce on a white plate with two dips.",
       "note": "Moms Magic Kitchen, Veg Crispy (generic match)"
+    },
+    {
+      "file": "mmk/paneer-fried-rice-photo.webp",
+      "source": "unsplash",
+      "unsplashId": "1751618646882-4221d5e3b1c2",
+      "pageUrl": "https://unsplash.com/photos/fried-rice-with-tofu-and-vegetables-in-a-bowl--4V4SjHPPDk",
+      "photographer": "Pavan Reddy",
+      "shows": "White bowl of veg fried rice with peas, corn, red pepper and golden pan-seared white cubes (tofu/paneer look) among the rice; no meat or egg.",
+      "note": "Moms Magic Kitchen, Paneer Fried Rice (lookalike match)"
+    },
+    {
+      "file": "mmk/paneer-schezwan-rice-photo.webp",
+      "pexelsId": 35064908,
+      "photographer": "unknown (see page)",
+      "shows": "Bowl of white rice topped with large tofu cubes in a spicy red-orange sauce with spring onion and sesame; tofu stands in for paneer, rice is plain white not fried.",
+      "note": "Moms Magic Kitchen, Paneer Schezwan Rice (lookalike match)"
+    },
+    {
+      "file": "mmk/mushroom-garlic-rice-photo.webp",
+      "pexelsId": 10695887,
+      "photographer": "Skyler Ewing",
+      "shows": "Colourful vegetable stir fry with mushrooms, cauliflower, peppers and sugar snap peas over rice in a ceramic bowl, chopsticks across it (another angle of the Mushroom Fried Rice photo)",
+      "note": "Moms Magic Kitchen, Mushroom Garlic Rice (lookalike match)"
+    },
+    {
+      "file": "mmk/mushroom-schezwan-rice-photo.webp",
+      "source": "unsplash",
+      "unsplashId": "1627906295804-46770ad5bed7",
+      "pageUrl": "https://unsplash.com/photos/cooked-rice-with-broccoli-on-black-plate-Ky-k7gMWLNI",
+      "photographer": "Frank Holleman",
+      "shows": "Brown rice cooked with sliced mushrooms and spinach, crispy fried onion/garlic, with broccoli on a black plate and whole mushrooms behind; vegan, not strictly fried rice and mushrooms are modest in amount.",
+      "note": "Moms Magic Kitchen, Mushroom Schezwan Rice (lookalike match)"
+    },
+    {
+      "file": "mmk/mushroom-fried-rice-photo.webp",
+      "pexelsId": 10695966,
+      "photographer": "Skyler Ewing",
+      "shows": "Rice bowl topped with stir-fried mushrooms, cauliflower, red pepper, snap peas and broccoli in sauce; vegetarian, not Indo-Chinese fried rice.",
+      "note": "Moms Magic Kitchen, Mushroom Fried Rice (close match)"
+    },
+    {
+      "file": "mmk/veg-tripura-rice-photo2.webp",
+      "pexelsId": 5720820,
+      "photographer": "Usman Yousaf",
+      "shows": "Top view of spicy veg rice with green and red chilli/pepper strips on a rectangular tray beside a small bowl of red curry on yellow; no visible mushrooms, no meat/egg.",
+      "note": "Moms Magic Kitchen, Veg Tripura Rice (generic match)"
+    },
+    {
+      "file": "mmk/baby-corn-fried-rice-photo.webp",
+      "pexelsId": 36293910,
+      "photographer": "Soc Nang Dong",
+      "shows": "Golden vegetable fried rice with peas, carrot, white veg cubes and crushed nuts, tomato slices on a white plate; baby corn not clearly identifiable, no meat/egg visible.",
+      "note": "Moms Magic Kitchen, Baby Corn Fried Rice (generic match)"
+    },
+    {
+      "file": "mmk/triple-schezwan-rice-photo.webp",
+      "pexelsId": 28445828,
+      "photographer": "Aperture Photography",
+      "shows": "Top view of two bowls: veg hakka noodles (baby corn, mushroom, paneer/tofu, cabbage, carrot) beside a bowl of red-brown spicy Manchurian gravy; no rice.",
+      "note": "Moms Magic Kitchen, Triple Schezwan Rice (lookalike match)"
+    },
+    {
+      "file": "mmk/egg-fried-rice-with-noodles-photo.webp",
+      "pexelsId": 32845321,
+      "photographer": "Studio D7",
+      "shows": "Egg fried rice with scrambled egg, spring onion, carrot and a halved boiled egg on top in a black bowl on a checked cloth; no noodles.",
+      "note": "Moms Magic Kitchen, Egg Fried Rice With Noodles (generic match)"
     }
   ]
 }

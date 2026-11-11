@@ -30,26 +30,25 @@ for (const d of dishes) (byHash[hash(d.image)] ||= []).push(d.name);
 const clashes = Object.values(byHash).filter((v) => v.length > 1);
 check('no two dishes share the same photo', clashes.length === 0, JSON.stringify(clashes));
 
-const stock = dishes.filter((d) => d.image.endsWith('-photo.webp'));
+const isStock = (img) => /-photo\d*\.webp$/.test(img);
+const stock = dishes.filter((d) => isStock(d.image));
 const creditedFiles = new Set(credits.map((c) => c.file));
 const uncredited = stock.filter((d) => !creditedFiles.has(d.image.replace('/menu/', ''))).map((d) => d.name);
-check('29 dishes use a stock photo', stock.length === 29, String(stock.length));
+check('all 37 dishes use a credited stock photo', stock.length === 37, String(stock.length));
 check('every stock photo has its credit recorded', uncredited.length === 0, uncredited.join(', '));
 check('the banner photo is credited', creditedFiles.has('mmk/banner-photo.webp') && existsSync('public' + lib.MOMS_MAGIC_KITCHEN_IMAGE));
 
 const mine = credits.filter((c) => c.file.startsWith('mmk/'));
 check('the blocked Pexels photo 25440738 is not used', !mine.some((c) => c.pexelsId === 25440738));
-check('every credit names a Pexels id', mine.every((c) => Number.isInteger(c.pexelsId) && c.pexelsId > 0));
-
-// The eight that keep the kitchen's own poster crop (no honest stock match): a stock photo
-// must not replace these without somebody looking at it.
-const KEPT = ['Paneer Fried Rice', 'Paneer Schezwan Rice', 'Mushroom Fried Rice', 'Mushroom Schezwan Rice', 'Mushroom Garlic Rice',
-  'Baby Corn Fried Rice', 'Triple Schezwan Rice', 'Egg Fried Rice with Noodles'];
-const poster = dishes.filter((d) => !d.image.endsWith('-photo.webp')).map((d) => d.name).sort();
-check('exactly the eight poster-photo dishes keep their own photo', JSON.stringify(poster) === JSON.stringify([...KEPT].sort()), poster.join(', '));
+const sourceIds = mine.map((c) => c.pexelsId ?? c.unsplashId);
+// (the banner deliberately reuses one dish's photo, so it is left out)
+const seen = {}; for (const c of mine.filter((c) => c.file !== 'mmk/banner-photo.webp')) (seen[c.pexelsId ?? c.unsplashId] ||= []).push(c.file);
+const reused = Object.values(seen).filter((v) => v.length > 1);
+check('no source photo is used for two dishes (even cropped differently)', reused.length === 0, JSON.stringify(reused));
+check('every credit names its Pexels id or Unsplash photo', mine.every((c) => (Number.isInteger(c.pexelsId) && c.pexelsId > 0) || (c.source === 'unsplash' && c.unsplashId && c.pageUrl)));
 
 // A vegetarian dish must not be given a photo whose credit says it shows meat or egg.
-const bad = dishes.filter((d) => d.isVeg && d.image.endsWith('-photo.webp')).filter((d) => {
+const bad = dishes.filter((d) => d.isVeg && isStock(d.image)).filter((d) => {
   const c = credits.find((x) => x.file === d.image.replace('/menu/', ''));
   // "no meat or egg seen" is good news, not a match: drop negated phrases first.
   const text = (c?.shows || '').replace(/\b(no|without|not|nor)\b[^;.,]*/gi, '');
