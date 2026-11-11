@@ -10,6 +10,7 @@ import { useAuthStore } from '../store/authStore';
 import { useSEO } from '../utils/seo';
 import toast from 'react-hot-toast';
 import { friendlyAuthError } from '../lib/authErrors';
+import { toLoginEmail } from '../lib/staffSignIn';
 
 const getFriendlyErrorMessage = friendlyAuthError;
 
@@ -84,7 +85,8 @@ export default function AuthPage() {
 
       setSubmitLoading(true);
       try {
-        await loginWithEmail(email.trim(), password.trim());
+        // A bare username (e.g. "partner") is an ID Partner rider account.
+        await loginWithEmail(toLoginEmail(email), password.trim());
         toast.success('Welcome back to Mom\'s Magic! 🍳');
         navigate('/profile');
       } catch (err: any) {
@@ -284,7 +286,10 @@ export default function AuthPage() {
                   <div className="relative">
                     <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
-                      type="email"
+                      type="text"
+                      inputMode="email"
+                      autoCapitalize="none"
+                      autoComplete="username"
                       placeholder="name@gmail.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}

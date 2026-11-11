@@ -76,8 +76,11 @@ function GoldenParticles() {
 function MenswearAdminRedirect() {
   const profile: any = useAuthStore((s) => s.profile);
   const { pathname } = useLocation();
-  const isShopAdmin = String(profile?.role || '').toUpperCase() === 'HOTEL_ADMIN' && profile?.hotelId === MENSWEAR_SHOP_ID;
+  const role = String(profile?.role || '').toUpperCase();
+  const isShopAdmin = role === 'HOTEL_ADMIN' && profile?.hotelId === MENSWEAR_SHOP_ID;
   if (isShopAdmin && pathname !== '/admin/menswear') return <Navigate to="/admin/menswear" replace />;
+  // A delivery partner signing in on the normal login lands in ID Partner.
+  if (role === 'RIDER' && !pathname.startsWith('/partner')) return <Navigate to="/partner" replace />;
   return null;
 }
 

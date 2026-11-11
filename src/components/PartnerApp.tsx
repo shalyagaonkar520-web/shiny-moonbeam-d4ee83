@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { auth, db, firebaseReady } from '../firebase';
 import { useSEO } from '../utils/seo';
-import { staffSignIn } from '../lib/staffSignIn';
+import { staffSignIn, toLoginEmail } from '../lib/staffSignIn';
 import { friendlyAuthError } from '../lib/authErrors';
 import { useZoneStore } from '../lib/zones';
 import {
@@ -20,13 +20,8 @@ import { askNotificationPermission, notifyNewOrder, startAlarm, stopAlarm, unloc
 import { useMyPosition, useOnline, useRiderGps, useWakeLock } from '../lib/partnerHooks';
 import RouteMap from './RouteMap';
 
-/** Usernames without a domain map to this, so "partner" signs in as partner@idpartner.momsmagic.shop. */
-const RIDER_EMAIL_DOMAIN = 'idpartner.momsmagic.shop';
-
-const toEmail = (u: string) => {
-  const v = u.trim().toLowerCase();
-  return v.includes('@') ? v : `${v}@${RIDER_EMAIL_DOMAIN}`;
-};
+/** "partner" signs in as partner@idpartner.momsmagic.shop. */
+const toEmail = toLoginEmail;
 
 type Gate = { s: 'loading' } | { s: 'out' } | { s: 'denied'; reason: string } | { s: 'in'; user: User; name: string };
 

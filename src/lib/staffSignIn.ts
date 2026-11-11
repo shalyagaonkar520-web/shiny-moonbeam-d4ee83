@@ -16,3 +16,12 @@ export async function staffSignIn(auth: Auth, email: string, password: string) {
     throw err;
   }
 }
+
+/** ID Partner usernames map to this domain: "partner" -> partner@idpartner.momsmagic.shop. */
+export const RIDER_EMAIL_DOMAIN = 'idpartner.momsmagic.shop';
+
+/** A login name as typed: a full email stays as it is; a bare username is a rider's. */
+export function toLoginEmail(v: string): string {
+  const s = v.trim().toLowerCase();
+  return s.includes('@') ? s : `${s}@${RIDER_EMAIL_DOMAIN}`;
+}

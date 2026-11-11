@@ -259,6 +259,23 @@ async function until(fn) { for (let i = 0; i < 20; i++) { const v = await fn(); 
     const t2 = (await get(`tracking/${track}`))?.riderLocation?.at;
     ok('GPS stops after delivery is closed', t1 === t2);
 
+    // The normal customer login takes a rider straight to ID Partner.
+    const lctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await lctx.addInitScript(() => {
+      localStorage.setItem('delivery-location-storage', JSON.stringify({ state: { deliveryLocation: { lat: 14.9637, lng: 74.7093, address: 'Main Road, Yellapur', distance: 0.3, isDeliverable: true, zoneId: 'yellapur' } }, version: 0 }));
+      localStorage.setItem('mintoo_location_confirmed', String(Date.now()));
+      sessionStorage.setItem('mintoo_yellapur_choice', 'food');
+    });
+    const lp = await lctx.newPage();
+    global.__pages.login = lp;
+    await lp.goto(BASE + '/login?preview=1');
+    await lp.getByRole('button', { name: /Continue/ }).click({ timeout: 8000 }).catch(() => {});
+    await lp.getByPlaceholder('name@gmail.com').fill('partner');
+    await lp.locator('input[type=password]').first().fill(TEST_PASSWORD);
+    await lp.getByRole('button', { name: /Sign in to account/i }).click();
+    ok('normal login with username "partner" opens ID Partner', await lp.waitForURL((u) => new URL(u).pathname.startsWith('/partner'), { timeout: 20000 }).then(() => true, () => false), lp.url());
+    await lctx.close();
+
     // Rider delivery switched OFF: orders go to JIS as before.
     await put('cities/yellapur', { name: 'Yellapur', active: true, riderDirect: false, deliveryBounds: ZONE, etaMinutes: 10 });
     const yctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
