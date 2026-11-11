@@ -129,7 +129,16 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#fff1f4]/70 via-[#fff8fa]/60 to-[#ffffff] text-gray-900 pb-36 pt-3 px-3.5 sm:px-6">
       <div className="max-w-md mx-auto space-y-4">
-        
+        {String((profile as any)?.role || '').toUpperCase() === 'SUPER_ADMIN' && (
+          <button
+            type="button"
+            onClick={() => navigate('/admin/home')}
+            className="w-full py-3 rounded-2xl bg-gray-900 text-white font-black text-sm active:scale-[0.99] transition-transform"
+          >
+            Open Admin home (rider delivery, men's wear, dashboard)
+          </button>
+        )}
+
         {/* Header */}
         <div className="flex items-center gap-3 py-2 px-1">
           <button

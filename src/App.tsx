@@ -53,6 +53,7 @@ const TrackRoute = lazy(() => import('./components/LiveTrackPage'));
 // ID Partner, the rider app.
 const PartnerApp = lazy(() => import('./components/PartnerApp'));
 const RiderDeliveryAdmin = lazy(() => import('./components/RiderDeliveryAdmin'));
+const StaffHome = lazy(() => import('./components/StaffHome'));
 const MenswearPage = lazy(() => import('./components/MenswearPage'));
 const MenswearProductPage = lazy(() => import('./components/MenswearProductPage'));
 const MenswearAdminPage = lazy(() => import('./components/MenswearAdminPage'));
@@ -75,12 +76,25 @@ function GoldenParticles() {
  */
 function MenswearAdminRedirect() {
   const profile: any = useAuthStore((s) => s.profile);
+  const uid = useAuthStore((s) => s.user?.uid) || '';
   const { pathname } = useLocation();
   const role = String(profile?.role || '').toUpperCase();
   const isShopAdmin = role === 'HOTEL_ADMIN' && profile?.hotelId === MENSWEAR_SHOP_ID;
   if (isShopAdmin && pathname !== '/admin/menswear') return <Navigate to="/admin/menswear" replace />;
   // A delivery partner signing in on the normal login lands in ID Partner.
   if (role === 'RIDER' && !pathname.startsWith('/partner')) return <Navigate to="/partner" replace />;
+  // The super admin lands on Admin home once per visit after signing in.
+  // The login page always ends on /profile, so that is where this triggers;
+  // Admin home itself marks the visit as done (see StaffHome).
+  if (role === 'SUPER_ADMIN' && pathname === '/profile') {
+    let shown = false;
+    try {
+      shown = sessionStorage.getItem('mm_admin_home_shown') === uid;
+    } catch {
+      shown = true; // storage blocked: never loop
+    }
+    if (!shown) return <Navigate to="/admin/home" replace />;
+  }
   return null;
 }
 
@@ -278,6 +292,7 @@ export default function App() {
                   <Route path="/admin" element={<AdminPage />} />
                   <Route path="/admin/menswear" element={<MenswearAdminPage />} />
                   <Route path="/admin/rider-delivery" element={<RiderDeliveryAdmin />} />
+                  <Route path="/admin/home" element={<StaffHome />} />
                   {/* The old dark /orders list read stale localStorage; /track is the live list. */}
                   <Route path="/orders" element={<Navigate to="/track" replace />} />
                   <Route path="/spin" element={<LuckyWheelPage />} />

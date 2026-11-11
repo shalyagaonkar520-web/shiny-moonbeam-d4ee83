@@ -92,6 +92,13 @@ async function seed() {
   for (const id of ['mumtaz', 'moms-magic', 'al_amin', 'coastal_crown', 'malabar', 'sankalpa']) {
     await put(`hotels/${id}`, { name: id, cityId: 'yellapur', status: 'ACTIVE', acceptingOrders: true, ...(id === 'mumtaz' ? PICKUP : {}) });
   }
+  // A super admin, for the single sign-in check.
+  const admin = await fetch(`http://${AUTH}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=fake`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: 'owner@example.com', password: TEST_PASSWORD, returnSecureToken: true }),
+  }).then((r) => r.json());
+  await put(`users/${admin.localId}`, { uid: admin.localId, email: 'owner@example.com', name: 'Owner', role: 'SUPER_ADMIN', active: true });
   return uid;
 }
 
@@ -275,6 +282,31 @@ async function until(fn) { for (let i = 0; i < 20; i++) { const v = await fn(); 
     await lp.getByRole('button', { name: /Sign in to account/i }).click();
     ok('normal login with username "partner" opens ID Partner', await lp.waitForURL((u) => new URL(u).pathname.startsWith('/partner'), { timeout: 20000 }).then(() => true, () => false), lp.url());
     await lctx.close();
+
+    // Single sign-in for the owner: normal login -> Admin home -> rider switch, no second login.
+    await put('cities/yellapur', { name: 'Yellapur', active: true, riderDirect: false, deliveryBounds: ZONE, etaMinutes: 10 });
+    const actx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await actx.addInitScript(() => {
+      localStorage.setItem('delivery-location-storage', JSON.stringify({ state: { deliveryLocation: { lat: 14.9637, lng: 74.7093, address: 'Main Road, Yellapur', distance: 0.3, isDeliverable: true, zoneId: 'yellapur' } }, version: 0 }));
+      localStorage.setItem('mintoo_location_confirmed', String(Date.now()));
+      sessionStorage.setItem('mintoo_yellapur_choice', 'food');
+    });
+    const ap = await actx.newPage();
+    global.__pages.admin = ap;
+    await ap.goto(BASE + '/login?preview=1');
+    await ap.getByRole('button', { name: /Continue/ }).click({ timeout: 8000 }).catch(() => {});
+    await ap.getByPlaceholder('name@gmail.com').fill('owner@example.com');
+    await ap.locator('input[type=password]').first().fill(TEST_PASSWORD);
+    await ap.getByRole('button', { name: /Sign in to account/i }).click();
+    ok('owner signing in on the normal login lands on Admin home', await ap.waitForURL((u) => new URL(u).pathname === '/admin/home', { timeout: 20000 }).then(() => true, () => false), ap.url());
+    await ap.getByText('Rider delivery (ID Partner)').click();
+    await ap.getByText('ID Partner delivery OFF').waitFor({ timeout: 15000 });
+    ok('rider delivery page opens without a second sign-in', true);
+    if (SHOTS) await ap.screenshot({ path: `${SHOTS}/e2e-admin-rider.png`, fullPage: true });
+    await ap.getByRole('button', { name: 'Rider delivery on or off' }).click();
+    await ap.getByRole('button', { name: 'Save', exact: true }).click();
+    ok('owner switches rider delivery ON (saved)', await until(async () => (await get('cities/yellapur'))?.riderDirect === true));
+    await actx.close();
 
     // Rider delivery switched OFF: orders go to JIS as before.
     await put('cities/yellapur', { name: 'Yellapur', active: true, riderDirect: false, deliveryBounds: ZONE, etaMinutes: 10 });
