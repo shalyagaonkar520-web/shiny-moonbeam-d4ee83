@@ -23,6 +23,9 @@ export const PARTNER_HOTELS: PartnerHotel[] = [
   { id: 'coastal_crown', name: 'Coastal Crown',  idPrefix: 'coastal-',  descriptionMatch: ['Coastal Crown'] },
   { id: 'malabar',       name: 'Hotel Malabar',  idPrefix: 'malabar-',  descriptionMatch: ["Hotel Malabar", "Kaka's Hotel Malabar"] },
   { id: 'sankalpa',      name: 'Hotel Sankalpa', idPrefix: 'sankalpa-', descriptionMatch: ['Hotel Sankalpa'] },
+  // Chetana Masalapuri Center (src/data/chetanaMenu.ts): its orders need a
+  // hotels/ record with this id in the panel, like any kitchen.
+  { id: 'chetana-masalapuri-center', name: 'Chetana Masalapuri Center', idPrefix: 'chetana-', descriptionMatch: ['Chetana Masalapuri Center'] },
   // The clothing shop (src/data/mensWear.ts). Its orders need a hotels/
   // record with this id in the panel, like any kitchen.
   { id: 'mintoo-men-s-wear', name: "Mintoo Men's Wear", idPrefix: 'mw-', descriptionMatch: ["Mintoo Men's Wear"] },

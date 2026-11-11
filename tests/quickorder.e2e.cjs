@@ -90,7 +90,7 @@ async function pickBiryani(p) {
     await p.waitForURL(/\/track\//, { timeout: 30000 }).catch(() => {});
     await p.waitForTimeout(1500);
     const sent = calls.place[0] || {};
-    check('A order sent to the server once', calls.place.length === 1);
+    check('A order sent to the server once', calls.place.length === 1, 'count=' + calls.place.length + ' ids=' + calls.place.map((c) => c.orderId).join(','));
     check('A cash on delivery', sent.paymentMethod === 'cod');
     check('A name and normalised phone sent', sent.customer?.name === 'Asha' && sent.customer?.phone === '9876543210');
     check('A biryani in the order', (sent.items || []).some((i) => /biri?y?a?ni/i.test(i.name)));

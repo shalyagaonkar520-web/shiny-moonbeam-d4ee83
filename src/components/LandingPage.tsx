@@ -112,6 +112,11 @@ const PARTNER_HOTELS = [
 // "What's on your mind?" Circular Dish Plates (Matching user's reference photo)
 const WHATS_ON_YOUR_MIND = [
   {
+    id: 'chats',
+    name: 'Chats',
+    image: '/menu/chetana/pani-puri.webp'
+  },
+  {
     id: 'biryani',
     name: 'Biryani',
     image: '/chicken_biryani_new.webp'
@@ -334,6 +339,7 @@ export default function LandingPage() {
 
   const CATEGORY_TABS = [
     'All',
+    'Chats',
     'Biryani',
     'Fast Food',
     'Starters',
@@ -368,6 +374,9 @@ export default function LandingPage() {
 
     // What's on your mind filter
     if (selectedMindCategory) {
+      if (selectedMindCategory === 'chats') {
+        return item.category === 'Chats';
+      }
       if (selectedMindCategory === 'biryani') {
         return item.category === 'Biryani' || item.name.toLowerCase().includes('biryani') || item.name.toLowerCase().includes('kushka');
       }

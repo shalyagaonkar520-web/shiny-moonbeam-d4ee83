@@ -17,6 +17,7 @@ import { resolveMumtazDishImage, isNonVegItem } from './hotelMumtazMenuImages';
 import { HOTEL_COASTAL_CROWN_MENU } from './hotelCoastalCrownMenu';
 import { HOTEL_MALABAR_MENU } from './hotelMalabarMenu';
 import { MOMS_MAGIC_KITCHEN_MENU, MOMS_MAGIC_KITCHEN_IMAGE } from './momsMagicKitchenMenu';
+import { CHETANA_MENU, CHETANA_HOTEL_ID, CHETANA_HOTEL_NAME, CHATS_CATEGORY } from './chetanaMenu';
 
 export interface PartnerHotelProduct extends Product {
   id: string;
@@ -114,6 +115,24 @@ function momsMagicKitchenItems(): PartnerHotelProduct[] {
   );
 }
 
+/** Chetana Masalapuri Center: all of it is the home page's "Chats" category. */
+function chetanaItems(): PartnerHotelProduct[] {
+  return CHETANA_MENU.map((item) => ({
+    id: `chetana-${slug(item.name)}`,
+    hotelId: CHETANA_HOTEL_ID,
+    hotelName: CHETANA_HOTEL_NAME,
+    hotelPath: '/',
+    showHotelBadge: true,
+    name: item.name,
+    price: item.price,
+    image: item.image,
+    category: CHATS_CATEGORY,
+    type: 'food' as const,
+    isVeg: true,
+    description: `${CHETANA_HOTEL_NAME} ${item.name}`,
+  }));
+}
+
 function malabarItems(): PartnerHotelProduct[] {
   return HOTEL_MALABAR_MENU.flatMap((category) =>
     category.items.map((item) => ({
@@ -141,6 +160,7 @@ function malabarItems(): PartnerHotelProduct[] {
 export const PARTNER_HOTEL_PRODUCTS: PartnerHotelProduct[] = [
   // Featured (gold) kitchen, listed first everywhere.
   ...momsMagicKitchenItems(),
+  ...chetanaItems(),
   ...sankalpaItems(),
   ...mumtazItems(),
   ...coastalCrownItems(),
