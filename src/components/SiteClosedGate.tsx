@@ -33,7 +33,7 @@ export default function SiteClosedGate({ children }: { children: React.ReactNode
   }, []);
 
   // Staff pages keep working on a closed day: that is when stock gets sorted.
-  if (!closed || pathname.startsWith('/admin')) return <>{children}</>;
+  if (!closed || pathname.startsWith('/admin') || pathname.startsWith('/partner')) return <>{children}</>;
 
   // Local preview (npm run dev) keeps working while the live site is shut, so
   // new screens can be checked on a closed day. Production builds never take

@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { useLocationStore, NearbyRestaurant } from '../store/locationStore';
 
 import { haversineDistance, reverseGeocode } from '../lib/location';
+import { locate, useZoneStore, type ZoneId } from '../lib/zones';
 
 // ═══════════════════════════════════════════════════════════════
 // OVERPASS API - FETCH NEARBY RESTAURANTS
@@ -82,6 +83,7 @@ export default function LocationPicker() {
   const [address, setAddress] = useState<string>('');
   const [distance, setDistance] = useState<number>(0);
   const [isDeliverable, setIsDeliverable] = useState<boolean>(true);
+  const [zoneId, setZoneId] = useState<ZoneId | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isGeolocating, setIsGeolocating] = useState<boolean>(false);
   const [loadingNearby, setLoadingNearby] = useState<boolean>(false);
@@ -101,12 +103,12 @@ export default function LocationPicker() {
       setSelectedLng(lng);
       setIsLoading(true);
 
-      // Calculate distance
-      const dist = haversineDistance(
-        restaurantLocation.lat, restaurantLocation.lng, lat, lng
-      );
-      setDistance(parseFloat(dist.toFixed(2)));
+      // Which zone serves this spot, and how far it is from that zone's origin.
+      const located = locate(lat, lng);
+      const dist = located.distance;
+      setDistance(dist);
       setIsDeliverable(dist <= maxDeliveryRange);
+      setZoneId(located.zoneId);
 
       // Reverse geocode
       const addr = await reverseGeocode(lat, lng);
@@ -132,16 +134,18 @@ export default function LocationPicker() {
             .bindPopup(popupNode('Delivery Location', addr));
         }
 
-        // Draw delivery range circle
+        // Draw the delivery area: the LPU rectangle, or the Yellapur circle.
         if (circleRef.current) map.removeLayer(circleRef.current);
-        circleRef.current = L.circle([restaurantLocation.lat, restaurantLocation.lng], {
-          radius: maxDeliveryRange * 1000,
-          color: '#e11d48',
-          fillColor: '#e11d48',
-          fillOpacity: 0.05,
-          weight: 1.5,
-          dashArray: '8, 6',
-        }).addTo(map);
+        const areaStyle = { color: '#e11d48', fillColor: '#e11d48', fillOpacity: 0.05, weight: 1.5, dashArray: '8, 6' };
+        if (located.zoneId === 'lpu') {
+          const b = useZoneStore.getState().lpu.bounds;
+          circleRef.current = L.rectangle([[b.minLat, b.minLng], [b.maxLat, b.maxLng]], areaStyle).addTo(map);
+        } else {
+          circleRef.current = L.circle([restaurantLocation.lat, restaurantLocation.lng], {
+            radius: maxDeliveryRange * 1000,
+            ...areaStyle,
+          }).addTo(map);
+        }
       }
 
       // Fetch nearby restaurants
@@ -373,6 +377,7 @@ export default function LocationPicker() {
         address,
         distance,
         isDeliverable,
+        zoneId,
       });
       closeLocationPicker();
     }

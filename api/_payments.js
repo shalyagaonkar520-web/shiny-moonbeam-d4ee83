@@ -169,8 +169,9 @@ export async function markGroupPaid(razorpayOrderId, paymentId, expect = {}) {
     if (primary.paymentStatus === 'completed') return 'already';
     const waiting = primary.status === 'awaiting_payment';
     snaps.forEach((snap) => {
+      const direct = snap.data()?.dispatchStatus === 'RIDER_DIRECT';
       tx.update(snap.ref, waiting
-        ? { paymentStatus: 'completed', paymentId, paidAt, status: 'pending', orderStatus: 'NEW' }
+        ? { paymentStatus: 'completed', paymentId, paidAt, status: 'pending', orderStatus: 'NEW', ...(direct ? { riderOffer: 'OPEN' } : {}) }
         : { paymentStatus: 'completed', paymentId, paidAt, refundNeeded: true });
     });
     // Keeping the UTR and the provider on the payment record is what makes a

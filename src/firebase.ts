@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { getFirestore, doc, setDoc, serverTimestamp, connectFirestoreEmulator } from 'firebase/firestore';
+import { getAuth, connectAuthEmulator } from 'firebase/auth';
 
 import { firebaseConfig } from './firebaseConfig';
 import { rememberWebPushToken } from './lib/push';
@@ -22,6 +22,13 @@ try {
   _app = initializeApp(firebaseConfig);
   _db = getFirestore(_app);
   _auth = getAuth(_app);
+  // End-to-end tests run the app against the local emulators. Only a dev
+  // server started with this variable connects there; a production build
+  // never does (Vite inlines `undefined` for it).
+  if (import.meta.env.DEV && import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true') {
+    connectFirestoreEmulator(_db, '127.0.0.1', Number(import.meta.env.VITE_FIRESTORE_EMULATOR_PORT || 8080));
+    connectAuthEmulator(_auth, `http://127.0.0.1:${import.meta.env.VITE_AUTH_EMULATOR_PORT || 9099}`, { disableWarnings: true });
+  }
   firebaseReady = true;
 } catch (error) {
   console.error(

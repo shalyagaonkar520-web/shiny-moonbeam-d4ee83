@@ -17,6 +17,7 @@ async function newCtx(browser, { server, razorpay } = {}) {
     if (!sessionStorage.getItem('seeded')) {
       localStorage.setItem('delivery-location-storage', JSON.stringify({ state: { deliveryLocation: loc }, version: 0 }));
       localStorage.setItem('mintoo_user_name', 'Test Customer');
+      sessionStorage.setItem('mintoo_yellapur_choice', 'food'); // answer the Food / Men's Wear question
       localStorage.setItem('mintoo_user_phone', '9876543210');
       sessionStorage.setItem('mintoo_location_confirmed', '1');
       sessionStorage.setItem('seeded', '1');

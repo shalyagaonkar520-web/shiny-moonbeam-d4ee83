@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { haversineDistance, reverseGeocode } from '../lib/location';
+import { locate, type ZoneId } from '../lib/zones';
 
 export interface NearbyRestaurant {
   id: number;
@@ -14,8 +15,10 @@ export interface DeliveryLocation {
   lat: number;
   lng: number;
   address: string;
-  distance: number; // in km
+  distance: number; // in km, from the zone's origin (kitchen or LPU pickup point)
   isDeliverable: boolean;
+  /** Which delivery zone serves this point (see lib/zones). Absent on locations saved before zones. */
+  zoneId?: ZoneId | null;
 }
 
 interface LocationStore {
@@ -91,13 +94,14 @@ export const useLocationStore = create<LocationStore>()(
         }
 
         const { latitude, longitude } = pos.coords;
-        const distance = haversineDistance(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, latitude, longitude);
+        const { zoneId, distance } = locate(latitude, longitude);
         const location = {
           lat: latitude,
           lng: longitude,
           address: 'Current location',
-          distance: parseFloat(distance.toFixed(2)),
+          distance,
           isDeliverable: distance <= MAX_DELIVERY_RANGE,
+          zoneId,
         };
         // The service-area check needs only the coordinates, so the customer is
         // let in now and the street address fills in when the lookup returns.

@@ -2,6 +2,7 @@ import { Home, Briefcase, MapPin, Trash2, Check } from 'lucide-react';
 import { useSavedAddresses, useSavedAddressStore, fullAddress, samePlace, SavedAddress } from '../store/savedAddressStore';
 import { useLocationStore, SERVICE_RADIUS_KM } from '../store/locationStore';
 import { haversineDistance } from '../lib/location';
+import { locate } from '../lib/zones';
 
 const ICONS = { Home, Work: Briefcase, Other: MapPin } as const;
 
@@ -21,8 +22,7 @@ export default function SavedAddressList({ onSelect, manage, compact }: Props) {
 
   if (addresses.length === 0) return null;
 
-  const distanceOf = (a: SavedAddress) =>
-    haversineDistance(restaurantLocation.lat, restaurantLocation.lng, a.lat, a.lng);
+  const distanceOf = (a: SavedAddress) => locate(a.lat, a.lng).distance;
   const isCurrent = (a: SavedAddress) => !!deliveryLocation && samePlace(deliveryLocation, a);
 
   const choose = (a: SavedAddress) => {
@@ -60,7 +60,7 @@ export default function SavedAddressList({ onSelect, manage, compact }: Props) {
       {addresses.map((a) => {
         const Icon = ICONS[a.label];
         const dist = distanceOf(a);
-        const outside = dist > SERVICE_RADIUS_KM;
+        const outside = locate(a.lat, a.lng).zoneId === null;
         const current = isCurrent(a);
         return (
           <li key={a.id} className={`rounded-2xl border p-3 flex items-start gap-3 bg-white ${current ? 'border-[#e11d48]' : 'border-gray-200'}`}>

@@ -4,11 +4,12 @@ import { MapPin, Locate, Map as MapIcon, Loader2, AlertTriangle, PackageSearch, 
 import { useLocationStore, SERVICE_RADIUS_KM, SERVICE_AREA_NAME } from '../store/locationStore';
 import { useSavedAddresses } from '../store/savedAddressStore';
 import SavedAddressList from './SavedAddressList';
+import { inServiceArea as zoneInServiceArea, servedAreasText } from '../lib/zones';
 
 // Pages that must work without a delivery location: staff tools, order
 // tracking (a customer may track from anywhere), and the legal pages Google
 // Play links to.
-const OPEN_PATHS = ['/admin', '/delivery', '/track', '/privacy', '/delete-account'];
+const OPEN_PATHS = ['/admin', '/delivery', '/partner', '/track', '/privacy', '/delete-account'];
 
 function isOpenPath(pathname: string) {
   return OPEN_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
@@ -72,7 +73,7 @@ export default function LocationGate({ children }: { children: React.ReactNode }
     if (deliveryLocation && deliveryLocation !== before) confirm();
   }, [isLocationPickerOpen, deliveryLocation]);
 
-  const inServiceArea = !!deliveryLocation && deliveryLocation.distance <= SERVICE_RADIUS_KM;
+  const inServiceArea = zoneInServiceArea(deliveryLocation);
 
   // Download the home page while the customer is still answering, so it is
   // ready the moment they tap Continue (it used to start only after).
@@ -113,10 +114,10 @@ export default function LocationGate({ children }: { children: React.ReactNode }
           </h1>
           <p className="mt-2 text-sm text-gray-500 font-medium max-w-xs">
             {outOfArea
-              ? `Minto currently delivers only in ${SERVICE_AREA_NAME}, within ${SERVICE_RADIUS_KM} km of our kitchen.`
+              ? `Minto currently delivers only in ${servedAreasText()}.`
               : inServiceArea
               ? 'Continue with your last location, or choose a new one.'
-              : `Share your location so we can show you what's available. We deliver across ${SERVICE_AREA_NAME}.`}
+              : `Share your location so we can show you what's available. We deliver across ${servedAreasText()}.`}
           </p>
         </div>
 

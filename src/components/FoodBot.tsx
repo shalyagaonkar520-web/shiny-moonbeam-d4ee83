@@ -17,6 +17,7 @@ import {
   STRINGS, LANG_LABEL, INTRO, FOOD_CATEGORIES, CAKE_CATEGORIES,
   dishesFor, type Lang, type Kind, type Diet, type CategoryId, type Dish, type Offer,
 } from '../lib/foodBot';
+import { inServiceArea as zoneInServiceArea } from '../lib/zones';
 
 const PAGE = 12;
 
@@ -395,7 +396,7 @@ function CheckoutSteps(p: StepsProps) {
 
   if (p.stage === 'location') {
     const loc = p.deliveryLocation;
-    const outside = !!loc && loc.distance > SERVICE_RADIUS_KM;
+    const outside = !!loc && !zoneInServiceArea(loc);
     const tooFarForCash = !!loc && !outside && loc.distance > COD_MAX_KM;
     return (
       <div className="space-y-3">

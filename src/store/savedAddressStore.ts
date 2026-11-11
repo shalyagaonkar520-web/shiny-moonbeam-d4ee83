@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import { haversineDistance } from '../lib/location';
 import { useLocationStore } from './locationStore';
 import { useAuthStore } from './authStore';
+import { locate } from '../lib/zones';
 
 export type AddressLabel = 'Home' | 'Work' | 'Other';
 
@@ -91,14 +92,15 @@ export const useSavedAddressStore = create<SavedAddressState>()(
       },
 
       deliverTo: (a) => {
-        const { restaurantLocation, maxDeliveryRange, setDeliveryLocation } = useLocationStore.getState();
-        const distance = haversineDistance(restaurantLocation.lat, restaurantLocation.lng, a.lat, a.lng);
+        const { maxDeliveryRange, setDeliveryLocation } = useLocationStore.getState();
+        const { zoneId, distance } = locate(a.lat, a.lng);
         setDeliveryLocation({
           lat: a.lat,
           lng: a.lng,
           address: fullAddress(a),
-          distance: parseFloat(distance.toFixed(2)),
+          distance,
           isDeliverable: distance <= maxDeliveryRange,
+          zoneId,
         });
       },
     }),

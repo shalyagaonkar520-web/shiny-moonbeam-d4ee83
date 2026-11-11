@@ -7,6 +7,7 @@ import { requestForToken, onMessageListener } from './firebase';
 import { flushTelegramOutbox } from './lib/notifyTelegram';
 import { useAuthStore } from './store/authStore';
 import { MENSWEAR_SHOP_ID } from './data/mensWear';
+import { useZoneStore } from './lib/zones';
 
 // Components
 const LandingPage = lazy(() => import('./components/LandingPage'));
@@ -47,6 +48,11 @@ const LuckyWheelPage = lazy(() => import('./components/LuckyWheelPage'));
 const AuthPage = lazy(() => import('./components/AuthPage'));
 const TrackOrderPage = lazy(() => import('./components/TrackOrderPage'));
 const TrackComingSoon = lazy(() => import('./components/TrackComingSoon'));
+// LPU orders: live map + timeline. Other orders still see "coming soon".
+const TrackRoute = lazy(() => import('./components/LiveTrackPage'));
+// ID Partner, the rider app for LPU deliveries.
+const PartnerApp = lazy(() => import('./components/PartnerApp'));
+const LpuZoneAdmin = lazy(() => import('./components/LpuZoneAdmin'));
 const MenswearPage = lazy(() => import('./components/MenswearPage'));
 const MenswearProductPage = lazy(() => import('./components/MenswearProductPage'));
 const MenswearAdminPage = lazy(() => import('./components/MenswearAdminPage'));
@@ -100,6 +106,11 @@ export default function App() {
   const listenToMenu = useMenuStore(state => state.listenToMenu);
 
   const setDeferredPrompt = useInstallModalStore(state => state.setDeferredPrompt);
+
+  // The LPU delivery zone (rectangle, pickup point, ETA): one read per start.
+  useEffect(() => {
+    void useZoneStore.getState().load();
+  }, []);
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: any) => {
@@ -243,7 +254,8 @@ export default function App() {
                   <Route path="/menswear" element={<Suspense fallback={<ShirtLoader />}><MenswearPage /></Suspense>} />
                   <Route path="/menswear/:slug" element={<Suspense fallback={<ShirtLoader />}><MenswearProductPage /></Suspense>} />
                   <Route path="/track" element={<TrackComingSoon />} />
-                  <Route path="/track/:orderId" element={<TrackComingSoon />} />
+                  <Route path="/track/:orderId" element={<TrackRoute />} />
+                  <Route path="/partner" element={<PartnerApp />} />
                   <Route path="/privacy" element={<PrivacyPage />} />
                   <Route path="/delete-account" element={<DeleteAccountPage />} />
                   <Route path="/addresses" element={<AddressesPage />} />
@@ -262,6 +274,7 @@ export default function App() {
                   <Route path="/about" element={<AboutFounder />} />
                   <Route path="/admin" element={<AdminPage />} />
                   <Route path="/admin/menswear" element={<MenswearAdminPage />} />
+                  <Route path="/admin/lpu" element={<LpuZoneAdmin />} />
                   {/* The old dark /orders list read stale localStorage; /track is the live list. */}
                   <Route path="/orders" element={<Navigate to="/track" replace />} />
                   <Route path="/spin" element={<LuckyWheelPage />} />

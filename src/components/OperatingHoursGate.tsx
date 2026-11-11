@@ -29,7 +29,8 @@ export default function OperatingHoursGate({ children }: { children: React.React
   //  - /admin so the owner can manage the store
   //  - ?preview=1 so the app can be checked on a real phone without lifting the gate
   //    for customers. Sticky for the session once used.
-  const isAdminRoute = location.pathname.startsWith('/admin');
+  // ...and /partner: a rider mid-delivery must never be locked out.
+  const isAdminRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/partner');
   const [preview] = useState(() => {
     try {
       if (new URLSearchParams(window.location.search).has('preview')) {

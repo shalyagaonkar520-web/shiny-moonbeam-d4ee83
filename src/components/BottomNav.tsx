@@ -10,7 +10,7 @@ export default function BottomNav() {
   const isActive = (path: string) => location.pathname === path;
 
   // The men's wear admin page is a work screen, not a shopping one.
-  if (location.pathname.startsWith('/admin/menswear')) return null;
+  if (location.pathname.startsWith('/admin/') || location.pathname.startsWith('/partner')) return null;
 
   return (
     <nav className="safe-bottom fixed bottom-0 left-0 right-0 z-[100] bg-white/95 backdrop-blur-xl border-t border-rose-100 shadow-[0_-4px_25px_rgba(244,63,94,0.06)] py-1.5 px-4 sm:px-6">

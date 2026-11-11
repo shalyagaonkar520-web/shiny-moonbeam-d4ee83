@@ -14,6 +14,7 @@ async function context(browser, { savedDetails, location = LOC }) {
   await c.addInitScript(([loc, saved]) => {
     if (sessionStorage.getItem('seeded')) return;
     if (loc) localStorage.setItem('delivery-location-storage', JSON.stringify({ state: { deliveryLocation: loc }, version: 0 }));
+    sessionStorage.setItem('mintoo_yellapur_choice', 'food'); // answer the Food / Men's Wear question
     if (saved) {
       localStorage.setItem('mintoo_user_name', 'Saved Customer');
       localStorage.setItem('mintoo_user_phone', '9876543210');

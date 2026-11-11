@@ -108,7 +108,7 @@ export function couponDiscountFor(coupon, subtotal) {
  * Prices an order from trusted data.
  * @param {{ items: any[], couponCode?: string, location: {lat:number,lng:number}, now?: Date }} input
  */
-export async function priceOrder({ items, couponCode, location, now = new Date(), allowUnknownItems = true }) {
+export async function priceOrder({ items, couponCode, location, origin = KITCHEN, now = new Date(), allowUnknownItems = true }) {
   const [menu, settings] = await Promise.all([liveMenu(), liveSettings()]);
   const flags = [];
 
@@ -152,7 +152,8 @@ export async function priceOrder({ items, couponCode, location, now = new Date()
   });
 
   const subtotal = lines.reduce((s, l) => s + l.price * l.quantity, 0);
-  const distanceKm = Math.round(haversineKm(KITCHEN.lat, KITCHEN.lng, location.lat, location.lng) * 100) / 100;
+  // From the zone's own origin: the Yellapur kitchen, or the LPU pickup point.
+  const distanceKm = Math.round(haversineKm(origin.lat, origin.lng, location.lat, location.lng) * 100) / 100;
 
   const coupons = Array.isArray(settings.coupons) ? settings.coupons : [];
   const code = String(couponCode || '').trim().toUpperCase();
