@@ -1,5 +1,5 @@
 {
-  "_comment": "Pexels source attribution for the verified dish photos used by Hotel Mumtaz, Coastal Crown and Kaka's Hotel Malabar. Every photo was visually checked against its dish before being committed. Photo URL pattern: https://www.pexels.com/photo/<pexelsId>/",
+  "_comment": "Pexels source attribution for the verified dish photos used by Hotel Mumtaz, Coastal Crown, Kaka's Hotel Malabar and Moms Magic Kitchen. Every photo was visually checked against its dish before being committed. Photo URL pattern: https://www.pexels.com/photo/<pexelsId>/",
   "_license": "Pexels License - free to use, no attribution required. Recorded here for traceability.",
   "photos": [
     {
@@ -328,6 +328,216 @@
       "pexelsId": 37303308,
       "photographer": "Tharun Thejus",
       "shows": "Vegetarian biryani with carrot, peas, potato and cauliflower"
+    },
+    {
+      "file": "mmk/veg-fried-rice-photo.webp",
+      "pexelsId": 35071826,
+      "photographer": "Milton Das",
+      "shows": "Top-down plate of vegetable fried rice with carrot, beans and coriander, with green chutney and red sauce bowls beside it; no meat or egg seen.",
+      "note": "Moms Magic Kitchen, Veg Fried Rice (exact match)"
+    },
+    {
+      "file": "mmk/veg-schezwan-fried-rice-photo.webp",
+      "pexelsId": 28674544,
+      "photographer": "Kunal Lakhotia",
+      "shows": "White bowl of orange-red spicy Indian-Chinese rice with dried red chillies and spring onion on a dark background; vegetarian.",
+      "note": "Moms Magic Kitchen, Veg Schezwan Fried Rice (exact match)"
+    },
+    {
+      "file": "mmk/veg-garlic-rice-photo.webp",
+      "pexelsId": 35588196,
+      "photographer": "Rahul Sonawane",
+      "shows": "Light, pale fried rice with spring onion and greens in a dark wooden bowl; looks like a plain garlic-style veg fried rice, no meat.",
+      "note": "Moms Magic Kitchen, Veg Garlic Rice (generic match)"
+    },
+    {
+      "file": "mmk/veg-singapore-rice-photo.webp",
+      "pexelsId": 17910326,
+      "photographer": "Nadja M",
+      "shows": "Golden-orange spiced vegetable rice with peas, carrot and herbs in a cast-iron pan; curry-yellow look but no noodles.",
+      "note": "Moms Magic Kitchen, Veg Singapore Rice (close match)"
+    },
+    {
+      "file": "mmk/mixed-veg-fried-rice-photo.webp",
+      "pexelsId": 3926124,
+      "photographer": "bishop tamrakar",
+      "shows": "Dome of vegetable fried rice with visible carrot, peas and beans, tomato rose and coriander on a white plate with french fries and sauces; vegetarian.",
+      "note": "Moms Magic Kitchen, Mixed Veg Fried Rice (exact match)"
+    },
+    {
+      "file": "mmk/veg-noodles-photo.webp",
+      "pexelsId": 2764905,
+      "photographer": "Zahid Akhtar",
+      "shows": "Top-down hakka-style vegetable noodles with green capsicum and carrot strips in a dark bowl on a black background; no meat or egg.",
+      "note": "Moms Magic Kitchen, Veg Noodles (exact match)"
+    },
+    {
+      "file": "mmk/veg-schezwan-noodles-photo.webp",
+      "pexelsId": 38579055,
+      "photographer": "Prateek Lall",
+      "shows": "Glossy red-brown spicy Szechuan/schezwan noodles with spring onion, red chilli and sesame in a white rim bowl on a red surface; no meat visible.",
+      "note": "Moms Magic Kitchen, Veg Schezwan Noodles (exact match)"
+    },
+    {
+      "file": "mmk/paneer-noodles-photo.webp",
+      "pexelsId": 23645814,
+      "photographer": "Nadin Sh",
+      "shows": "Stir-fried noodles with carrot, broccoli, herbs and seared white cubes that are tofu per the title but read as paneer, in a blue bowl on green; vegetarian.",
+      "note": "Moms Magic Kitchen, Paneer Noodles (close match)"
+    },
+    {
+      "file": "mmk/paneer-schezwan-noodles-photo.webp",
+      "pexelsId": 35779075,
+      "photographer": "Rahul Sonawane",
+      "shows": "Schezwan-style carrot-and-noodle stir-fry topped with crispy golden paneer batons and spring onion in a wooden bowl; vegetarian.",
+      "note": "Moms Magic Kitchen, Paneer Schezwan Noodles (exact match)"
+    },
+    {
+      "file": "mmk/mushroom-noodles-photo.webp",
+      "pexelsId": 4518699,
+      "photographer": "Polina Tankilevitch",
+      "shows": "Soba noodles with whole shiitake mushrooms, bamboo shoot, red pepper and sesame on a white plate, chopsticks (fingertips at top edge, crop out); vegetarian, not Indian-Chinese style.",
+      "note": "Moms Magic Kitchen, Mushroom Noodles (close match)"
+    },
+    {
+      "file": "mmk/mushroom-schezwan-noodles-photo.webp",
+      "pexelsId": 4518705,
+      "photographer": "Polina Tankilevitch",
+      "shows": "Close-up of soba noodles with shiitake mushroom, bamboo shoot, carrot, red pepper and sesame; vegetarian but not a schezwan/spicy-red sauce, only generic mushroom noodles.",
+      "note": "Moms Magic Kitchen, Mushroom Schezwan Noodles (generic match)"
+    },
+    {
+      "file": "mmk/egg-fried-rice-photo.webp",
+      "pexelsId": 28503583,
+      "photographer": "Nano Erdozain",
+      "shows": "Top-down fried rice in a blue bowl topped with sliced yellow omelette, chives and red chilli; sharp, appetising, centred.",
+      "note": "Moms Magic Kitchen, Egg Fried Rice (exact match)"
+    },
+    {
+      "file": "mmk/chicken-fried-rice-photo.webp",
+      "pexelsId": 34668500,
+      "photographer": "UNDO KIM",
+      "shows": "Green bowl of fried rice with shredded chicken pieces, carrot and spring onion, cucumber slices on a wooden table (a spoon at the top edge).",
+      "note": "Moms Magic Kitchen, Chicken Fried Rice (exact match)"
+    },
+    {
+      "file": "mmk/chicken-schezwan-fried-rice-photo.webp",
+      "pexelsId": 34613243,
+      "photographer": "UNDO KIM",
+      "shows": "Red-orange spicy-looking fried rice with chicken pieces in a bowl with cucumber slices on a wooden table (same set as chicken-fried-rice, but a clearly redder rice).",
+      "note": "Moms Magic Kitchen, Chicken Schezwan Fried Rice (exact match)"
+    },
+    {
+      "file": "mmk/egg-schezwan-fried-rice-photo.webp",
+      "pexelsId": 34439450,
+      "photographer": "Jb Moordiana",
+      "shows": "Spicy red-brown fried rice served on a banana leaf topped with a halved boiled egg and tomato slices; Indonesian nasi goreng style, egg visible.",
+      "note": "Moms Magic Kitchen, Egg Schezwan Fried Rice (close match)"
+    },
+    {
+      "file": "mmk/non-veg-mix-fried-rice-photo.webp",
+      "pexelsId": 37171028,
+      "photographer": "Monakha laden",
+      "shows": "Top-down plate of fried rice with fried chicken pieces, a fried egg, prawn crackers and salad garnish; chicken plus egg clearly visible.",
+      "note": "Moms Magic Kitchen, Non Veg Mix Fried Rice (close match)"
+    },
+    {
+      "file": "mmk/egg-noodles-photo.webp",
+      "pexelsId": 793750,
+      "photographer": "Jane T D.",
+      "shows": "Black bowl of spicy brown noodles topped with two halved soft-boiled eggs, coriander and chilli flakes; egg is boiled halves, not scrambled.",
+      "note": "Moms Magic Kitchen, Egg Noodles (close match)"
+    },
+    {
+      "file": "mmk/egg-schezwan-noodles-photo.webp",
+      "pexelsId": 20220647,
+      "photographer": "Su La Pyae",
+      "shows": "Orange chilli-sauced noodles with sesame, spring onion, squash/veg pieces and halved boiled eggs on a white plate; dish is off-centre with a mug behind, and the noodles are thin rice-style.",
+      "note": "Moms Magic Kitchen, Egg Schezwan Noodles (close match)"
+    },
+    {
+      "file": "mmk/chicken-noodles-photo.webp",
+      "pexelsId": 24738508,
+      "photographer": "Nadin Sh",
+      "shows": "Bowl of stir-fried noodles with red pepper strips, spring onion and visible chicken pieces in a teal bowl, top-down.",
+      "note": "Moms Magic Kitchen, Chicken Noodles (exact match)"
+    },
+    {
+      "file": "mmk/chicken-schezwan-noodles-photo.webp",
+      "pexelsId": 28460868,
+      "photographer": "Nano Erdozain",
+      "shows": "Spicy red-orange stir-fried noodles topped with crispy fried chicken strips and spring onion in a dark blue bowl on a dark background; darker mood than ideal.",
+      "note": "Moms Magic Kitchen, Chicken Schezwan Noodles (close match)"
+    },
+    {
+      "file": "mmk/chicken-garlic-noodles-photo.webp",
+      "pexelsId": 24738507,
+      "photographer": "Nadin Sh",
+      "shows": "Teal bowl of stir-fried noodles with chicken pieces, red pepper, spring onion and sesame seeds on a pale background; no specific garlic visible.",
+      "note": "Moms Magic Kitchen, Chicken Garlic Noodles (close match)"
+    },
+    {
+      "file": "mmk/chicken-chilli-photo.webp",
+      "pexelsId": 5339079,
+      "photographer": "Roman Odintsov",
+      "shows": "Glossy dark-red Indo-Chinese chicken (Manchurian/chilli style) with green chilli and pepper pieces on a white rectangular dish against a pale background; dish is smallish in frame and sits right of centre.",
+      "note": "Moms Magic Kitchen, Chicken Chilli (close match)"
+    },
+    {
+      "file": "mmk/gobi-manchurian-photo.webp",
+      "pexelsId": 35071824,
+      "photographer": "Milton Das",
+      "shows": "Crispy cauliflower florets in dark glossy manchurian sauce with coriander on a white plate with two dips, pink background.",
+      "note": "Moms Magic Kitchen, Gobi Manchurian (exact match)"
+    },
+    {
+      "file": "mmk/veg-manchurian-photo.webp",
+      "pexelsId": 29631489,
+      "photographer": "Kunal Lakhotia",
+      "shows": "Vegetable manchurian balls in dark sauce topped with shredded spring onion in a white bowl on white background.",
+      "note": "Moms Magic Kitchen, Veg Manchurian (exact match)"
+    },
+    {
+      "file": "mmk/chicken-kebab-photo.webp",
+      "pexelsId": 34389377,
+      "photographer": "Calvin Seng",
+      "shows": "Golden-red charred grilled chicken kebab pieces on flatbread over a wooden board with a bread basket behind; portrait framing, warm and appetising.",
+      "note": "Moms Magic Kitchen, Chicken Kebab (exact match)"
+    },
+    {
+      "file": "mmk/veg-tripura-rice-photo.webp",
+      "pexelsId": 10695966,
+      "photographer": "Skyler Ewing",
+      "shows": "Rice bowl topped with stir-fried mushrooms, cauliflower, red pepper, snap peas and broccoli in sauce; vegetarian, not Indo-Chinese fried rice.",
+      "note": "Moms Magic Kitchen, Mushroom Fried Rice (close match)"
+    },
+    {
+      "file": "mmk/chicken-tripura-rice-photo.webp",
+      "pexelsId": 36388450,
+      "photographer": "Muhammad Khawar Nazir",
+      "shows": "Grey plate with fried noodles, vegetable fried rice and chicken in dark sauce, plus a bit of a pizza slice at the edge; rice and noodles together, but no egg visible. Weakest pick.",
+      "note": "Moms Magic Kitchen, Egg Fried Rice with Noodles (close match)"
+    },
+    {
+      "file": "mmk/banner-photo.webp",
+      "pexelsId": 35779075,
+      "photographer": "Rahul Sonawane",
+      "shows": "Schezwan-style carrot-and-noodle stir-fry topped with crispy golden paneer batons and spring onion in a wooden bowl; vegetarian.",
+      "note": "Moms Magic Kitchen banner and home card"
+    },
+    {
+      "file": "mmk/paneer-crispy-photo.webp",
+      "pexelsId": 31783383,
+      "photographer": "grayom .",
+      "shows": "Golden fried paneer pieces in glossy red sauce with onion and coriander in a white dish (the lower half of a portrait photo; its upper half, a plate of veg fried rice, is cropped out)",
+      "note": "Moms Magic Kitchen, Paneer Crispy (close match: saucy, not dry-crisp)"
+    },
+    {
+      "file": "mmk/veg-crispy-photo.webp",
+      "pexelsId": 35071828,
+      "photographer": "Milton Das",
+      "shows": "Dry crispy cauliflower florets tossed with green capsicum and onion in dark sauce on a white plate with two dips.",
+      "note": "Moms Magic Kitchen, Veg Crispy (generic match)"
     }
   ]
 }

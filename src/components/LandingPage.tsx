@@ -50,7 +50,7 @@ const PARTNER_HOTELS = [
     tagline: "Fried Rice, Noodles & Chinese",
     isOpen: true,
     badge: "Gold",
-    image: "/triple_schezwan_rice.webp",
+    image: "/menu/mmk/banner-photo.webp",
     hasCustomPhoto: true
   },
   {
