@@ -91,6 +91,15 @@ const PARTNER_HOTELS = [
     hasCustomPhoto: true
   },
   {
+    id: 'chetana-masalapuri-center',
+    name: "Chetana Masalapuri Center",
+    tagline: "Chaats & Snacks, from 4 PM",
+    isOpen: true,
+    badge: "View Menu",
+    image: "/hotel_chetana.webp",
+    hasCustomPhoto: true
+  },
+  {
     id: 'coastal_crown',
     name: "Coastal Crown",
     tagline: "Seafood & Tandoor Magic",
@@ -254,6 +263,11 @@ export default function LandingPage() {
     }
     if (hotel.id === 'sankalpa') {
       navigate('/hotel-sankalpa');
+      return;
+    }
+    if (hotel.id === 'chetana-masalapuri-center') {
+      if (!chatsOpen) toast(`${hotel.name}: Closed – Opens at ${CHATS_OPENS_AT_LABEL}`, { id: 'chats-closed' });
+      navigate('/hotel-chetana');
       return;
     }
     if (!hotel.isOpen) {
@@ -931,7 +945,9 @@ export default function LandingPage() {
                     <span className={`text-[10px] font-bold ${
                       !liveOpen ? 'text-gray-500' : 'text-emerald-600'
                     }`}>
-                      {mmkBeforeOpening && isHotelOpen(hotel.id) ? `Opens ${MMK_OPENS_AT_LABEL}` : !liveOpen ? 'Closed now' : 'View menu'}
+                      {mmkBeforeOpening && isHotelOpen(hotel.id) ? `Opens ${MMK_OPENS_AT_LABEL}`
+                        : hotel.id === 'chetana-masalapuri-center' && liveOpen && !chatsOpen ? `Opens ${CHATS_OPENS_AT_LABEL}`
+                        : !liveOpen ? 'Closed now' : 'View menu'}
                     </span>
                     <span className="text-[10px] text-gray-500" aria-hidden="true">→</span>
                   </div>

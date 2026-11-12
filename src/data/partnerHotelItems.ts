@@ -121,7 +121,7 @@ function chetanaItems(): PartnerHotelProduct[] {
     id: `chetana-${slug(item.name)}`,
     hotelId: CHETANA_HOTEL_ID,
     hotelName: CHETANA_HOTEL_NAME,
-    hotelPath: '/',
+    hotelPath: '/hotel-chetana',
     showHotelBadge: true,
     name: item.name,
     price: item.price,
