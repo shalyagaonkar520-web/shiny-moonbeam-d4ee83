@@ -22,6 +22,7 @@ import DishImage from './DishImage';
 import { PARTNER_HOTEL_PRODUCTS } from '../data/partnerHotelItems';
 import { useDishOrderable } from '../store/dishAvailabilityStore';
 import { useMmkOpen, isMmkOpenNow, isMmkItem, MMK_CLOSED_MESSAGE, MMK_OPENS_AT_LABEL } from '../lib/mmkHours';
+import { useChatsOpen, isChatsOpenNow, isChatsItem, CHATS_OPENS_AT_LABEL } from '../lib/chatsHours';
 import { isInYellapur } from '../lib/yellapur';
 import { MENSWEAR_MIN_PRICE } from '../data/mensWear';
 import YellapurChooser from './YellapurChooser';
@@ -214,6 +215,14 @@ export default function LandingPage() {
   // dishes are not suggested anywhere on this screen; other hotels' are.
   const mmkPanelOpen = useLiveHotelStore((s) => s.isOpen(GOLD_HOTEL_ID));
   const mmkLive = mmkOpen && mmkPanelOpen;
+  // Chats (Chetana) take orders from 4 PM IST; before that, say so on their list.
+  const chatsOpen = useChatsOpen();
+  const chatsClosedBanner =
+    !chatsOpen && (selectedMindCategory === 'chats' || selectedCategoryTab === 'Chats') ? (
+      <div className="rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold px-4 py-2.5">
+        Chats open daily at {CHATS_OPENS_AT_LABEL}. You can browse now and order from {CHATS_OPENS_AT_LABEL}.
+      </div>
+    ) : null;
 
   const handleHotelClick = (hotel: typeof PARTNER_HOTELS[0]) => {
     if (!isHotelOpen(hotel.id)) {
@@ -277,6 +286,8 @@ export default function LandingPage() {
     const { hotelName, hotelPath, showHotelBadge, ...cartProduct } = product;
     // Moms Magic Kitchen before 2:30 PM IST: the cart refuses it and says why.
     if (isMmkItem(cartProduct) && !isMmkOpenNow()) { addItem(cartProduct); return; }
+    // Chats before 4 PM IST: the cart refuses it and says why.
+    if (isChatsItem(cartProduct) && !isChatsOpenNow()) { addItem(cartProduct); return; }
     playSound(SOUNDS.ADD_TO_CART);
     addItem(cartProduct);
     toast.success(`${product.name} added! 🍽️`, {
@@ -674,6 +685,7 @@ export default function LandingPage() {
               </button>
             </div>
 
+            {chatsClosedBanner}
             <MenuFilterChips
               priceSort={priceSort}
               onPriceSort={setPriceSort}
@@ -1241,6 +1253,7 @@ export default function LandingPage() {
             })}
           </div>
 
+          {chatsClosedBanner}
           <MenuFilterChips
             priceSort={priceSort}
             onPriceSort={setPriceSort}

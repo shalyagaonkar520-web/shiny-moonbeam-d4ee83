@@ -22,6 +22,7 @@ import { getItemHotelTag, getItemHotel, getOrderHotelName, getOrderHotelId, grou
 import DishImage from './DishImage';
 import { useDishAvailabilityStore } from '../store/dishAvailabilityStore';
 import { isMmkOpenNow, isMmkItem } from '../lib/mmkHours';
+import { isChatsOpenNow, isChatsItem } from '../lib/chatsHours';
 import { isMmkHalfItem } from '../data/momsMagicKitchenMenu';
 import { notifyTelegram } from '../lib/notifyTelegram';
 import { couponDiscountFor, couponGivesFreeDelivery, normaliseIndianMobile, CouponRule } from '../lib/pricing';
@@ -592,6 +593,12 @@ export default function Checkout() {
     // too; this also covers the fallback path that writes without it).
     if (!isMmkOpenNow() && activeItems.some((i: any) => isMmkItem(i))) {
       toast.error(orderErrorMessage('mmk_not_open_yet'));
+      return;
+    }
+
+    // Chats (Chetana) take orders only from 4 PM IST; the server checks too.
+    if (!isChatsOpenNow() && activeItems.some((i: any) => isChatsItem(i))) {
+      toast.error(orderErrorMessage('chats_not_open_yet'));
       return;
     }
 

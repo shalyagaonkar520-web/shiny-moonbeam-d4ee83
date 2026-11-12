@@ -5,6 +5,7 @@ import { useDishAvailabilityStore } from './dishAvailabilityStore';
 import { getItemHotel } from '../utils/orderHotels';
 import toast from 'react-hot-toast';
 import { isMmkOpenNow, isMmkItem, MMK_CLOSED_MESSAGE } from '../lib/mmkHours';
+import { isChatsOpenNow, isChatsItem, CHATS_CLOSED_MESSAGE } from '../lib/chatsHours';
 import { isMmkHalfItem } from '../data/momsMagicKitchenMenu';
 import { useSystemStore } from './systemStore';
 
@@ -64,6 +65,11 @@ export const useCartStore = create<CartStore>()(persist((set, get) => {
       // search, the food bot and reorder.
       if (isMmkItem(product) && !isMmkOpenNow()) {
         toast.error(`Moms Magic Kitchen: ${MMK_CLOSED_MESSAGE}`, { id: 'mmk-closed' });
+        return;
+      }
+      // Chats (Chetana) open at 4 PM IST, same coverage as above.
+      if (isChatsItem(product) && !isChatsOpenNow()) {
+        toast.error(`Chats: ${CHATS_CLOSED_MESSAGE}`, { id: 'chats-closed' });
         return;
       }
       // Half portions only while the admin switch is on (e.g. a reorder of an

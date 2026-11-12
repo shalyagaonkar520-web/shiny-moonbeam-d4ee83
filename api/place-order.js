@@ -2,6 +2,7 @@ import { getApps } from 'firebase-admin/app';
 import { loadAdminAuth } from './_adminAuth.js';
 import { unavailableDishes } from './_dishAvailability.js';
 import { isMmkOpenNow, isMmkLine } from './_mmkHours.js';
+import { isChatsOpenNow, isChatsLine } from './_chatsHours.js';
 import { adminDb } from './_firebaseAdmin.js';
 import { priceOrder, liveSettings, isHalfPortionLine, SERVICE_RADIUS_KM, COD_MAX_KM } from './_pricing.js';
 import { announceOnce } from './_orderMessage.js';
@@ -146,6 +147,10 @@ export default async function handler(req, res) {
   // dishes rather than by hotel. Before any payment order, like the checks below.
   const hasMmk = priced.lines.some(isMmkLine) || items.some((i) => i?.hotelId === 'moms_magic_kitchen');
   if (hasMmk && !isMmkOpenNow()) return bad(res, 409, 'mmk_not_open_yet');
+
+  // Chats (Chetana Masalapuri Center) take orders only from 4 PM IST.
+  const hasChats = priced.lines.some(isChatsLine) || items.some(isChatsLine);
+  if (hasChats && !isChatsOpenNow()) return bad(res, 409, 'chats_not_open_yet');
 
   // Moms Magic Kitchen half portions are sold only while the admin switch
   // system/settings.mmkHalfPortions is on (off by default).

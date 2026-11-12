@@ -104,6 +104,7 @@ export function orderErrorMessage(code: string, hotels?: string[]): string {
       return `${hotels.join(' and ')} ${verb} stopped taking orders right now. Remove those items and try again.`;
     }
     case 'mmk_not_open_yet': return 'Moms Magic Kitchen is closed – opens at 2:30 PM. Remove its items to order now, or come back at 2:30 PM.';
+    case 'chats_not_open_yet': return 'Chats are closed – they open at 4 PM. Remove them to order now, or come back at 4 PM.';
     case 'dish_unavailable': return 'Some dishes in your cart are not available right now. Remove them and try again.';
     case 'invalid_phone': return 'Please enter a valid 10-digit mobile number.';
     case 'invalid_name': return 'Please enter your name.';
