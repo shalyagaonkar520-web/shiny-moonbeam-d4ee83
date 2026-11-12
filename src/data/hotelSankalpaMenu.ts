@@ -1,6 +1,7 @@
 // Hotel Sankalpa - Pure Veg Heritage Feasts, full menu.
 // 84 items across 9 categories. Every item is vegetarian.
-// Item names and prices are taken from the restaurant's own menu and must not be altered.
+// Item names and base prices are taken from the restaurant's own menu and must not be altered.
+// Customers pay the base price + SANKALPA_MARKUP (Rs 15), applied at the bottom of this file.
 // Dish photos are resolved through the centralized map in ./sankalpaMenuImages.
 
 import { SANKALPA_MENU_IMAGES } from './sankalpaMenuImages';
@@ -19,7 +20,11 @@ export interface SankalpaMenuCategory {
   items: SankalpaMenuItem[];
 }
 
-export const HOTEL_SANKALPA_MENU: SankalpaMenuCategory[] = [
+/** Added to every restaurant price (owner's instruction, 12 Nov 2026). */
+export const SANKALPA_MARKUP = 15;
+
+/** The restaurant's own menu prices, exactly as printed. */
+const SANKALPA_BASE_MENU: SankalpaMenuCategory[] = [
 
   {
     title: 'Veg Main Course',
@@ -580,3 +585,9 @@ export const HOTEL_SANKALPA_MENU: SankalpaMenuCategory[] = [
     ]
   }
 ];
+
+/** What customers see and pay: the restaurant price plus SANKALPA_MARKUP. */
+export const HOTEL_SANKALPA_MENU: SankalpaMenuCategory[] = SANKALPA_BASE_MENU.map((category) => ({
+  ...category,
+  items: category.items.map((item) => ({ ...item, price: item.price + SANKALPA_MARKUP })),
+}));
