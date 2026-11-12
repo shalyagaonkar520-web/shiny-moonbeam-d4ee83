@@ -12,8 +12,8 @@ android {
         applicationId "com.minto.food"
         minSdk 24
         targetSdk 36
-        versionCode 1211
-        versionName "12.1.1"
+        versionCode 1212
+        versionName "12.1.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
