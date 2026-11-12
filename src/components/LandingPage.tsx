@@ -299,18 +299,23 @@ export default function LandingPage() {
   // remaining hotels, each badged with the hotel that cooks it.
   // Dishes switched off in the panel are left out everywhere on this screen.
   const isOrderable = useDishOrderable();
+  // A hotel switched off (or closed) in the panel disappears from every dish
+  // list too, not just its card. `liveStatuses` is only here so this recomputes
+  // the moment the panel flips a switch.
+  const liveStatuses = useLiveHotelStore((s) => s.statuses);
   const allProducts = useMemo(
     () => {
       const partner = PARTNER_HOTEL_PRODUCTS.filter(
-        (item) => isOrderable(item.hotelId, item.name) && (mmkLive || item.hotelId !== GOLD_HOTEL_ID)
+        (item) => isHotelOpen(item.hotelId) && isOrderable(item.hotelId, item.name) && (mmkLive || item.hotelId !== GOLD_HOTEL_ID)
       );
       return [
         ...partner.filter((item) => item.hotelId === GOLD_HOTEL_ID),
-        ...menuItems.filter((item) => isOrderable('al_amin', item.name)),
+        ...menuItems.filter((item) => isHotelOpen('al_amin') && isOrderable('al_amin', item.name)),
         ...partner.filter((item) => item.hotelId !== GOLD_HOTEL_ID),
       ];
     },
-    [menuItems, isOrderable, mmkLive]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [menuItems, isOrderable, mmkLive, isHotelOpen, liveStatuses]
   );
 
   /** Hotel name to print on a card, or null for Al Amin / Minto items. */

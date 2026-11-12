@@ -73,12 +73,14 @@ export default function FoodBot({ onClose }: { onClose: () => void }) {
   const mmkLive = mmkOpen && mmkPanelOpen;
 
   // The same dishes the home page lists, minus anything the kitchen switched off.
+  const liveStatuses = useLiveHotelStore((s) => s.statuses);
   const foodProducts = useMemo(
     () => [
-      ...menuItems.filter((p) => isOrderable('al_amin', p.name)),
-      ...PARTNER_HOTEL_PRODUCTS.filter((p) => isOrderable(p.hotelId, p.name) && (mmkLive || p.hotelId !== 'moms_magic_kitchen')),
+      ...menuItems.filter((p) => isHotelOpen('al_amin') && isOrderable('al_amin', p.name)),
+      ...PARTNER_HOTEL_PRODUCTS.filter((p) => isHotelOpen(p.hotelId) && isOrderable(p.hotelId, p.name) && (mmkLive || p.hotelId !== 'moms_magic_kitchen')),
     ] as Offer['product'][],
-    [menuItems, isOrderable, mmkLive]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [menuItems, isOrderable, mmkLive, isHotelOpen, liveStatuses]
   );
 
   const t = STRINGS[state.lang || 'en'];
