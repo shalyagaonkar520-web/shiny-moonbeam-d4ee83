@@ -3,6 +3,7 @@
 // by the browser. Used by /api/place-order.
 import { readFileSync } from 'node:fs';
 import { adminDb } from './_firebaseAdmin.js';
+import { isWeekendFreeDelivery, WEEKEND_FREE_DELIVERY_REASON } from './_freeDeliveryDays.js';
 
 const CATALOG = JSON.parse(readFileSync(new URL('./_catalog.json', import.meta.url), 'utf8'));
 
@@ -164,8 +165,11 @@ export async function priceOrder({ items, couponCode, location, origin = KITCHEN
   if (code && coupon && coupon.type !== 'free_delivery' && couponDiscount === 0) flags.push(`coupon ${code} not valid for this order`);
 
   const freeByCoupon = !!coupon && coupon.isActive && coupon.type === 'free_delivery' && subtotal >= Number(coupon.minOrderValue || 0);
-  const deliveryCharge = freeByCoupon ? 0 : deliveryChargeFor(distanceKm);
-  const freeDeliveryReason = freeByCoupon ? `${coupon.code} Promo` : '';
+  // Saturdays and Sundays (IST) are free for everyone; a coupon only matters
+  // on weekdays. The weekend reason wins so the receipt says why.
+  const freeByWeekend = isWeekendFreeDelivery(now);
+  const deliveryCharge = freeByWeekend || freeByCoupon ? 0 : deliveryChargeFor(distanceKm);
+  const freeDeliveryReason = freeByWeekend ? WEEKEND_FREE_DELIVERY_REASON : freeByCoupon ? `${coupon.code} Promo` : '';
 
   const hasMumtaz = lines.some((l) => l.hotelId === 'mumtaz');
   const packagingFee = hasMumtaz ? MUMTAZ_PACKAGING_FEE : 0;

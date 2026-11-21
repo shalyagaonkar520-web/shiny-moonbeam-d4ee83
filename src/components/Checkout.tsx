@@ -12,6 +12,7 @@ import { Send, MapPin, Ticket, Calendar, ShieldCheck, ChevronLeft, Loader2, Lock
 import toast from 'react-hot-toast';
 import { useCityStore } from '../store/cityStore';
 import { calculateDeliveryCharge } from '../types';
+import { isWeekendFreeDelivery, WEEKEND_FREE_DELIVERY_REASON } from '../lib/freeDeliveryDays';
 import { useSystemStore } from '../store/systemStore';
 import { playSound, SOUNDS } from '../utils/audio';
 import { useSEO } from '../utils/seo';
@@ -169,8 +170,10 @@ export default function Checkout() {
   const appliedCouponDetails = appliedCoupon ? activeCoupons.find(c => c.code.toUpperCase() === appliedCoupon) : null;
   // Only a free-delivery coupon waives the fee (the old "free before 2 PM"
   // rule was removed).
-  const isFreeDelivery = couponGivesFreeDelivery(appliedCouponDetails, subtotal);
-  const freeDeliveryReason = isFreeDelivery ? `${appliedCouponDetails!.code} Promo` : '';
+  // Saturdays and Sundays (IST) are free for everyone, coupon or not.
+  const freeByWeekend = isWeekendFreeDelivery();
+  const isFreeDelivery = freeByWeekend || couponGivesFreeDelivery(appliedCouponDetails, subtotal);
+  const freeDeliveryReason = freeByWeekend ? WEEKEND_FREE_DELIVERY_REASON : isFreeDelivery ? `${appliedCouponDetails!.code} Promo` : '';
   const deliveryCharge = isFreeDelivery ? 0 : baseDeliveryCharge;
 
   // Re-checked on every render: dropping below the minimum or the admin

@@ -13,14 +13,14 @@ const check = (name, cond, extra = '') => { console.log(`${cond ? 'PASS' : 'FAIL
 
 // 1. Tampered price is replaced by the catalog price and flagged
 const home = { lat: 14.9651, lng: 74.7105 };
-const afternoon = new Date('2026-09-27T10:30:00Z'); // 16:00 IST
+const afternoon = new Date('2026-09-28T10:30:00Z'); // 16:00 IST
 const r1 = await priceOrder({ items: [{ id: 'ff-1', name: 'Masala Papad', price: 1, quantity: 2 }], location: home, now: afternoon });
 check('catalog price wins over tampered price', r1.lines[0].price === 69, `(got ${r1.lines[0].price})`);
 check('tamper flagged', r1.flags.some((f) => f.includes('menu says ₹69')));
 check('delivery charged in the afternoon', r1.deliveryCharge === 20, `(got ${r1.deliveryCharge})`);
 
 // 2. No free delivery before 2 PM any more: mornings are charged too
-const morningIST = new Date('2026-09-27T05:00:00Z'); // 10:30 IST
+const morningIST = new Date('2026-09-28T05:00:00Z'); // 10:30 IST
 const r2 = await priceOrder({ items: [{ id: 'ff-1', name: 'Masala Papad', price: 69, quantity: 1 }], location: home, now: morningIST });
 check('delivery charged in the morning', r2.deliveryCharge === 20 && r2.freeDeliveryReason === '', `(got ${r2.deliveryCharge})`);
 
