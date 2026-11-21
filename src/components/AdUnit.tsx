@@ -2,8 +2,9 @@ import { useEffect, useRef } from 'react';
 
 // One Google AdSense display unit ("ads"). The AdSense script itself is loaded
 // from index.html. Rules:
-//  - Only on the pages that render <AdUnit />: the bottom of the home page.
-//    Never on the menu, cart, checkout or order-tracking screens.
+//  - Only on the pages that render <AdUnit />: the bottom of the home page and of
+//    the order page shown after payment (/track/:id).
+//    Never on the menu, cart or checkout, where it could cost an order.
 //  - Never inside the Android app: it is this same site in a WebView, and
 //    AdSense does not allow ads in an app's WebView.
 //  - If Google's script is blocked (ad blocker, offline) nothing is shown and

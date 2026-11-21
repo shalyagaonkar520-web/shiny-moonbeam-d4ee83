@@ -11,6 +11,7 @@ import { haversineDistance } from '../lib/location';
 import { playSound, SOUNDS } from '../utils/audio';
 import LiveMap from './LiveMap';
 import TrackComingSoon from './TrackComingSoon';
+import AdUnit from './AdUnit';
 
 /** Orders this device placed, as checkout saved them. */
 function localOrders(): any[] {
@@ -246,6 +247,10 @@ function LiveTrack({ order, offsetTop }: { order: any; offsetTop: boolean }) {
           <MapPin className="w-4 h-4 text-[#e11d48] shrink-0 mt-0.5" />
           <span>{order.deliveryLocation?.address}</span>
         </section>
+
+        {/* Google ad at the very bottom: the order is already placed and paid,
+            so it cannot get in the way of ordering. Hidden in the Android app. */}
+        <AdUnit />
       </main>
     </div>
   );
