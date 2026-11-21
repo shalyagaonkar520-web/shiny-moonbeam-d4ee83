@@ -20,6 +20,7 @@ import { playSound, SOUNDS } from '../utils/audio';
 import { useSEO } from '../utils/seo';
 import DishImage from './DishImage';
 import { PARTNER_HOTEL_PRODUCTS } from '../data/partnerHotelItems';
+import AdUnit from './AdUnit';
 import { useDishOrderable } from '../store/dishAvailabilityStore';
 import { useMmkOpen, isMmkOpenNow, isMmkItem, MMK_CLOSED_MESSAGE, MMK_OPENS_AT_LABEL } from '../lib/mmkHours';
 import { useChatsOpen, isChatsOpenNow, isChatsItem, CHATS_OPENS_AT_LABEL } from '../lib/chatsHours';
@@ -1433,6 +1434,9 @@ export default function LandingPage() {
         </section>
         </>
         )}
+
+        {/* Google ad: the one place ads appear (bottom of the home page). */}
+        <AdUnit />
 
         {/* Pexels Attribution */}
         <div className="pt-6 pb-8 text-center border-t border-gray-100">
