@@ -92,6 +92,17 @@
          the AdSense account. -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7422477829341364"
          crossorigin="anonymous"></script>
+    <!-- Google Tag Manager (visitor statistics). Not loaded inside the Android app. -->
+    <script>
+      if (!/MintoApp|MomsMagicApp|; wv\)/.test(navigator.userAgent)) {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+        var gtmScript = document.createElement('script');
+        gtmScript.async = true;
+        gtmScript.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-WHHQHMWH';
+        document.head.appendChild(gtmScript);
+      }
+    </script>
   </head>
   <body>
     <div id="root">
