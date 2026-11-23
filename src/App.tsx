@@ -26,6 +26,7 @@ const HotelMalabarMenuPage = lazy(() => import('./components/HotelMalabarMenuPag
 const MomsMagicKitchenMenuPage = lazy(() => import('./components/MomsMagicKitchenMenuPage'));
 const HotelSankalpaMenuPage = lazy(() => import('./components/HotelSankalpaMenuPage'));
 const HotelChetanaMenuPage = lazy(() => import('./components/HotelChetanaMenuPage'));
+const YellapurFoodPage = lazy(() => import('./components/YellapurFoodPage'));
 import BottomNav from './components/BottomNav';
 import BottomCartBar from './components/BottomCartBar';
 import CityGateway from './components/CityGateway';
@@ -286,6 +287,9 @@ export default function App() {
                   <Route path="/hotel-moms-magic-kitchen" element={<MomsMagicKitchenMenuPage />} />
                   <Route path="/hotel-sankalpa" element={<HotelSankalpaMenuPage />} />
                   <Route path="/hotel-chetana" element={<HotelChetanaMenuPage />} />
+                  <Route path="/food-delivery-yellapur" element={<YellapurFoodPage />} />
+                  <Route path="/biryani-yellapur" element={<YellapurFoodPage />} />
+                  <Route path="/order-food-online-yellapur" element={<YellapurFoodPage />} />
                   <Route path="/clean" element={<MMCleanPage />} />
                   <Route path="/celebration" element={<CelebrationHub />} />
                   <Route path="/celebration/design" element={<CelebrationDesign />} />

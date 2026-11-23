@@ -166,8 +166,8 @@ const WHATS_ON_YOUR_MIND = [
 
 export default function LandingPage() {
   useSEO(
-    "Minto - Food Delivery in Yellapur | Biryani, Chaats, Veg Meals & More",
-    "Order Chicken Biryani, Shawarma, Chaats, Noodles, Veg Meals, Fast Food and Special Combo Offers from Minto. Fast food delivery in Yellapur, Dandeli and nearby areas. Free delivery on Saturday and Sunday."
+    "Minto (formerly Moms Magic) - Food Delivery in Yellapur | Biryani, Chaats & More",
+    "Minto, formerly Moms Magic: order Chicken Biryani, Shawarma, Chaats, Noodles, Veg Meals, Fast Food and Special Combo Offers from Minto. Fast food delivery in Yellapur, Dandeli and nearby areas. Free delivery on Saturday and Sunday."
   );
 
   const navigate = useNavigate();
