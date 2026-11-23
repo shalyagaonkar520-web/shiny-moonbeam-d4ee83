@@ -28,7 +28,7 @@ const PAGES: Record<string, PageCopy> = {
       'Order chicken biryani and more online in Yellapur from Minto (formerly Moms Magic). Home delivery from local restaurants, free delivery on Saturday and Sunday.',
     h1: 'Order biryani in Yellapur',
     intro:
-      'Looking for biryani in Yellapur? Minto (formerly Moms Magic) lists biryani and rice dishes from local restaurants such as Hotel Mumtaz and Moms Magic Kitchen, delivered to your home.',
+      'Looking for biryani in Yellapur? Minto (formerly Moms Magic) lists biryani and rice dishes from local restaurants such as Hotel Mumtaz, delivered to your home.',
   },
   '/order-food-online-yellapur': {
     title: 'Order Food Online in Yellapur | Minto (formerly Moms Magic)',
