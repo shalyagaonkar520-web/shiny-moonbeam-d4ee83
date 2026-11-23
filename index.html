@@ -101,6 +101,17 @@
         gtmScript.async = true;
         gtmScript.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-WHHQHMWH';
         document.head.appendChild(gtmScript);
+
+        // Google Analytics 4 (G-HMET5GCY9B), loaded directly so it works without
+        // any tag being published inside Tag Manager. Do not also add this
+        // Measurement ID as a tag in Tag Manager: visits would be counted twice.
+        var gaScript = document.createElement('script');
+        gaScript.async = true;
+        gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-HMET5GCY9B';
+        document.head.appendChild(gaScript);
+        window.gtag = function () { window.dataLayer.push(arguments); };
+        window.gtag('js', new Date());
+        window.gtag('config', 'G-HMET5GCY9B');
       }
     </script>
   </head>
