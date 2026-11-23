@@ -56,6 +56,15 @@ const PARTNER_HOTELS = [
     hasCustomPhoto: true
   },
   {
+    id: 'sankalpa',
+    name: "Hotel Sankalpa",
+    tagline: "Pure Veg Heritage Feasts",
+    isOpen: true,
+    badge: "View Menu",
+    image: "/hotel_sankalpa.webp",
+    hasCustomPhoto: true
+  },
+  {
     id: 'mintoo',
     name: "Minto",
     tagline: "All Orders",
@@ -80,15 +89,6 @@ const PARTNER_HOTELS = [
     isOpen: true,
     badge: "View Menu",
     image: "/hotel_malabar.webp",
-    hasCustomPhoto: true
-  },
-  {
-    id: 'sankalpa',
-    name: "Hotel Sankalpa",
-    tagline: "Pure Veg Heritage Feasts",
-    isOpen: true,
-    badge: "View Menu",
-    image: "/hotel_sankalpa.webp",
     hasCustomPhoto: true
   },
   {
