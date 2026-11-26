@@ -1,6 +1,32 @@
+import { useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { useSEO } from '../utils/seo';
+
+// Questions people ask, answered with what the app really does. Shown on the
+// page and also given to Google as FAQ structured data.
+const FAQ: { q: string; a: string }[] = [
+  {
+    q: 'Which areas does Minto deliver to?',
+    a: 'Minto delivers in Yellapur, within about 12 km of the town. You can check your address at checkout before you pay.',
+  },
+  {
+    q: 'How much is the delivery charge?',
+    a: 'Delivery starts at Rs 20 and goes up by Rs 10 for each km after the first 2 km. Delivery is free every Saturday and Sunday.',
+  },
+  {
+    q: 'Is Minto the same as Moms Magic?',
+    a: 'Yes. Minto was earlier called Moms Magic. It is the same service and the same website, momsmagic.shop.',
+  },
+  {
+    q: 'Can I pay cash on delivery?',
+    a: 'Yes, for addresses within 5 km. You can also pay online.',
+  },
+  {
+    q: 'Which restaurants can I order from?',
+    a: 'Moms Magic Kitchen, Hotel Sankalpa, Hotel Mumtaz, Hotel Malabar, Chetana Masalapuri Center, Coastal Crown and Hotel Al Amin (while it is open).',
+  },
+];
 
 // Plain-text landing pages for the searches people actually type ("food
 // delivery in Yellapur", "biryani in Yellapur"). Every statement below must be
@@ -30,6 +56,14 @@ const PAGES: Record<string, PageCopy> = {
     intro:
       'Looking for biryani in Yellapur? Minto (formerly Moms Magic) lists biryani and rice dishes from local restaurants such as Hotel Mumtaz, delivered to your home.',
   },
+  '/best-food-in-yellapur': {
+    title: 'Best Food in Yellapur - Restaurants & Home Delivery | Minto (formerly Moms Magic)',
+    description:
+      'Find the best food in Yellapur: biryani, pure veg meals, chaats, seafood and more from local restaurants, delivered by Minto (formerly Moms Magic).',
+    h1: 'Best food in Yellapur',
+    intro:
+      'Yellapur has restaurants for every taste, from pure veg meals to biryani, chaats and seafood. Minto (formerly Moms Magic) puts them in one app so you can compare menus and get the food delivered.',
+  },
   '/order-food-online-yellapur': {
     title: 'Order Food Online in Yellapur | Minto (formerly Moms Magic)',
     description:
@@ -55,6 +89,24 @@ export default function YellapurFoodPage() {
   const page = PAGES[pathname] ?? PAGES['/food-delivery-yellapur'];
   useSEO(page.title, page.description);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const el = document.createElement('script');
+    el.type = 'application/ld+json';
+    el.text = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: FAQ.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    });
+    document.head.appendChild(el);
+    return () => {
+      el.remove();
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#fff1f4]/70 via-[#fff8fa]/60 to-white text-gray-900 pb-32 pt-6 px-4">
@@ -103,6 +155,16 @@ export default function YellapurFoodPage() {
           <p className="text-xs text-gray-700 font-medium leading-relaxed">
             Pay online, or choose cash on delivery for addresses within 5 km.
           </p>
+        </section>
+
+        <section className="space-y-2">
+          <h2 className="text-sm font-black text-gray-900">Frequently asked questions</h2>
+          {FAQ.map((f) => (
+            <div key={f.q} className="space-y-0.5">
+              <h3 className="text-xs font-black text-gray-900">{f.q}</h3>
+              <p className="text-xs text-gray-700 font-medium leading-relaxed">{f.a}</p>
+            </div>
+          ))}
         </section>
 
         <section className="space-y-1.5">

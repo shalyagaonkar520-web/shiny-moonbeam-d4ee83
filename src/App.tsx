@@ -289,6 +289,7 @@ export default function App() {
                   <Route path="/hotel-chetana" element={<HotelChetanaMenuPage />} />
                   <Route path="/food-delivery-yellapur" element={<YellapurFoodPage />} />
                   <Route path="/biryani-yellapur" element={<YellapurFoodPage />} />
+                  <Route path="/best-food-in-yellapur" element={<YellapurFoodPage />} />
                   <Route path="/order-food-online-yellapur" element={<YellapurFoodPage />} />
                   <Route path="/clean" element={<MMCleanPage />} />
                   <Route path="/celebration" element={<CelebrationHub />} />
